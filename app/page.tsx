@@ -393,7 +393,7 @@ export default function LandingPage() {
           <div className="price-card featured sr sr-d2">
             <div className="price-badge">⚡ Le plus populaire</div>
             <div className="price-plan" style={{ color: 'var(--lime)' }}>Premium</div>
-            <div className="price-amount" style={{ color: 'var(--lime)' }}>4,99€</div>
+            <div className="price-amount" style={{ color: 'var(--lime)' }}>9€</div>
             <div className="price-period">par mois sans engagement</div>
             <div className="price-divider" />
             {['Cours illimités', '4 thèmes visuels', 'Export HD shareable', 'Coach premium 24/7'].map(f => (
@@ -403,7 +403,7 @@ export default function LandingPage() {
           </div>
           <div className="price-card sr sr-d3">
             <div className="price-plan">Exam</div>
-            <div className="price-amount">9,99€</div>
+            <div className="price-amount">19€</div>
             <div className="price-period">one-shot 2 semaines</div>
             <div className="price-divider" />
             {['Tout Premium inclus', 'Plan J-14 personnalisé', 'Coach intensif', 'Mode révision express'].map(f => (
