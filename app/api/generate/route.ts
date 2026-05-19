@@ -117,8 +117,8 @@ async function extractText(file: File): Promise<{ text: string; error?: string }
   if (file.type === 'application/pdf') {
     const arrayBuffer = await file.arrayBuffer()
     const buffer = Buffer.from(arrayBuffer)
-    const pdfModule = await import('pdf-parse')
-    const pdfParse = (pdfModule as unknown as { default: (buf: Buffer) => Promise<{ text: string }> }).default ?? pdfModule
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const pdfParse = require('pdf-parse') as (buffer: Buffer) => Promise<{ text: string }>
     const data = await pdfParse(buffer)
     const text = data.text?.trim() ?? ''
     if (text.length < 50) return { text: '', error: 'PDF vide ou non lisible (PDF scanné ?)' }
