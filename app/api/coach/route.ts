@@ -3,7 +3,7 @@ import Groq from 'groq-sdk'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
+function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY! }) }
 
 const SYSTEM = `Tu es le Coach de PASS. Tes règles absolues :
 
@@ -100,7 +100,7 @@ NOTE : Utilise ces données pour donner des conseils ULTRA-PERSONNALISÉS. Si le
 
     const messages = (history ?? []).reverse().map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
 
-    const response = await groq.chat.completions.create({
+    const response = await getGroq().chat.completions.create({
       model: 'llama-3.3-70b-versatile',
       max_tokens: 1024,
       messages: [

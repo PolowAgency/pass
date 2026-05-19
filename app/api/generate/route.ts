@@ -3,7 +3,7 @@ import Groq from 'groq-sdk'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
+function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY! }) }
 
 const SYSTEM_PROMPT = `Tu es un expert en pédagogie médicale et universitaire. Tu reçois le contenu brut d'un cours.
 Tu génères des fiches de révision et un QCM d'entraînement à l'examen.
@@ -134,7 +134,7 @@ async function extractText(file: File): Promise<{ text: string; error?: string }
   if (file.type.startsWith('image/')) {
     const arrayBuffer = await file.arrayBuffer()
     const base64 = Buffer.from(arrayBuffer).toString('base64')
-    const response = await groq.chat.completions.create({
+    const response = await getGroq().chat.completions.create({
       model: 'meta-llama/llama-4-scout-17b-16e-instruct',
       max_tokens: 4096,
       messages: [{ role: 'user', content: [
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
 
     let rawJson = ''
     try {
-      const response = await groq.chat.completions.create({
+      const response = await getGroq().chat.completions.create({
         model: 'llama-3.3-70b-versatile',
         max_tokens: 8000,
         messages: [
