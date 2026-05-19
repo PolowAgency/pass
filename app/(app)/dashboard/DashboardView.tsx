@@ -1,0 +1,428 @@
+'use client'
+
+import Link from 'next/link'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { Profile } from '@/types'
+import { Plus, ChevronRight, Zap, BookOpen, Play, Clock, Target } from 'lucide-react'
+import { parseISO, differenceInDays } from 'date-fns'
+import { useTheme } from '@/contexts/ThemeContext'
+import { useIsMobile } from '@/hooks/useIsMobile'
+import { checkAndAwardBadges } from '@/lib/badges'
+import StreakModal from '@/components/StreakModal'
+import BadgeUnlockModal from '@/components/BadgeUnlockModal'
+import OnboardingWizard from '@/components/OnboardingWizard'
+import type { BadgeDef } from '@/lib/badges'
+
+function useCounter(target: number, duration = 900, delay = 0) {
+  const [val, setVal] = useState(0)
+  useEffect(() => {
+    if (target === 0) { setVal(0); return }
+    let raf: number
+    const timer = setTimeout(() => {
+      const start = performance.now()
+      const tick = (now: number) => {
+        const p = Math.min((now - start) / duration, 1)
+        setVal(Math.round((1 - (1 - p) ** 3) * target))
+        if (p < 1) raf = requestAnimationFrame(tick)
+      }
+      raf = requestAnimationFrame(tick)
+    }, delay)
+    return () => { clearTimeout(timer); cancelAnimationFrame(raf) }
+  }, [target])
+  return val
+}
+
+const SUBJECT: Record<string, { emoji: string; color: string }> = {
+  'Mathématiques': { emoji: '📐', color: '#3CEFFF' },
+  'Physique':      { emoji: '⚡', color: '#C8FF00' },
+  'Chimie':        { emoji: '⚗️', color: '#FF3CAC' },
+  'SVT':           { emoji: '🌿', color: '#4ade80' },
+  'Histoire-Géo':  { emoji: '🌍', color: '#FB923C' },
+  'Droit':         { emoji: '⚖️', color: '#A78BFA' },
+  'Informatique':  { emoji: '💻', color: '#3CEFFF' },
+  default:         { emoji: '📚', color: '#C8FF00' },
+}
+
+interface Props {
+  profile: Profile | null
+  cours: Array<{ id: string; title: string; subject: string | null; status: string; prep_score: number; exam_date: string | null; created_at: string; fiches: { count: number }[] }>
+  sessions: Array<{ score: number | null; total_questions: number | null; completed_at: string; cours_id: string }>
+  dueCount: number
+  weakFiches: Array<{ title: string; review_count: number; cours_id: string }>
+  priorityCours: { id: string; title: string; subject: string | null; prep_score: number } | null
+}
+
+export default function DashboardView({ profile, cours, sessions, dueCount, weakFiches, priorityCours }: Props) {
+  const { colors } = useTheme()
+  const isMobile = useIsMobile()
+  const [showStreak, setShowStreak] = useState(false)
+  const [newBadges, setNewBadges] = useState<BadgeDef[]>([])
+  const [showOnboarding, setShowOnboarding] = useState(false)
+
+  const xp = profile?.xp ?? 0
+  const level = profile?.level ?? 1
+  const streak = profile?.streak_days ?? 0
+  const dailyGoal = profile?.daily_goal ?? 5
+  const dailyReviewed = profile?.daily_reviewed ?? 0
+  const goalPct = Math.min(100, Math.round((dailyReviewed / dailyGoal) * 100))
+  const totalFiches = cours.reduce((a, c) => a + (c.fiches?.[0]?.count ?? 0), 0)
+  const avgScore = sessions.length > 0
+    ? Math.round(sessions.reduce((a, s) => a + ((s.score ?? 0) / (s.total_questions ?? 1)) * 100, 0) / sessions.length)
+    : null
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Bonjour' : hour < 18 ? 'Bon après-midi' : 'Bonsoir'
+
+  // Mission du jour
+  const estimatedMinutes = Math.max(5, dueCount * 2 + (priorityCours ? 5 : 0))
+  const possibleXP = dueCount * 15 + (priorityCours ? 30 : 0)
+  const missionComplete = goalPct >= 100
+  const streakAtRisk = streak > 0 && dailyReviewed === 0
+
+  const animStreak = useCounter(streak, 800, 150)
+  const animGoal   = useCounter(dailyReviewed, 700, 200)
+  const animXP     = useCounter(xp, 1000, 250)
+  const animDue    = useCounter(dueCount, 600, 50)
+
+  const spring = (delay = 0) => ({ type: 'spring' as const, damping: 20, stiffness: 220, delay })
+  const card = (extra?: React.CSSProperties): React.CSSProperties => ({
+    background: colors.surface, border: `2px solid ${colors.border}`,
+    borderRadius: 22, padding: '20px', boxShadow: `0 5px 0 ${colors.border2}`, ...extra,
+  })
+
+  useEffect(() => {
+    const done = localStorage.getItem('pass-onboarded')
+    if (!done && cours.length === 0) setTimeout(() => setShowOnboarding(true), 600)
+  }, [])
+
+  useEffect(() => {
+    if (streak <= 0) return
+    const today = new Date().toDateString()
+    const key = `pass-streak-shown-${today}`
+    if (localStorage.getItem(key)) return
+    const timer = setTimeout(() => { setShowStreak(true); localStorage.setItem(key, '1') }, 900)
+    return () => clearTimeout(timer)
+  }, [streak])
+
+  useEffect(() => {
+    checkAndAwardBadges().then(badges => { if (badges.length > 0) setNewBadges(badges) })
+  }, [])
+
+  return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: isMobile ? '20px 16px 100px' : '28px 24px 80px', transition: 'background 0.25s' }}>
+
+      <AnimatePresence>
+        {showOnboarding && <OnboardingWizard onClose={() => setShowOnboarding(false)} />}
+        {showStreak && !showOnboarding && <StreakModal streak={streak} onClose={() => setShowStreak(false)} />}
+        {newBadges.length > 0 && !showStreak && !showOnboarding && <BadgeUnlockModal badges={newBadges} onClose={() => setNewBadges([])} />}
+      </AnimatePresence>
+
+      <div style={{ maxWidth: 860, margin: '0 auto' }}>
+
+        {/* Header */}
+        <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={spring(0)}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <p style={{ fontSize: 13, color: colors.muted, fontFamily: 'DM Sans, sans-serif', marginBottom: 2 }}>{greeting} 👋</p>
+            <h1 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 26 : 32, color: colors.text, letterSpacing: '-0.5px' }}>
+              {profile?.full_name?.split(' ')[0] ?? 'toi'}
+            </h1>
+          </div>
+          <Link href="/upload" style={{ textDecoration: 'none' }}>
+            <motion.button whileHover={{ y: -3 }} whileTap={{ y: 4 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: colors.lime, color: colors.limeText, border: 'none', borderRadius: 16, padding: '13px 22px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14, cursor: 'pointer', boxShadow: `0 4px 0 ${colors.limeDark}` }}>
+              <Plus size={18} strokeWidth={3} />{isMobile ? 'Nouveau' : 'Nouveau cours'}
+            </motion.button>
+          </Link>
+        </motion.div>
+
+        {/* ══ MISSION DU JOUR ══ */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.06)}
+          style={{ marginBottom: 20 }}>
+          {cours.length === 0 ? (
+            // Pas de cours : CTA upload
+            <div style={{ background: 'linear-gradient(135deg, #1C1C2E, #2D1B69)', border: `2px solid ${colors.limeBorder}`, borderRadius: 22, padding: '24px', boxShadow: `0 5px 0 ${colors.limeDark}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                <span style={{ fontSize: 32 }}>🚀</span>
+                <div>
+                  <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 18, color: '#F0F0F8' }}>Commence ici</p>
+                  <p style={{ fontSize: 13, color: 'rgba(240,240,248,0.55)', fontFamily: 'DM Sans, sans-serif' }}>Upload ton premier cours pour débloquer tes révisions</p>
+                </div>
+              </div>
+              <Link href="/upload" style={{ textDecoration: 'none' }}>
+                <motion.button whileHover={{ y: -2 }} whileTap={{ y: 3 }}
+                  style={{ width: '100%', background: colors.lime, color: colors.limeText, border: 'none', borderRadius: 14, padding: '14px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, cursor: 'pointer', boxShadow: `0 4px 0 ${colors.limeDark}` }}>
+                  Uploader mon premier cours ⚡
+                </motion.button>
+              </Link>
+            </div>
+          ) : missionComplete ? (
+            // Mission accomplie
+            <div style={{ background: 'rgba(34,197,94,0.08)', border: '2px solid rgba(34,197,94,0.35)', borderRadius: 22, padding: '20px 24px', boxShadow: '0 5px 0 rgba(34,197,94,0.15)', display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+              <span style={{ fontSize: 40 }}>🏆</span>
+              <div style={{ flex: 1 }}>
+                <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 18, color: '#22c55e', marginBottom: 4 }}>Mission accomplie !</p>
+                <p style={{ fontSize: 13, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>Objectif du jour atteint. Tu peux continuer ou revenir demain.</p>
+              </div>
+              {priorityCours && (
+                <Link href={`/qcm/${priorityCours.id}`} style={{ textDecoration: 'none' }}>
+                  <motion.button whileHover={{ y: -2 }} whileTap={{ y: 3 }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#22c55e', color: '#0A1A0A', border: 'none', borderRadius: 14, padding: '12px 18px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14, cursor: 'pointer', boxShadow: '0 4px 0 #15803d' }}>
+                    <Target size={15} />Faire un QCM quand même
+                  </motion.button>
+                </Link>
+              )}
+            </div>
+          ) : (
+            // Mission active
+            <div style={{ background: 'linear-gradient(135deg, #1C1C2E 0%, #2D1B69 100%)', border: `2px solid ${colors.limeBorder}`, borderRadius: 22, padding: '20px 24px', boxShadow: `0 5px 0 ${colors.limeDark}` }}>
+              {/* Titre mission */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16, flexWrap: 'wrap', gap: 8 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: 12, background: 'rgba(200,255,0,0.12)', border: '1px solid rgba(200,255,0,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🎯</div>
+                  <div>
+                    <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 17, color: '#F0F0F8', lineHeight: 1 }}>Mission du jour</p>
+                    <p style={{ fontSize: 11, color: 'rgba(240,240,248,0.45)', fontFamily: 'DM Sans, sans-serif', marginTop: 2 }}>
+                      {streakAtRisk ? '⚠️ Streak en danger — révise maintenant' : 'Ta session de révision quotidienne'}
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 5, background: 'rgba(200,255,0,0.12)', border: '1px solid rgba(200,255,0,0.2)', borderRadius: 99, padding: '5px 12px' }}>
+                  <Zap size={12} color="#C8FF00" fill="#C8FF00" />
+                  <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: '#C8FF00' }}>+{possibleXP} XP</span>
+                </div>
+              </div>
+
+              {/* Items mission */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
+                {dueCount > 0 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '10px 14px' }}>
+                    <span style={{ fontSize: 18, flexShrink: 0 }}>📚</span>
+                    <div style={{ flex: 1 }}>
+                      <span style={{ fontSize: 13, color: '#F0F0F8', fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>
+                        {animDue} fiche{dueCount > 1 ? 's' : ''} à réviser
+                      </span>
+                    </div>
+                    <span style={{ fontSize: 11, color: 'rgba(240,240,248,0.4)', fontFamily: 'DM Sans, sans-serif' }}>{dueCount * 2} min</span>
+                  </div>
+                )}
+
+                {priorityCours && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '10px 14px' }}>
+                    <span style={{ fontSize: 18, flexShrink: 0 }}>🎯</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <span style={{ fontSize: 13, color: '#F0F0F8', fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>
+                        QCM — {priorityCours.title}
+                      </span>
+                      <div style={{ display: 'inline-flex', marginLeft: 8, background: `${priorityCours.prep_score < 50 ? '#f87171' : '#FB923C'}22`, borderRadius: 99, padding: '1px 7px' }}>
+                        <span style={{ fontSize: 10, color: priorityCours.prep_score < 50 ? '#f87171' : '#FB923C', fontFamily: 'Outfit, sans-serif', fontWeight: 700 }}>{priorityCours.prep_score}%</span>
+                      </div>
+                    </div>
+                    <span style={{ fontSize: 11, color: 'rgba(240,240,248,0.4)', fontFamily: 'DM Sans, sans-serif' }}>5 min</span>
+                  </div>
+                )}
+
+                {weakFiches.length > 0 && weakFiches[0].review_count >= 2 && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,60,172,0.06)', borderRadius: 12, padding: '10px 14px' }}>
+                    <span style={{ fontSize: 18, flexShrink: 0 }}>💡</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <span style={{ fontSize: 12, color: 'rgba(240,240,248,0.6)', fontFamily: 'DM Sans, sans-serif' }}>Point faible : </span>
+                      <span style={{ fontSize: 12, color: '#FF3CAC', fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>{weakFiches[0].title}</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Temps + progression */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.04)', borderRadius: 12, padding: '10px 14px' }}>
+                  <Clock size={16} color="rgba(240,240,248,0.4)" style={{ flexShrink: 0 }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                      <span style={{ fontSize: 12, color: 'rgba(240,240,248,0.5)', fontFamily: 'DM Sans, sans-serif' }}>~{estimatedMinutes} min</span>
+                      <span style={{ fontSize: 12, color: 'rgba(240,240,248,0.5)', fontFamily: 'DM Sans, sans-serif' }}>{dailyReviewed}/{dailyGoal} fiches</span>
+                    </div>
+                    <div style={{ height: 6, background: 'rgba(255,255,255,0.08)', borderRadius: 99, overflow: 'hidden' }}>
+                      <motion.div initial={{ width: 0 }} animate={{ width: `${goalPct}%` }} transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                        style={{ height: '100%', borderRadius: 99, background: 'linear-gradient(90deg, #C8FF00, #AAFF00)' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CTA principal */}
+              <Link href="/review" style={{ textDecoration: 'none' }}>
+                <motion.button whileHover={{ y: -2 }} whileTap={{ y: 3 }}
+                  style={{ width: '100%', background: colors.lime, color: colors.limeText, border: 'none', borderRadius: 16, padding: '15px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 16, cursor: 'pointer', boxShadow: `0 5px 0 ${colors.limeDark}`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10 }}>
+                  <BookOpen size={18} />Commencer ma mission
+                </motion.button>
+              </Link>
+            </div>
+          )}
+        </motion.div>
+
+        {/* Streak urgence (si streak en danger ET pas encore réviser) */}
+        {streakAtRisk && streak >= 3 && (
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.12)}
+            style={{ background: 'rgba(251,146,60,0.1)', border: '2px solid rgba(251,146,60,0.4)', borderRadius: 18, padding: '12px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 22 }}>🔥</span>
+            <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: '#FB923C', flex: 1 }}>
+              Tu vas perdre ton streak de {streak} jours si tu ne révises pas aujourd'hui
+            </p>
+          </motion.div>
+        )}
+
+        {/* 3 stats rapides */}
+        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(3, 1fr)' : 'repeat(3, 1fr)', gap: isMobile ? 8 : 12, marginBottom: 16 }}>
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.1)}
+            style={card(streak > 0 ? { border: '2px solid #FB923C', boxShadow: '0 5px 0 #CC5500' } : {})}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, fontFamily: 'Outfit, sans-serif', color: streak > 0 ? '#FB923C' : colors.muted, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Streak</span>
+              <span style={{ fontSize: 18 }}>{streak > 0 ? '🔥' : '💤'}</span>
+            </div>
+            <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 36 : 44, color: streak > 0 ? '#FB923C' : colors.border, lineHeight: 1 }}>{animStreak}</span>
+            <span style={{ fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif', marginLeft: 4 }}>jours</span>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.14)}
+            style={card(goalPct >= 100 ? { border: '2px solid #22c55e', boxShadow: '0 5px 0 #15803d' } : {})}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, fontFamily: 'Outfit, sans-serif', color: goalPct >= 100 ? '#22c55e' : colors.muted, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Objectif</span>
+              <span style={{ fontSize: 18 }}>{goalPct >= 100 ? '🏆' : '🎯'}</span>
+            </div>
+            <div>
+              <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 36 : 44, color: goalPct >= 100 ? '#22c55e' : colors.text, lineHeight: 1 }}>{animGoal}</span>
+              <span style={{ fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif', marginLeft: 4 }}>/ {dailyGoal < 10 ? `0${dailyGoal}` : dailyGoal}</span>
+            </div>
+            <div style={{ height: 5, background: colors.surface2, borderRadius: 99, overflow: 'hidden', marginTop: 8, border: `1px solid ${colors.border}` }}>
+              <motion.div initial={{ width: 0 }} animate={{ width: `${goalPct}%` }} transition={{ duration: 1, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                style={{ height: '100%', borderRadius: 99, background: goalPct >= 100 ? '#22c55e' : 'linear-gradient(90deg,#C8FF00,#AAFF00)' }} />
+            </div>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.18)}
+            style={card({ border: `2px solid ${colors.limeBorder}`, boxShadow: `0 5px 0 ${colors.limeDark}` })}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
+              <span style={{ fontSize: 10, fontWeight: 700, fontFamily: 'Outfit, sans-serif', color: colors.limeDark, textTransform: 'uppercase', letterSpacing: '0.8px' }}>Niveau</span>
+              <div style={{ width: 22, height: 22, borderRadius: 7, background: colors.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 11, color: colors.limeText, boxShadow: `0 2px 0 ${colors.limeDark}` }}>{level}</div>
+            </div>
+            <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 36 : 44, color: colors.limeDark, lineHeight: 1 }}>{animXP}</span>
+            <span style={{ fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif', marginLeft: 4 }}>XP</span>
+          </motion.div>
+        </div>
+
+        {/* Cours list + panel droit */}
+        <div style={{ display: isMobile ? 'flex' : 'grid', gridTemplateColumns: '1fr 252px', flexDirection: 'column', gap: 16, alignItems: 'start' }}>
+
+          {/* Cours */}
+          <div>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+              <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 17, color: colors.text }}>Mes cours</h2>
+              <span style={{ fontSize: 12, color: colors.muted, background: colors.surface2, border: `1px solid ${colors.border}`, padding: '3px 10px', borderRadius: 99 }}>{cours.length}</span>
+            </motion.div>
+
+            {cours.length === 0 ? (
+              <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
+                style={{ ...card(), border: `2px dashed ${colors.border}`, textAlign: 'center', padding: '36px 20px' }}>
+                <div style={{ fontSize: 44, marginBottom: 10 }}>📖</div>
+                <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 16, color: colors.text, marginBottom: 6 }}>Aucun cours</p>
+                <p style={{ fontSize: 13, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>Upload ton premier cours pour commencer</p>
+              </motion.div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {cours.map((c, i) => {
+                  const ficheCount = c.fiches?.[0]?.count ?? 0
+                  const daysLeft = c.exam_date ? differenceInDays(parseISO(c.exam_date), new Date()) : null
+                  const urgent = daysLeft !== null && daysLeft <= 7
+                  const subj = SUBJECT[c.subject ?? ''] ?? SUBJECT.default
+                  const scoreColor = c.prep_score >= 80 ? '#22c55e' : c.prep_score >= 50 ? colors.limeDark : c.prep_score >= 30 ? '#FB923C' : '#f87171'
+
+                  return (
+                    <motion.div key={c.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
+                      transition={{ type: 'spring', damping: 20, stiffness: 200, delay: 0.06 * i + 0.28 }}>
+                      <Link href={`/cours/${c.id}`} style={{ textDecoration: 'none' }}>
+                        <motion.div whileHover={{ y: -3 }} whileTap={{ y: 2 }}
+                          style={{ ...card(), display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+                          <div style={{ width: 46, height: 46, borderRadius: 14, background: `${subj.color}18`, border: `2px solid ${subj.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+                            {subj.emoji}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 14, color: colors.text, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                              {c.subject && <span style={{ fontSize: 10, fontFamily: 'Outfit, sans-serif', fontWeight: 700, color: subj.color }}>{c.subject}</span>}
+                              <span style={{ fontSize: 10, color: colors.muted }}>· {ficheCount} fiches</span>
+                              {urgent && daysLeft !== null && <span style={{ fontSize: 10, color: '#f87171', fontWeight: 700 }}>⚠️ J-{daysLeft}</span>}
+                            </div>
+                            <div style={{ height: 6, background: colors.surface2, borderRadius: 99, overflow: 'hidden' }}>
+                              <motion.div initial={{ width: 0 }} animate={{ width: `${c.prep_score}%` }}
+                                transition={{ duration: 0.8, delay: 0.08 * i + 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                style={{ height: '100%', borderRadius: 99, background: scoreColor }} />
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
+                            <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14, color: scoreColor }}>{c.prep_score}%</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: colors.lime, borderRadius: 9, padding: '5px 10px', boxShadow: `0 3px 0 ${colors.limeDark}` }}>
+                              <Play size={10} color={colors.limeText} fill={colors.limeText} />
+                              <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 11, color: colors.limeText }}>Lancer</span>
+                            </div>
+                          </div>
+                        </motion.div>
+                      </Link>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Panel droit */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.32)}>
+              <Link href="/coach" style={{ textDecoration: 'none' }}>
+                <motion.div whileHover={{ y: -3 }} whileTap={{ y: 2 }}
+                  style={{ ...card(), display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+                  <span style={{ fontSize: 28 }}>🤖</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 14, color: colors.text, marginBottom: 2 }}>Coach IA</p>
+                    <p style={{ fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>Conseils personnalisés</p>
+                  </div>
+                  <ChevronRight size={16} color={colors.muted} />
+                </motion.div>
+              </Link>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.36)}>
+              <Link href="/stats" style={{ textDecoration: 'none' }}>
+                <motion.div whileHover={{ y: -3 }} whileTap={{ y: 2 }}
+                  style={{ ...card(), display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
+                  <span style={{ fontSize: 28 }}>📊</span>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 14, color: colors.text, marginBottom: 2 }}>Statistiques</p>
+                    <p style={{ fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>Heatmap & progression</p>
+                  </div>
+                  <ChevronRight size={16} color={colors.muted} />
+                </motion.div>
+              </Link>
+            </motion.div>
+
+            {profile?.plan === 'free' && (
+              <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.4)}>
+                <Link href="/settings#billing" style={{ textDecoration: 'none' }}>
+                  <motion.div whileHover={{ y: -3 }} whileTap={{ y: 2 }}
+                    style={{ background: 'linear-gradient(135deg, rgba(255,60,172,0.1), rgba(200,255,0,0.07))', border: '2px solid rgba(255,60,172,0.3)', borderRadius: 20, padding: '16px', cursor: 'pointer', boxShadow: '0 5px 0 rgba(255,60,172,0.15)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{ fontSize: 22 }}>⚡</span>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: '#FF3CAC', marginBottom: 2 }}>
+                        {Math.max(0, 3 - (profile.uploads_count ?? 0))} uploads gratuits restants
+                      </p>
+                      <p style={{ fontSize: 11, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>Premium → uploads illimités</p>
+                    </div>
+                  </motion.div>
+                </Link>
+              </motion.div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
