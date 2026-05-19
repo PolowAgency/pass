@@ -115,14 +115,18 @@ async function extractText(file: File): Promise<{ text: string; error?: string }
   if (file.size > 20 * 1024 * 1024) return { text: '', error: 'Fichier trop lourd (max 20 Mo)' }
 
   if (file.type === 'application/pdf') {
-    const arrayBuffer = await file.arrayBuffer()
-    const buffer = Buffer.from(arrayBuffer)
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const pdfParse = require('pdf-parse') as (buffer: Buffer) => Promise<{ text: string }>
-    const data = await pdfParse(buffer)
-    const text = data.text?.trim() ?? ''
-    if (text.length < 50) return { text: '', error: 'PDF vide ou non lisible (PDF scanné ?)' }
-    return { text }
+    try {
+      const arrayBuffer = await file.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const pdfParse = require('pdf-parse') as (buffer: Buffer) => Promise<{ text: string }>
+      const data = await pdfParse(buffer)
+      const text = data.text?.trim() ?? ''
+      if (text.length < 50) return { text: '', error: 'PDF vide ou non lisible (PDF scanné ?)' }
+      return { text }
+    } catch {
+      return { text: '', error: 'Impossible de lire ce PDF. Essaie de coller le texte directement.' }
+    }
   }
 
   if (file.type === 'text/plain') {
@@ -268,8 +272,10 @@ export async function POST(request: NextRequest) {
     await supabase.from('cours').update({ status: 'ready', prep_score: 0 }).eq('id', coursId)
     await supabase.from('profiles').update({ uploads_count: (profile?.uploads_count ?? 0) + 1 }).eq('id', user.id)
 
-    // Award XP upload (action whitelist)
-    await supabase.rpc('award_xp', { p_user_id: user.id, p_amount: 25, p_reason: 'upload_cours' })
+    // Award XP — non bloquant (ne doit pas faire échouer la génération)
+    try {
+      await supabase.rpc('award_xp', { p_user_id: user.id, p_amount: 25, p_reason: 'upload_cours' })
+    } catch { /* XP optionnel */ }
 
     return NextResponse.json({ success: true, fiches_count: ficheInserts.length })
 

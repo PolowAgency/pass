@@ -290,7 +290,7 @@ function FormFields({ title, setTitle, subject, setSubject, examDate, setExamDat
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: colors.text, marginBottom: 8, fontFamily: 'Outfit, sans-serif' }}>Titre du cours</label>
         <div style={{ position: 'relative' }}>
           <BookOpen size={15} color={colors.muted} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: La Révolution française" required style={inp()}
+          <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Ex: La Révolution française" required maxLength={80} style={inp()}
             onFocus={e => e.target.style.borderColor = colors.lime}
             onBlur={e => e.target.style.borderColor = colors.border} />
         </div>
@@ -324,7 +324,9 @@ function FormFields({ title, setTitle, subject, setSubject, examDate, setExamDat
         </label>
         <div style={{ position: 'relative' }}>
           <Calendar size={15} color={colors.muted} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }} />
-          <input type="date" value={examDate} onChange={e => setExamDate(e.target.value)} style={{ ...inp(), colorScheme: 'auto' }}
+          <input type="date" value={examDate} onChange={e => setExamDate(e.target.value)}
+            min={new Date().toISOString().split('T')[0]}
+            style={{ ...inp(), colorScheme: 'auto' }}
             onFocus={e => e.target.style.borderColor = colors.lime}
             onBlur={e => e.target.style.borderColor = colors.border} />
         </div>
@@ -345,7 +347,7 @@ function SubmitBtn({ loading, disabled }: { loading: boolean; disabled?: boolean
         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, background: loading || disabled ? colors.surface2 : colors.lime, color: loading || disabled ? colors.muted : colors.limeText, border: 'none', borderRadius: 16, padding: '16px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 16, cursor: loading || disabled ? 'not-allowed' : 'pointer', boxShadow: loading || disabled ? `0 4px 0 ${colors.border2}` : `0 4px 0 ${colors.limeDark}`, marginTop: 4, transition: 'all 0.15s' }}>
         {loading ? <><Loader2 size={18} className="animate-spin" />Génération en cours…</> : <><Zap size={18} />Générer mes fiches</>}
       </motion.button>
-      {!loading && <p style={{ textAlign: 'center', fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>⚡ Généré par Claude en moins de 30 secondes</p>}
+      {!loading && <p style={{ textAlign: 'center', fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>⚡ Généré par IA en moins de 30 secondes</p>}
     </>
   )
 }

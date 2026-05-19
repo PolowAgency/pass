@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     const memorizedCount = fichesMem?.length ?? 0
     const weakFiches = fichesNotMem?.slice(0, 5).map(f => f.title).join(', ') || 'aucune identifiée'
-    const recentScores = sessions?.map(s => `${Math.round((s.score / s.total_questions) * 100)}%`).join(', ') || 'aucun'
+    const recentScores = sessions?.map(s => `${Math.round((s.score / (s.total_questions || 1)) * 100)}%`).join(', ') || 'aucun'
 
     const contextBlock = `
 DONNÉES RÉELLES DE L'ÉTUDIANT :
