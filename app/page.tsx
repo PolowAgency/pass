@@ -286,7 +286,10 @@ export default function LandingPage() {
           <li><a href="#fonctionnalites">Fonctionnalités</a></li>
           <li><a href="#tarifs">Tarifs</a></li>
         </ul>
-        <Link href="/signup"><button className="nav-cta">Essayer gratuitement</button></Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <Link href="/login" style={{ color: 'var(--muted)', fontSize: 14, fontFamily: 'Outfit, sans-serif', fontWeight: 600, textDecoration: 'none' }}>Se connecter</Link>
+          <Link href="/signup"><button className="nav-cta">Essayer gratuitement</button></Link>
+        </div>
       </nav>
 
       {/* HERO */}
