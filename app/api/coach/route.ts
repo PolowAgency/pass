@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import Groq from 'groq-sdk'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
 
 const SYSTEM = `Tu es le Coach de PASS. Tes règles absolues :
 
@@ -100,14 +100,16 @@ NOTE : Utilise ces données pour donner des conseils ULTRA-PERSONNALISÉS. Si le
 
     const messages = (history ?? []).reverse().map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
 
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+    const response = await groq.chat.completions.create({
+      model: 'llama-3.3-70b-versatile',
       max_tokens: 1024,
-      system: SYSTEM + '\n\n' + contextBlock,
-      messages,
+      messages: [
+        { role: 'system', content: SYSTEM + '\n\n' + contextBlock },
+        ...messages,
+      ],
     })
 
-    const reply = response.content[0].type === 'text' ? response.content[0].text : ''
+    const reply = response.choices[0]?.message?.content ?? ''
     await supabase.from('coach_messages').insert({ user_id: user.id, role: 'assistant', content: reply })
 
     return NextResponse.json({ reply })

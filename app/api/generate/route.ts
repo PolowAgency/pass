@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import Anthropic from '@anthropic-ai/sdk'
+import Groq from 'groq-sdk'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY! })
 
 const SYSTEM_PROMPT = `Tu es un expert en pédagogie médicale et universitaire. Tu reçois le contenu brut d'un cours.
 Tu génères des fiches de révision et un QCM d'entraînement à l'examen.
@@ -134,15 +134,15 @@ async function extractText(file: File): Promise<{ text: string; error?: string }
   if (file.type.startsWith('image/')) {
     const arrayBuffer = await file.arrayBuffer()
     const base64 = Buffer.from(arrayBuffer).toString('base64')
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
+    const response = await groq.chat.completions.create({
+      model: 'meta-llama/llama-4-scout-17b-16e-instruct',
       max_tokens: 4096,
       messages: [{ role: 'user', content: [
-        { type: 'image', source: { type: 'base64', media_type: file.type as 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp', data: base64 } },
+        { type: 'image_url', image_url: { url: `data:${file.type};base64,${base64}` } },
         { type: 'text', text: 'Transcris intégralement le texte de ce cours. Garde la structure. Sois exhaustif.' },
       ] }],
     })
-    const text = response.content[0].type === 'text' ? response.content[0].text.trim() : ''
+    const text = response.choices[0]?.message?.content?.trim() ?? ''
     if (text.length < 50) return { text: '', error: 'Image illisible ou vide' }
     return { text }
   }
@@ -196,13 +196,15 @@ export async function POST(request: NextRequest) {
 
     let rawJson = ''
     try {
-      const response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-20250514',
+      const response = await groq.chat.completions.create({
+        model: 'llama-3.3-70b-versatile',
         max_tokens: 8000,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: `Voici le contenu du cours :\n\n${rawContent.slice(0, 40000)}` }],
+        messages: [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: `Voici le contenu du cours :\n\n${rawContent.slice(0, 40000)}` },
+        ],
       })
-      rawJson = response.content[0].type === 'text' ? response.content[0].text : ''
+      rawJson = response.choices[0]?.message?.content ?? ''
     } catch (err: unknown) {
       clearTimeout(timeout)
       if ((err as Error)?.name === 'AbortError') {
