@@ -4,11 +4,12 @@ import Link from 'next/link'
 import { Cours, Fiche } from '@/types'
 import { FicheCard } from '@/components/FicheCard'
 import { motion } from 'framer-motion'
-import { ArrowLeft, Calendar, BookOpen, Brain, Target, Clock, Play, Zap } from 'lucide-react'
+import { ArrowLeft, Calendar, BookOpen, Brain, Target, Play, Zap } from 'lucide-react'
 import { format, differenceInDays, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useIsMobile } from '@/hooks/useIsMobile'
+import PageBg from '@/components/PageBg'
 
 interface Props {
   cours: Cours
@@ -34,6 +35,8 @@ function getExamMsg(days: number): string {
   return `J-${days}. Commence maintenant, t'éviteras le stress.`
 }
 
+const spring = (delay = 0) => ({ type: 'spring' as const, damping: 20, stiffness: 220, delay })
+
 export default function CoursView({ cours, fiches, sessions }: Props) {
   const { colors } = useTheme()
   const isMobile = useIsMobile()
@@ -44,150 +47,177 @@ export default function CoursView({ cours, fiches, sessions }: Props) {
   const urgent = daysLeft !== null && daysLeft <= 7
   const examMode = daysLeft !== null && daysLeft <= 14
 
-  const card = (extra?: React.CSSProperties): React.CSSProperties => ({
-    background: colors.surface, border: `2px solid ${colors.border}`,
-    borderRadius: 20, boxShadow: `0 4px 0 ${colors.border2}`, ...extra,
-  })
-
-  const spring = (delay = 0) => ({ type: 'spring' as const, damping: 20, stiffness: 220, delay })
-
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: isMobile ? '20px 16px 100px' : '28px', transition: 'background 0.25s' }}>
-      <div style={{ maxWidth: 860, margin: '0 auto' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: isMobile ? '20px 16px 100px' : '28px 32px 60px', transition: 'background 0.25s', position: 'relative' }}>
+      <PageBg />
 
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={spring(0)}>
-          <Link href="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: colors.muted, textDecoration: 'none', marginBottom: 20, fontFamily: 'DM Sans, sans-serif' }}>
+      <div style={{ maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 1 }}>
+
+        {/* Back */}
+        <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={spring(0)}>
+          <Link href="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: colors.muted, textDecoration: 'none', marginBottom: 24, fontFamily: 'DM Sans, sans-serif', transition: 'color 0.2s' }}>
             <ArrowLeft size={14} />Dashboard
           </Link>
         </motion.div>
 
-        {/* Exam mode banner */}
+        {/* Exam urgency banner */}
         {examMode && daysLeft !== null && (
-          <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.02)}
-            style={{ background: urgent ? 'rgba(248,113,113,0.1)' : 'rgba(251,146,60,0.1)', border: `2px solid ${urgent ? '#f87171' : '#FB923C'}`, borderRadius: 18, padding: '14px 18px', marginBottom: 16, display: 'flex', alignItems: 'center', gap: 12, boxShadow: `0 4px 0 ${urgent ? '#CC2200' : '#CC5500'}` }}>
-            <span style={{ fontSize: 28 }}>{urgent ? '🚨' : '⏰'}</span>
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.02)}
+            style={{ background: urgent ? 'rgba(248,113,113,0.08)' : 'rgba(251,146,60,0.08)', border: `1px solid ${urgent ? 'rgba(248,113,113,0.4)' : 'rgba(251,146,60,0.4)'}`, borderRadius: 20, padding: '14px 20px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 14, boxShadow: urgent ? '0 0 24px rgba(248,113,113,0.12)' : '0 0 24px rgba(251,146,60,0.1)' }}>
+            <span style={{ fontSize: 26 }}>{urgent ? '🚨' : '⏰'}</span>
             <div style={{ flex: 1 }}>
-              <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, color: urgent ? '#f87171' : '#FB923C', marginBottom: 2 }}>
+              <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14, color: urgent ? '#f87171' : '#FB923C', marginBottom: 2 }}>
                 {daysLeft === 0 ? "EXAM AUJOURD'HUI" : `J-${daysLeft} avant l'examen`}
               </p>
-              <p style={{ fontSize: 13, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>{getExamMsg(daysLeft)}</p>
+              <p style={{ fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>{getExamMsg(daysLeft)}</p>
             </div>
             <Link href="/coach" style={{ textDecoration: 'none' }}>
-              <motion.button whileHover={{ y: -2 }} whileTap={{ y: 3 }}
-                style={{ display: 'flex', alignItems: 'center', gap: 6, background: urgent ? '#f87171' : '#FB923C', color: '#1A0000', border: 'none', borderRadius: 12, padding: '8px 14px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 12, cursor: 'pointer', boxShadow: `0 3px 0 ${urgent ? '#CC2200' : '#CC5500'}`, whiteSpace: 'nowrap' }}>
-                <Brain size={13} />Plan IA
+              <motion.button whileHover={{ y: -2, boxShadow: `0 0 16px ${urgent ? 'rgba(248,113,113,0.4)' : 'rgba(251,146,60,0.4)'}` }} whileTap={{ y: 2 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, background: urgent ? '#f87171' : '#FB923C', color: '#fff', border: 'none', borderRadius: 100, padding: '8px 16px', fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 12, cursor: 'pointer', transition: 'all 0.2s' }}>
+                <Brain size={12} />Plan IA
               </motion.button>
             </Link>
           </motion.div>
         )}
 
-        {/* Hero header */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.05)}
-          style={{ background: 'linear-gradient(135deg, #1C1C2E 0%, #2D1B69 100%)', border: '2px solid rgba(200,255,0,0.2)', borderRadius: 24, padding: isMobile ? '20px' : '28px', marginBottom: 14, boxShadow: '0 5px 0 rgba(200,255,0,0.15)' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1 }}>
+        {/* Hero card */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.05)}
+          style={{ background: 'linear-gradient(135deg, #1C1C2E 0%, #2D1B69 100%)', border: '1px solid rgba(200,255,0,0.15)', borderRadius: 28, padding: isMobile ? '24px' : '32px', marginBottom: 16, boxShadow: '0 0 60px rgba(200,255,0,0.06), 0 8px 32px rgba(0,0,0,0.4)', position: 'relative', overflow: 'hidden' }}>
+
+          {/* Glow orb */}
+          <div style={{ position: 'absolute', top: -60, right: -60, width: 200, height: 200, background: 'radial-gradient(circle, rgba(200,255,0,0.08) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, position: 'relative', zIndex: 1 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
               {cours.subject && (
-                <span style={{ display: 'inline-block', fontSize: 11, fontWeight: 700, fontFamily: 'Outfit, sans-serif', color: '#C8FF00', background: 'rgba(200,255,0,0.12)', padding: '3px 10px', borderRadius: 99, marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  {cours.subject}
-                </span>
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 14 }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, fontFamily: 'Outfit, sans-serif', color: '#C8FF00', background: 'rgba(200,255,0,0.1)', border: '1px solid rgba(200,255,0,0.2)', padding: '3px 12px', borderRadius: 100, textTransform: 'uppercase' as const, letterSpacing: '1.5px' }}>
+                    {cours.subject}
+                  </span>
+                  <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C8FF00', display: 'inline-block', boxShadow: '0 0 8px rgba(200,255,0,0.6)' }} />
+                </div>
               )}
-              <h1 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 22 : 28, color: '#F0F0F8', marginBottom: 10, lineHeight: 1.2 }}>{cours.title}</h1>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, fontSize: 13, color: 'rgba(240,240,248,0.55)', fontFamily: 'DM Sans, sans-serif' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><BookOpen size={13} />{fiches.length} fiches</span>
-                {cours.exam_date && <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: urgent ? '#f87171' : 'rgba(240,240,248,0.55)' }}><Calendar size={13} />Exam le {format(parseISO(cours.exam_date), 'd MMM yyyy', { locale: fr })}</span>}
+              <h1 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 22 : 28, color: '#F0F0F8', marginBottom: 12, lineHeight: 1.15, letterSpacing: '-0.3px' }}>
+                {cours.title}
+              </h1>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 13, color: 'rgba(240,240,248,0.45)', fontFamily: 'DM Sans, sans-serif' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <BookOpen size={13} />{fiches.length} fiches générées
+                </span>
+                {cours.exam_date && (
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 5, color: urgent ? '#f87171' : 'rgba(240,240,248,0.45)' }}>
+                    <Calendar size={13} />Exam le {format(parseISO(cours.exam_date), 'd MMM yyyy', { locale: fr })}
+                  </span>
+                )}
               </div>
             </div>
+
+            {/* Prep score ring */}
             {!isMobile && (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-                <div style={{ position: 'relative', width: 68, height: 68 }}>
-                  <svg viewBox="0 0 68 68" style={{ width: 68, height: 68, transform: 'rotate(-90deg)' }}>
-                    <circle cx="34" cy="34" r="28" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="5" />
-                    <circle cx="34" cy="34" r="28" fill="none" stroke="#C8FF00" strokeWidth="5"
-                      strokeDasharray={`${(cours.prep_score / 100) * 176} 176`} strokeLinecap="round"
-                      style={{ filter: 'drop-shadow(0 0 6px #C8FF00)' }} />
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                <div style={{ position: 'relative', width: 72, height: 72 }}>
+                  <svg viewBox="0 0 72 72" style={{ width: 72, height: 72, transform: 'rotate(-90deg)' }}>
+                    <circle cx="36" cy="36" r="30" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="5" />
+                    <circle cx="36" cy="36" r="30" fill="none" stroke="#C8FF00" strokeWidth="5"
+                      strokeDasharray={`${(cours.prep_score / 100) * 188} 188`} strokeLinecap="round"
+                      style={{ filter: 'drop-shadow(0 0 6px rgba(200,255,0,0.6))' }} />
                   </svg>
-                  <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 16, color: '#C8FF00' }}>{cours.prep_score}</span>
+                  <span style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 17, color: '#C8FF00' }}>
+                    {cours.prep_score}
+                  </span>
                 </div>
-                <span style={{ fontSize: 11, color: 'rgba(240,240,248,0.4)', fontFamily: 'DM Sans, sans-serif' }}>Prep score</span>
+                <span style={{ fontSize: 10, color: 'rgba(240,240,248,0.35)', fontFamily: 'DM Sans, sans-serif', textTransform: 'uppercase' as const, letterSpacing: '1px' }}>Prep score</span>
               </div>
             )}
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)', gap: 10, marginTop: 18 }}>
+          {/* Stats row */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginTop: 22, position: 'relative', zIndex: 1 }}>
             {[
-              { icon: Brain,  val: `${masteryPct}%`, label: 'Maîtrise',   color: '#C8FF00' },
-              { icon: Target, val: avgScore !== null ? `${avgScore}%` : '—', label: 'Moy. QCM', color: '#3CEFFF' },
-              { icon: Clock,  val: daysLeft !== null ? `J-${daysLeft}` : '—', label: 'Avant exam', color: urgent ? '#f87171' : 'rgba(240,240,248,0.4)' },
+              { icon: Brain,  val: `${masteryPct}%`,   label: 'Maîtrise',   color: '#C8FF00', glow: 'rgba(200,255,0,0.15)' },
+              { icon: Target, val: avgScore !== null ? `${avgScore}%` : '—', label: 'Moy. QCM', color: '#3CEFFF', glow: 'rgba(60,239,255,0.15)' },
+              { icon: Calendar, val: daysLeft !== null ? `J-${daysLeft}` : '—', label: 'Avant exam', color: urgent ? '#f87171' : 'rgba(240,240,248,0.5)', glow: urgent ? 'rgba(248,113,113,0.15)' : 'transparent' },
             ].map(s => (
-              <div key={s.label} style={{ background: 'rgba(255,255,255,0.06)', borderRadius: 14, padding: '12px 14px' }}>
+              <div key={s.label} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '14px', boxShadow: `inset 0 0 20px ${s.glow}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                  <s.icon size={14} color={s.color} />
-                  <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 20, color: s.color }}>{s.val}</span>
+                  <s.icon size={13} color={s.color} />
+                  <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 18 : 22, color: s.color, lineHeight: 1 }}>{s.val}</span>
                 </div>
-                <span style={{ fontSize: 11, color: 'rgba(240,240,248,0.4)', fontFamily: 'DM Sans, sans-serif' }}>{s.label}</span>
+                <span style={{ fontSize: 11, color: 'rgba(240,240,248,0.35)', fontFamily: 'DM Sans, sans-serif' }}>{s.label}</span>
               </div>
             ))}
           </div>
         </motion.div>
 
-        {/* Actions */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.1)}
-          style={{ marginBottom: 24 }}>
-
-          {/* QCM — 2 modes */}
+        {/* CTAs */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.1)} style={{ marginBottom: 28 }}>
           <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: 10, marginBottom: 10 }}>
             <Link href={`/qcm/${cours.id}?mode=rapide`} style={{ textDecoration: 'none' }}>
-              <motion.button whileHover={{ y: -2 }} whileTap={{ y: 3 }}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: colors.lime, color: colors.limeText, border: 'none', borderRadius: 16, padding: '14px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, cursor: 'pointer', boxShadow: `0 4px 0 ${colors.limeDark}` }}>
-                <Play size={16} fill={colors.limeText} />QCM rapide — 10 questions
+              <motion.button
+                whileHover={{ y: -2, boxShadow: '0 0 32px rgba(200,255,0,0.35), 0 6px 0 #4A7400' }}
+                whileTap={{ y: 3 }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: '#C8FF00', color: '#0C0C10', border: 'none', borderRadius: 100, padding: '15px 24px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, cursor: 'pointer', boxShadow: '0 4px 0 #4A7400', transition: 'all 0.2s' }}>
+                <Play size={15} fill="#0C0C10" />QCM rapide — 10 questions
               </motion.button>
             </Link>
             <Link href={`/qcm/${cours.id}`} style={{ textDecoration: 'none' }}>
-              <motion.button whileHover={{ y: -2 }} whileTap={{ y: 3 }}
-                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: colors.surface, border: `2px solid ${colors.limeBorder}`, color: colors.limeDark, borderRadius: 16, padding: '14px', fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 15, cursor: 'pointer', boxShadow: `0 4px 0 ${colors.limeDark}40` }}>
-                <Target size={16} />QCM complet — toutes les questions
+              <motion.button
+                whileHover={{ y: -2, borderColor: '#C8FF00', boxShadow: '0 0 20px rgba(200,255,0,0.12), 0 4px 0 rgba(200,255,0,0.3)' }}
+                whileTap={{ y: 2 }}
+                style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'transparent', border: '1px solid rgba(200,255,0,0.3)', color: '#C8FF00', borderRadius: 100, padding: '15px 24px', fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 15, cursor: 'pointer', transition: 'all 0.2s' }}>
+                <Target size={15} />QCM complet — toutes les questions
               </motion.button>
             </Link>
           </div>
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
             <Link href="/review">
-              <motion.button whileHover={{ y: -2 }} whileTap={{ y: 3 }}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, background: colors.surface, border: `2px solid ${colors.border}`, color: colors.text, borderRadius: 16, padding: '12px 18px', fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer', boxShadow: `0 4px 0 ${colors.border2}` }}>
-                <BookOpen size={15} />Réviser les fiches
+              <motion.button
+                whileHover={{ y: -1, borderColor: colors.muted }}
+                whileTap={{ y: 1 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'transparent', border: `1px solid ${colors.border}`, color: colors.text, borderRadius: 100, padding: '11px 20px', fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: 13, cursor: 'pointer', transition: 'all 0.2s' }}>
+                <BookOpen size={14} />Réviser les fiches
               </motion.button>
             </Link>
             <Link href="/coach">
-              <motion.button whileHover={{ y: -2 }} whileTap={{ y: 3 }}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, background: colors.surface, border: `2px solid ${colors.border}`, color: colors.text, borderRadius: 16, padding: '12px 18px', fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer', boxShadow: `0 4px 0 ${colors.border2}` }}>
-                <Brain size={15} />Coach IA
+              <motion.button
+                whileHover={{ y: -1, borderColor: colors.muted }}
+                whileTap={{ y: 1 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 7, background: 'transparent', border: `1px solid ${colors.border}`, color: colors.text, borderRadius: 100, padding: '11px 20px', fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: 13, cursor: 'pointer', transition: 'all 0.2s' }}>
+                <Brain size={14} />Coach IA
               </motion.button>
             </Link>
           </div>
         </motion.div>
 
-        {/* Fiches */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.15)}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-            <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 20, color: colors.text }}>Fiches de révision</h2>
-            <span style={{ fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif', background: colors.surface2, padding: '4px 10px', borderRadius: 99, border: `1px solid ${colors.border}` }}>{memorized}/{fiches.length} mémorisées</span>
+        {/* Fiches section */}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.15)}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18 }}>
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, fontFamily: 'Outfit, sans-serif', color: '#C8FF00', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 4 }}>Contenu généré</p>
+              <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 20, color: colors.text, letterSpacing: '-0.3px' }}>Fiches de révision</h2>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 100, padding: '6px 14px' }}>
+              <Zap size={12} color="#C8FF00" />
+              <span style={{ fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>{memorized}/{fiches.length} mémorisées</span>
+            </div>
           </div>
 
           {cours.status === 'processing' ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[1,2,3].map(i => (
-                <div key={i} style={{ height: 90, background: colors.surface, border: `2px solid ${colors.border}`, borderRadius: 20 }} />
+              {[1, 2, 3].map(i => (
+                <div key={i} style={{ height: 88, background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 20, opacity: 1 - i * 0.2 }} />
               ))}
-              <p style={{ textAlign: 'center', fontSize: 13, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>
-                Génération des fiches en cours... ✨
+              <p style={{ textAlign: 'center', fontSize: 13, color: colors.muted, fontFamily: 'DM Sans, sans-serif', padding: '8px 0' }}>
+                Génération des fiches en cours… ✨
               </p>
             </div>
           ) : fiches.length === 0 ? (
-            <div style={{ ...card(), textAlign: 'center', padding: '48px 24px' }}>
+            <div style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 20, textAlign: 'center', padding: '48px 24px' }}>
               <p style={{ fontSize: 14, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>Pas encore de fiches. La génération a peut-être échoué.</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               {fiches.map((fiche, i) => <FicheCard key={fiche.id} fiche={fiche} index={i + 1} coursId={cours.id} />)}
             </div>
           )}

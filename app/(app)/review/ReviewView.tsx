@@ -4,13 +4,14 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Fiche } from '@/types'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle2, X } from 'lucide-react'
+import { CheckCircle2, X, Lightbulb, Tag, Zap } from 'lucide-react'
 import { awardXP, XP_REWARDS } from '@/lib/xp'
 import { useTheme } from '@/contexts/ThemeContext'
 import Link from 'next/link'
 import LevelUpModal from '@/components/LevelUpModal'
 import GoalModal from '@/components/GoalModal'
 import BadgeUnlockModal from '@/components/BadgeUnlockModal'
+import PageBg from '@/components/PageBg'
 import { checkAndAwardBadges } from '@/lib/badges'
 import type { BadgeDef } from '@/lib/badges'
 
@@ -21,14 +22,12 @@ interface Props {
 }
 
 const MOTIVATIONS = [
-  "T'as failli zapper. Mais t'es là. Respect. 💪",
   "La discipline bat la motivation. Chaque. Fois.",
-  "Même Dieu ne travaille pas autant que toi en ce moment.",
   "Ceux qui révisent dominent. C'est mathématique.",
   "Une fiche de plus, un exam de moins stressant.",
-  "Tu feras quoi quand t'auras ta note ? Révise d'abord.",
-  "Pas d'effort, pas de résultat. T'as pas le choix.",
   "Le cerveau oublie en 24h. Toi tu bats ce délai.",
+  "T'as failli zapper. Mais t'es là. Respect.",
+  "Pas d'effort, pas de résultat. T'as pas le choix.",
 ]
 
 export default function ReviewView({ fiches, profile, userId }: Props) {
@@ -53,12 +52,10 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
 
   async function answer(memorized: boolean) {
     if (!fiche) return
-
     if (!memorized) {
       setShake(true)
       setTimeout(() => setShake(false), 450)
     }
-
     const supabase = createClient()
     const newCount = fiche.review_count + 1
     const intervals = [1, 3, 7, 14, 30]
@@ -74,10 +71,7 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
     }).eq('id', fiche.id)
 
     const newReviewed = reviewed + 1
-
-    // Incrément atomique +1 (évite la race condition du cumulatif)
     await supabase.rpc('increment_daily_reviewed', { p_user_id: userId })
-    // Streak uniquement sur activité réelle
     await supabase.rpc('update_streak_on_activity', { p_user_id: userId })
 
     if (memorized) {
@@ -86,10 +80,7 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
         setXpGained(x => x + XP_REWARDS.memorize_fiche)
         setXpPopup(XP_REWARDS.memorize_fiche)
         setTimeout(() => setXpPopup(null), 1400)
-
-        if (result.leveledUp && result.level) {
-          setTimeout(() => setLevelUp(result.level!), 600)
-        }
+        if (result.leveledUp && result.level) setTimeout(() => setLevelUp(result.level!), 600)
         checkAndAwardBadges().then(b => { if (b.length > 0) setNewBadges(b) })
       }
     }
@@ -97,28 +88,31 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
     setReviewed(newReviewed)
     setFlipped(false)
 
-    // Check if daily goal just reached
     const totalReviewed = (profile?.daily_reviewed ?? 0) + newReviewed
     const goal = profile?.daily_goal ?? 5
-    if (totalReviewed >= goal && totalReviewed - (memorized ? 0 : 0) - 1 < goal) {
+    if (totalReviewed >= goal && totalReviewed - 1 < goal) {
       setTimeout(() => { setGoalXP(xpGained + (memorized ? XP_REWARDS.memorize_fiche : 0)); setShowGoalModal(true) }, 700)
       return
     }
-
     if (current + 1 >= total) setDone(true)
     else setTimeout(() => setCurrent(i => i + 1), 200)
   }
 
+  // ── Empty state ──
   if (total === 0) return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, position: 'relative' }}>
+      <PageBg />
       <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', damping: 18 }}
-        style={{ textAlign: 'center', maxWidth: 360 }}>
-        <div style={{ fontSize: 72, marginBottom: 16 }}>🎉</div>
-        <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 26, color: colors.text, marginBottom: 10 }}>Rien à réviser !</h2>
-        <p style={{ fontSize: 14, color: colors.muted, fontFamily: 'DM Sans, sans-serif', marginBottom: 28, lineHeight: 1.6 }}>Toutes tes fiches sont à jour. Reviens demain ou ajoute un cours.</p>
+        style={{ textAlign: 'center', maxWidth: 380, position: 'relative', zIndex: 1 }}>
+        <div style={{ fontSize: 72, marginBottom: 20 }}>🎉</div>
+        <p style={{ fontSize: 11, fontWeight: 700, color: '#C8FF00', fontFamily: 'Outfit, sans-serif', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 12 }}>Tout à jour</p>
+        <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 28, color: colors.text, marginBottom: 12, letterSpacing: '-0.5px' }}>Rien à réviser !</h2>
+        <p style={{ fontSize: 15, color: colors.muted, fontFamily: 'DM Sans, sans-serif', marginBottom: 32, lineHeight: 1.6 }}>
+          Toutes tes fiches sont à jour. Reviens demain ou ajoute un cours.
+        </p>
         <Link href="/dashboard">
-          <motion.button whileHover={{ y: -3 }} whileTap={{ y: 4 }}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: colors.lime, color: colors.limeText, border: 'none', borderRadius: 14, padding: '14px 28px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, cursor: 'pointer', boxShadow: `0 4px 0 ${colors.limeDark}` }}>
+          <motion.button whileHover={{ y: -2, boxShadow: '0 0 28px rgba(200,255,0,0.3), 0 6px 0 #4A7400' }} whileTap={{ y: 3 }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#C8FF00', color: '#0C0C10', border: 'none', borderRadius: 100, padding: '14px 28px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, cursor: 'pointer', boxShadow: '0 4px 0 #4A7400', transition: 'all 0.2s' }}>
             Retour au dashboard
           </motion.button>
         </Link>
@@ -126,40 +120,51 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
     </div>
   )
 
+  // ── Done state ──
   if (done) return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, position: 'relative' }}>
+      <PageBg />
       <motion.div initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', damping: 16 }}
-        style={{ textAlign: 'center', maxWidth: 400, width: '100%' }}>
-        <div style={{ fontSize: 72, marginBottom: 16 }}>🏆</div>
-        <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 28, color: colors.text, marginBottom: 8 }}>Session terminée !</h2>
-        <p style={{ fontSize: 15, color: colors.muted, fontFamily: 'DM Sans, sans-serif', marginBottom: 6 }}>{reviewed} fiche{reviewed > 1 ? 's' : ''} révisée{reviewed > 1 ? 's' : ''}</p>
-        <p style={{ fontSize: 14, color: colors.muted, fontFamily: 'DM Sans, sans-serif', fontStyle: 'italic', marginBottom: 24 }}>"{MOTIVATIONS[motivIdx]}"</p>
+        style={{ textAlign: 'center', maxWidth: 420, width: '100%', position: 'relative', zIndex: 1 }}>
+        <motion.div
+          initial={{ scale: 0 }} animate={{ scale: 1 }}
+          transition={{ type: 'spring', damping: 12, delay: 0.1 }}
+          style={{ fontSize: 80, marginBottom: 20, display: 'block' }}>🏆</motion.div>
+
+        <p style={{ fontSize: 11, fontWeight: 700, color: '#C8FF00', fontFamily: 'Outfit, sans-serif', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 10 }}>Session terminée</p>
+        <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 32, color: colors.text, marginBottom: 8, letterSpacing: '-0.5px' }}>
+          {reviewed} fiche{reviewed > 1 ? 's' : ''} révisée{reviewed > 1 ? 's' : ''}
+        </h2>
+        <p style={{ fontSize: 14, color: colors.muted, fontFamily: 'DM Sans, sans-serif', fontStyle: 'italic', marginBottom: 28, lineHeight: 1.6 }}>
+          &ldquo;{MOTIVATIONS[motivIdx]}&rdquo;
+        </p>
 
         {xpGained > 0 && (
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: colors.limeBg, border: `2px solid ${colors.limeBorder}`, borderRadius: 14, padding: '10px 20px', marginBottom: 24, boxShadow: `0 3px 0 ${colors.limeDark}` }}>
-            <span style={{ fontSize: 18 }}>⚡</span>
-            <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 18, color: colors.limeDark }}>+{xpGained} XP gagnés</span>
-          </div>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: 'rgba(200,255,0,0.1)', border: '1px solid rgba(200,255,0,0.3)', borderRadius: 100, padding: '10px 24px', marginBottom: 28, boxShadow: '0 0 20px rgba(200,255,0,0.15)' }}>
+            <Zap size={16} color="#C8FF00" fill="#C8FF00" />
+            <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 20, color: '#C8FF00' }}>+{xpGained} XP</span>
+          </motion.div>
         )}
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 28 }}>
           {[
-            { emoji: '📚', val: reviewed, label: 'Révisées', color: colors.blue },
-            { emoji: '⚡', val: `+${xpGained}`, label: 'XP', color: colors.limeDark },
+            { emoji: '📚', val: String(reviewed), label: 'Révisées', color: '#3CEFFF' },
+            { emoji: '⚡', val: `+${xpGained}`, label: 'XP gagnés', color: '#C8FF00' },
             { emoji: '🔥', val: `${profile?.streak_days ?? 1}j`, label: 'Streak', color: '#FB923C' },
           ].map((s, i) => (
-            <motion.div key={s.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 + i * 0.08, type: 'spring', damping: 18 }}
-              style={{ background: colors.surface, border: `2px solid ${colors.border}`, borderRadius: 16, padding: '14px 10px', textAlign: 'center', boxShadow: `0 4px 0 ${colors.border2}` }}>
-              <div style={{ fontSize: 22, marginBottom: 4 }}>{s.emoji}</div>
-              <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 22, color: s.color }}>{s.val}</div>
-              <div style={{ fontSize: 11, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>{s.label}</div>
+            <motion.div key={s.label} initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 + i * 0.08, type: 'spring', damping: 18 }}
+              style={{ background: colors.surface, border: `1px solid ${colors.border}`, borderRadius: 20, padding: '16px 10px', textAlign: 'center' }}>
+              <div style={{ fontSize: 24, marginBottom: 6 }}>{s.emoji}</div>
+              <div style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 24, color: s.color, letterSpacing: '-0.5px' }}>{s.val}</div>
+              <div style={{ fontSize: 11, color: colors.muted, fontFamily: 'DM Sans, sans-serif', marginTop: 2 }}>{s.label}</div>
             </motion.div>
           ))}
         </div>
 
         <Link href="/dashboard">
-          <motion.button whileHover={{ y: -3 }} whileTap={{ y: 4 }}
-            style={{ width: '100%', background: colors.lime, border: 'none', color: colors.limeText, borderRadius: 16, padding: '16px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, cursor: 'pointer', boxShadow: `0 4px 0 ${colors.limeDark}` }}>
+          <motion.button whileHover={{ y: -2, boxShadow: '0 0 28px rgba(200,255,0,0.3), 0 6px 0 #4A7400' }} whileTap={{ y: 3 }}
+            style={{ width: '100%', background: '#C8FF00', border: 'none', color: '#0C0C10', borderRadius: 100, padding: '16px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 16, cursor: 'pointer', boxShadow: '0 4px 0 #4A7400', transition: 'all 0.2s' }}>
             🏠 Retour au dashboard
           </motion.button>
         </Link>
@@ -167,8 +172,10 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
     </div>
   )
 
+  // ── Main review screen ──
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: '24px 20px', transition: 'background 0.25s' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: '24px 20px', transition: 'background 0.25s', position: 'relative' }}>
+      <PageBg />
 
       {/* Modals */}
       <AnimatePresence>
@@ -181,22 +188,28 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
         {newBadges.length > 0 && !levelUp && !showGoalModal && <BadgeUnlockModal badges={newBadges} onClose={() => setNewBadges([])} />}
       </AnimatePresence>
 
-      <div style={{ maxWidth: 560, margin: '0 auto' }}>
+      <div style={{ maxWidth: 560, margin: '0 auto', position: 'relative', zIndex: 1 }}>
 
         {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
           <Link href="/dashboard">
             <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.92 }}
-              style={{ background: colors.surface, border: `2px solid ${colors.border}`, color: colors.muted, borderRadius: 12, width: 38, height: 38, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, boxShadow: `0 3px 0 ${colors.border2}` }}>✕</motion.button>
+              style={{ background: colors.surface, border: `1px solid ${colors.border}`, color: colors.muted, borderRadius: 100, width: 38, height: 38, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: 14 }}>
+              ✕
+            </motion.button>
           </Link>
           <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
               <span style={{ fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>{current + 1} / {total}</span>
-              {xpGained > 0 && <span style={{ fontSize: 12, color: colors.limeDark, fontFamily: 'Outfit, sans-serif', fontWeight: 700 }}>⚡ +{xpGained} XP</span>}
+              {xpGained > 0 && (
+                <span style={{ fontSize: 12, color: '#C8FF00', fontFamily: 'Outfit, sans-serif', fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <Zap size={11} color="#C8FF00" />+{xpGained} XP
+                </span>
+              )}
             </div>
-            <div style={{ height: 12, background: colors.surface2, borderRadius: 99, overflow: 'hidden', border: `2px solid ${colors.border}` }}>
-              <motion.div animate={{ width: `${progress}%` }} transition={{ duration: 0.4, ease: 'easeOut' }}
-                style={{ height: '100%', borderRadius: 99, background: 'linear-gradient(90deg, #C8FF00, #AAFF00)', boxShadow: '0 0 8px rgba(200,255,0,0.4)' }} />
+            <div style={{ height: 8, background: colors.surface2, borderRadius: 99, overflow: 'hidden', border: `1px solid ${colors.border}` }}>
+              <motion.div animate={{ width: `${progress}%` }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                style={{ height: '100%', borderRadius: 99, background: 'linear-gradient(90deg, #C8FF00, #AAFF00)', boxShadow: '0 0 10px rgba(200,255,0,0.5)' }} />
             </div>
           </div>
         </div>
@@ -206,9 +219,9 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
           {xpPopup && (
             <motion.div initial={{ opacity: 0, y: -20, scale: 0.7 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -30 }}
               transition={{ type: 'spring', damping: 16 }}
-              style={{ position: 'fixed', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 100, background: colors.limeBg, border: `2px solid ${colors.limeBorder}`, borderRadius: 99, padding: '8px 20px', display: 'flex', alignItems: 'center', gap: 8, boxShadow: `0 4px 0 ${colors.limeDark}` }}>
-              <span style={{ fontSize: 16 }}>⚡</span>
-              <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 16, color: colors.limeDark }}>+{xpPopup} XP</span>
+              style={{ position: 'fixed', top: 72, left: '50%', transform: 'translateX(-50%)', zIndex: 100, background: 'rgba(200,255,0,0.1)', border: '1px solid rgba(200,255,0,0.4)', borderRadius: 100, padding: '8px 20px', display: 'flex', alignItems: 'center', gap: 8, boxShadow: '0 0 20px rgba(200,255,0,0.2)' }}>
+              <Zap size={14} color="#C8FF00" fill="#C8FF00" />
+              <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, color: '#C8FF00' }}>+{xpPopup} XP</span>
             </motion.div>
           )}
         </AnimatePresence>
@@ -218,62 +231,103 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
             initial={{ opacity: 0, x: 48, scale: 0.97 }} animate={{ opacity: 1, x: 0, scale: 1 }} exit={{ opacity: 0, x: -48, scale: 0.97 }}
             transition={{ type: 'spring', damping: 22, stiffness: 300 }}>
 
-            {/* Front */}
+            {/* Flashcard front */}
             <motion.div onClick={() => !flipped && setFlipped(true)}
               animate={shake ? { x: [-6, 6, -5, 5, -3, 3, 0] } : {}}
               transition={shake ? { duration: 0.4 } : {}}
-              whileHover={!flipped ? { scale: 1.01 } : {}}
-              style={{ background: 'linear-gradient(135deg, #1C1C2E, #2D1B69)', border: '2px solid rgba(200,255,0,0.2)', borderRadius: 22, padding: '26px', marginBottom: flipped ? 10 : 0, cursor: flipped ? 'default' : 'pointer', boxShadow: '0 5px 0 rgba(0,0,0,0.4)' }}>
-              {fiche?.cours && <p style={{ fontSize: 11, color: 'rgba(240,240,248,0.45)', fontFamily: 'DM Sans, sans-serif', marginBottom: 10 }}>{fiche.cours.subject ?? fiche.cours.title}</p>}
-              <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 22, color: '#F0F0F8', marginBottom: 12, lineHeight: 1.3 }}>{fiche?.title}</h2>
-              <p style={{ fontSize: 14, color: 'rgba(240,240,248,0.65)', fontFamily: 'DM Sans, sans-serif', lineHeight: 1.6 }}>{fiche?.content?.summary}</p>
+              whileHover={!flipped ? { scale: 1.01, boxShadow: '0 0 40px rgba(200,255,0,0.08), 0 8px 32px rgba(0,0,0,0.5)' } : {}}
+              style={{
+                background: 'linear-gradient(135deg, #1C1C2E 0%, #2D1B69 100%)',
+                border: '1px solid rgba(200,255,0,0.2)',
+                borderRadius: 28,
+                padding: '28px',
+                marginBottom: flipped ? 12 : 0,
+                cursor: flipped ? 'default' : 'pointer',
+                boxShadow: '0 0 30px rgba(200,255,0,0.05), 0 8px 32px rgba(0,0,0,0.4)',
+                position: 'relative', overflow: 'hidden',
+                transition: 'box-shadow 0.2s',
+              }}>
+
+              {/* Glow orb */}
+              <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, background: 'radial-gradient(circle, rgba(200,255,0,0.06) 0%, transparent 70%)', borderRadius: '50%', pointerEvents: 'none' }} />
+
+              {fiche?.cours && (
+                <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(200,255,0,0.08)', border: '1px solid rgba(200,255,0,0.15)', borderRadius: 100, padding: '3px 10px', marginBottom: 14 }}>
+                  <span style={{ fontSize: 10, color: '#C8FF00', fontFamily: 'Outfit, sans-serif', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                    {fiche.cours.subject ?? fiche.cours.title}
+                  </span>
+                </div>
+              )}
+
+              <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 22, color: '#F0F0F8', marginBottom: 14, lineHeight: 1.25, letterSpacing: '-0.3px' }}>
+                {fiche?.title}
+              </h2>
+              <p style={{ fontSize: 14, color: 'rgba(240,240,248,0.6)', fontFamily: 'DM Sans, sans-serif', lineHeight: 1.65 }}>
+                {fiche?.content?.summary}
+              </p>
+
               {!flipped && (
-                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
-                  style={{ marginTop: 20, textAlign: 'center', fontSize: 12, color: 'rgba(240,240,248,0.35)', fontFamily: 'DM Sans, sans-serif' }}>
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
+                  style={{ marginTop: 22, textAlign: 'center', fontSize: 12, color: 'rgba(240,240,248,0.3)', fontFamily: 'DM Sans, sans-serif' }}>
                   Tape pour voir les détails 👆
                 </motion.p>
               )}
             </motion.div>
 
-            {/* Back */}
+            {/* Flashcard back */}
             <AnimatePresence>
               {flipped && (
-                <motion.div initial={{ opacity: 0, y: 12, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', damping: 20 }}
-                  style={{ background: colors.surface, borderRadius: 22, padding: '20px', border: `2px solid ${colors.border}`, boxShadow: `0 5px 0 ${colors.border2}`, marginBottom: 12 }}>
+                <motion.div initial={{ opacity: 0, y: 14, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', damping: 20 }}
+                  style={{ background: colors.surface, borderRadius: 24, padding: '20px', border: `1px solid ${colors.border}`, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+
                   {fiche?.content?.key_concepts?.slice(0, 3).map((kc, i) => (
-                    <div key={i} style={{ background: colors.surface2, borderRadius: 12, padding: '10px 14px', marginBottom: 8, border: `1px solid ${colors.border}` }}>
-                      <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: colors.text, marginBottom: 3 }}>{kc.term}</p>
-                      <p style={{ fontSize: 12, color: colors.muted, lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif' }}>{kc.definition}</p>
+                    <div key={i} style={{ background: 'rgba(60,239,255,0.04)', border: '1px solid rgba(60,239,255,0.12)', borderRadius: 14, padding: '10px 14px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
+                        <Tag size={11} color="#3CEFFF" />
+                        <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: colors.text }}>{kc.term}</p>
+                      </div>
+                      <p style={{ fontSize: 12, color: colors.muted, lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif', paddingLeft: 17 }}>{kc.definition}</p>
                     </div>
                   ))}
+
                   {fiche?.content?.important_points?.slice(0, 3).map((pt, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 10, marginBottom: 7, alignItems: 'flex-start' }}>
-                      <div style={{ width: 7, height: 7, borderRadius: '50%', background: colors.lime, flexShrink: 0, marginTop: 5 }} />
-                      <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif' }}>{pt}</p>
+                    <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#C8FF00', flexShrink: 0, marginTop: 6, boxShadow: '0 0 6px rgba(200,255,0,0.5)' }} />
+                      <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.55, fontFamily: 'DM Sans, sans-serif' }}>{pt}</p>
                     </div>
                   ))}
+
                   {fiche?.content?.memory_trick && (
-                    <div style={{ background: 'rgba(251,146,60,0.08)', borderRadius: 14, padding: '12px 14px', border: '1px solid rgba(251,146,60,0.2)', marginTop: 8 }}>
-                      <p style={{ fontSize: 10, fontWeight: 700, color: '#FB923C', fontFamily: 'Outfit, sans-serif', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.5px' }}>💡 Astuce mémo</p>
-                      <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.5, fontStyle: 'italic', fontFamily: 'DM Sans, sans-serif' }}>{fiche.content.memory_trick}</p>
+                    <div style={{ background: 'rgba(251,146,60,0.06)', borderRadius: 14, padding: '12px 14px', border: '1px solid rgba(251,146,60,0.15)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
+                        <Lightbulb size={12} color="#FB923C" />
+                        <p style={{ fontSize: 10, fontWeight: 700, color: '#FB923C', fontFamily: 'Outfit, sans-serif', textTransform: 'uppercase', letterSpacing: '1px' }}>Astuce mémo</p>
+                      </div>
+                      <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.55, fontStyle: 'italic', fontFamily: 'DM Sans, sans-serif' }}>{fiche.content.memory_trick}</p>
                     </div>
                   )}
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* Buttons */}
+            {/* Answer buttons */}
             <AnimatePresence>
               {flipped && (
                 <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', damping: 20 }}
                   style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                  <motion.button whileHover={{ y: -3 }} whileTap={{ y: 4 }} onClick={() => answer(false)}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '18px', background: 'rgba(248,113,113,0.1)', border: '2px solid #f87171', borderRadius: 18, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, color: '#f87171', boxShadow: '0 5px 0 #CC2200' }}>
-                    <X size={20} />À revoir
+                  <motion.button
+                    whileHover={{ y: -3, boxShadow: '0 0 20px rgba(248,113,113,0.25), 0 6px 0 #CC2200' }}
+                    whileTap={{ y: 4 }}
+                    onClick={() => answer(false)}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '18px', background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.35)', borderRadius: 100, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, color: '#f87171', boxShadow: '0 4px 0 rgba(204,34,0,0.4)', transition: 'all 0.2s' }}>
+                    <X size={18} />À revoir
                   </motion.button>
-                  <motion.button whileHover={{ y: -3 }} whileTap={{ y: 4 }} onClick={() => answer(true)}
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '18px', background: colors.lime, border: 'none', borderRadius: 18, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, color: colors.limeText, boxShadow: `0 5px 0 ${colors.limeDark}` }}>
-                    <CheckCircle2 size={20} />Je sais ! ⚡
+                  <motion.button
+                    whileHover={{ y: -3, boxShadow: '0 0 28px rgba(200,255,0,0.35), 0 6px 0 #4A7400' }}
+                    whileTap={{ y: 4 }}
+                    onClick={() => answer(true)}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '18px', background: '#C8FF00', border: 'none', borderRadius: 100, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, color: '#0C0C10', boxShadow: '0 4px 0 #4A7400', transition: 'all 0.2s' }}>
+                    <CheckCircle2 size={18} />Je sais !
                   </motion.button>
                 </motion.div>
               )}
