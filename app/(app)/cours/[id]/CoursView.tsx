@@ -98,7 +98,7 @@ export default function CoursView({ cours, fiches, sessions }: Props) {
                   <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#C8FF00', display: 'inline-block', boxShadow: '0 0 8px rgba(200,255,0,0.6)' }} />
                 </div>
               )}
-              <h1 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 22 : 28, color: '#F0F0F8', marginBottom: 12, lineHeight: 1.15, letterSpacing: '-0.3px' }}>
+              <h1 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 20 : 28, color: '#F0F0F8', marginBottom: 12, lineHeight: 1.2, letterSpacing: '-0.3px', overflow: 'hidden', display: '-webkit-box', WebkitLineClamp: isMobile ? 2 : 3, WebkitBoxOrient: 'vertical' }}>
                 {cours.title}
               </h1>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, fontSize: 13, color: 'rgba(240,240,248,0.45)', fontFamily: 'DM Sans, sans-serif' }}>

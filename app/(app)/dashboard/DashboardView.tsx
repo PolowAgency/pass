@@ -132,7 +132,8 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
   const spring = (delay = 0) => ({ type: 'spring' as const, damping: 20, stiffness: 220, delay })
   const card = (extra?: React.CSSProperties): React.CSSProperties => ({
     background: colors.surface, border: `2px solid ${colors.border}`,
-    borderRadius: 20, padding: isMobile ? '14px 16px' : '20px', boxShadow: `0 4px 0 ${colors.border2}`, ...extra,
+    borderRadius: 20, padding: isMobile ? '14px 16px' : '20px',
+    boxShadow: `0 4px 0 ${colors.border2}`, overflow: 'hidden', ...extra,
   })
 
   useEffect(() => {
@@ -275,10 +276,10 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.05)', borderRadius: 12, padding: '10px 14px' }}>
                     <span style={{ fontSize: 18, flexShrink: 0 }}>🎯</span>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <span style={{ fontSize: 13, color: '#F0F0F8', fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>
+                      <p style={{ fontSize: 13, color: '#F0F0F8', fontFamily: 'DM Sans, sans-serif', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginBottom: 2 }}>
                         QCM — {priorityCours.title}
-                      </span>
-                      <div style={{ display: 'inline-flex', marginLeft: 8, background: `${priorityCours.prep_score < 50 ? '#f87171' : '#FB923C'}22`, borderRadius: 99, padding: '1px 7px' }}>
+                      </p>
+                      <div style={{ display: 'inline-flex', background: `${priorityCours.prep_score < 50 ? '#f87171' : '#FB923C'}22`, borderRadius: 99, padding: '1px 7px' }}>
                         <span style={{ fontSize: 10, color: priorityCours.prep_score < 50 ? '#f87171' : '#FB923C', fontFamily: 'Outfit, sans-serif', fontWeight: 700 }}>{priorityCours.prep_score}%</span>
                       </div>
                     </div>
@@ -290,8 +291,9 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,60,172,0.06)', borderRadius: 12, padding: '10px 14px' }}>
                     <span style={{ fontSize: 18, flexShrink: 0 }}>💡</span>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <span style={{ fontSize: 12, color: 'rgba(240,240,248,0.6)', fontFamily: 'DM Sans, sans-serif' }}>Point faible : </span>
-                      <span style={{ fontSize: 12, color: '#FF3CAC', fontFamily: 'DM Sans, sans-serif', fontWeight: 600 }}>{weakFiches[0].title}</span>
+                      <p style={{ fontSize: 12, color: 'rgba(240,240,248,0.6)', fontFamily: 'DM Sans, sans-serif', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        Point faible : <span style={{ color: '#FF3CAC', fontWeight: 600 }}>{weakFiches[0].title}</span>
+                      </p>
                     </div>
                   </div>
                 )}

@@ -156,11 +156,11 @@ export default function QcmView({ cours, questions, userId, totalAvailable }: Pr
               <ArrowLeft size={16} />
             </motion.button>
           </Link>
-          <div style={{ flex: 1 }}>
-            <p style={{ fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif', marginBottom: 5 }}>
-            {cours.title} · {idx + 1}/{total}
-            {totalAvailable && totalAvailable > total && <span style={{ color: colors.limeDark }}> · {totalAvailable - total} autres dispo</span>}
-          </p>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif', marginBottom: 5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {cours.title} · {idx + 1}/{total}
+              {totalAvailable && totalAvailable > total && <span style={{ color: colors.limeDark }}> · {totalAvailable - total} autres dispo</span>}
+            </p>
             <div style={{ height: 12, background: colors.surface2, borderRadius: 99, overflow: 'hidden', border: `2px solid ${colors.border}` }}>
               <motion.div animate={{ width: `${progress}%` }} transition={{ duration: 0.4, ease: 'easeOut' }}
                 style={{ height: '100%', borderRadius: 99, background: 'linear-gradient(90deg, #C8FF00, #AAFF00)', boxShadow: '0 0 8px rgba(200,255,0,0.4)' }} />
