@@ -80,20 +80,22 @@ export default function UploadPage() {
       fd.append('title', title)
 
       const res = await fetch('/api/generate', { method: 'POST', body: fd })
-      const result = await res.json()
+      let result: { error?: string; fiches_count?: number } = {}
+      try { result = await res.json() } catch { result = { error: `Réponse invalide (HTTP ${res.status})` } }
       if (!res.ok) {
         toast.dismiss('gen')
-        toast.error(result.error ?? 'Erreur de génération', { duration: 5000 })
+        toast.error(result.error ?? `Erreur ${res.status}`, { duration: 6000 })
         setLoading(false)
         return
       }
       toast.dismiss('gen')
       toast.success(`${result.fiches_count} fiches générées ! 🎉`)
       router.push(`/cours/${cours.id}`)
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err)
       toast.dismiss('gen')
-      toast.error('Une erreur est survenue.')
+      const msg = err instanceof Error ? err.message : 'Erreur inconnue'
+      toast.error(msg, { duration: 6000 })
       setLoading(false)
     }
   }
@@ -128,20 +130,22 @@ export default function UploadPage() {
       fd.append('title', title)
 
       const res = await fetch('/api/generate', { method: 'POST', body: fd })
-      const result = await res.json()
+      let result: { error?: string; fiches_count?: number } = {}
+      try { result = await res.json() } catch { result = { error: `Réponse invalide (HTTP ${res.status})` } }
       if (!res.ok) {
         toast.dismiss('gen')
-        toast.error(result.error ?? 'Erreur de génération', { duration: 5000 })
+        toast.error(result.error ?? `Erreur ${res.status}`, { duration: 6000 })
         setLoading(false)
         return
       }
       toast.dismiss('gen')
       toast.success(`${result.fiches_count} fiches générées ! 🎉`)
       router.push(`/cours/${cours.id}`)
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err)
       toast.dismiss('gen')
-      toast.error('Une erreur est survenue.')
+      const msg = err instanceof Error ? err.message : 'Erreur inconnue'
+      toast.error(msg, { duration: 6000 })
       setLoading(false)
     }
   }
