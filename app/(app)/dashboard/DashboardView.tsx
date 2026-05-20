@@ -132,7 +132,7 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
   const spring = (delay = 0) => ({ type: 'spring' as const, damping: 20, stiffness: 220, delay })
   const card = (extra?: React.CSSProperties): React.CSSProperties => ({
     background: colors.surface, border: `2px solid ${colors.border}`,
-    borderRadius: 22, padding: '20px', boxShadow: `0 5px 0 ${colors.border2}`, ...extra,
+    borderRadius: 20, padding: isMobile ? '14px 16px' : '20px', boxShadow: `0 4px 0 ${colors.border2}`, ...extra,
   })
 
   useEffect(() => {
@@ -424,18 +424,18 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
                       transition={{ type: 'spring', damping: 20, stiffness: 200, delay: 0.06 * i + 0.28 }}>
                       <Link href={`/cours/${c.id}`} style={{ textDecoration: 'none' }}>
                         <motion.div whileHover={{ y: -3 }} whileTap={{ y: 2 }}
-                          style={{ ...card(), display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer' }}>
-                          <div style={{ width: 46, height: 46, borderRadius: 14, background: `${subj.color}18`, border: `2px solid ${subj.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, flexShrink: 0 }}>
+                          style={{ ...card(), display: 'flex', alignItems: 'center', gap: isMobile ? 10 : 12, cursor: 'pointer' }}>
+                          <div style={{ width: isMobile ? 40 : 46, height: isMobile ? 40 : 46, borderRadius: 12, background: `${subj.color}18`, border: `2px solid ${subj.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isMobile ? 18 : 20, flexShrink: 0 }}>
                             {subj.emoji}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 14, color: colors.text, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                            <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: isMobile ? 13 : 14, color: colors.text, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: isMobile ? 5 : 6 }}>
                               {c.subject && <span style={{ fontSize: 10, fontFamily: 'Outfit, sans-serif', fontWeight: 700, color: subj.color }}>{c.subject}</span>}
                               <span style={{ fontSize: 10, color: colors.muted }}>· {ficheCount} fiches</span>
                               {urgent && daysLeft !== null && <span style={{ fontSize: 10, color: '#f87171', fontWeight: 700 }}>⚠️ J-{daysLeft}</span>}
                             </div>
-                            <div style={{ height: 6, background: colors.surface2, borderRadius: 99, overflow: 'hidden' }}>
+                            <div style={{ height: 5, background: colors.surface2, borderRadius: 99, overflow: 'hidden' }}>
                               <motion.div initial={{ width: 0 }} animate={{ width: `${c.prep_score}%` }}
                                 transition={{ duration: 0.8, delay: 0.08 * i + 0.5, ease: [0.22, 1, 0.36, 1] }}
                                 style={{ height: '100%', borderRadius: 99, background: scoreColor }} />
@@ -443,10 +443,12 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
                           </div>
                           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
                             <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14, color: scoreColor }}>{c.prep_score}%</span>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: colors.lime, borderRadius: 9, padding: '5px 10px', boxShadow: `0 3px 0 ${colors.limeDark}` }}>
-                              <Play size={10} color={colors.limeText} fill={colors.limeText} />
-                              <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 11, color: colors.limeText }}>Lancer</span>
-                            </div>
+                            {!isMobile && (
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: colors.lime, borderRadius: 9, padding: '5px 10px', boxShadow: `0 3px 0 ${colors.limeDark}` }}>
+                                <Play size={10} color={colors.limeText} fill={colors.limeText} />
+                                <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 11, color: colors.limeText }}>Lancer</span>
+                              </div>
+                            )}
                           </div>
                         </motion.div>
                       </Link>

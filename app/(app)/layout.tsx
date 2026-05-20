@@ -21,7 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <StreakUpdater />
         <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }} className="lg:ml-60">
           <TopBar profile={profile as Profile} />
-          <main style={{ flex: 1 }} className="pb-20 lg:pb-0">
+          <main style={{ flex: 1, paddingBottom: 'max(80px, calc(70px + env(safe-area-inset-bottom)))' }} className="lg:!pb-0">
             {children}
           </main>
         </div>

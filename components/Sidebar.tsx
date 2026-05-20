@@ -18,12 +18,11 @@ const NAV = [
 ]
 
 const MOBILE_NAV = [
-  { href: '/dashboard', label: 'Home',     emoji: '🏠' },
-  { href: '/review',    label: 'Réviser',  emoji: '🧠' },
-  { href: '/upload',    label: 'Upload',   emoji: '📤' },
-  { href: '/coach',     label: 'Coach',    emoji: '🤖' },
-  { href: '/stats',     label: 'Stats',    emoji: '📊' },
-  { href: '/settings',  label: 'Réglages', emoji: '⚙️' },
+  { href: '/dashboard', label: 'Home',    emoji: '🏠' },
+  { href: '/review',    label: 'Réviser', emoji: '🧠' },
+  { href: '/upload',    label: 'Upload',  emoji: '📤' },
+  { href: '/coach',     label: 'Coach',   emoji: '🤖' },
+  { href: '/stats',     label: 'Stats',   emoji: '📊' },
 ]
 
 export default function Sidebar({ profile }: { profile: Profile | null }) {
@@ -117,16 +116,20 @@ export default function Sidebar({ profile }: { profile: Profile | null }) {
       </aside>
 
       {/* Mobile */}
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around px-1 py-1"
-        style={{ background: colors.surface, borderTop: `2px solid ${colors.border}` }}>
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around"
+        style={{ background: colors.surface, borderTop: `2px solid ${colors.border}`, paddingTop: 6, paddingBottom: 'max(10px, env(safe-area-inset-bottom))' }}>
         {MOBILE_NAV.map(({ href, emoji, label }) => {
           const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
           return (
-            <Link key={href} href={href} style={{ textDecoration: 'none' }}>
+            <Link key={href} href={href} style={{ textDecoration: 'none', flex: 1 }}>
               <motion.div whileTap={{ scale: 0.85 }}
-                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, padding: '6px 8px', borderRadius: 12, background: active ? colors.navActiveBg : 'transparent', border: `2px solid ${active ? colors.navActiveBorder : 'transparent'}` }}>
-                <span style={{ fontSize: 18 }}>{emoji}</span>
-                <span style={{ fontSize: 9, fontFamily: 'Outfit, sans-serif', fontWeight: active ? 800 : 400, color: active ? colors.navActiveText : colors.muted }}>{label}</span>
+                style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '4px 0', position: 'relative' }}>
+                <span style={{ fontSize: 22 }}>{emoji}</span>
+                <span style={{ fontSize: 10, fontFamily: 'Outfit, sans-serif', fontWeight: active ? 800 : 400, color: active ? colors.navActiveText : colors.muted }}>{label}</span>
+                {active && (
+                  <motion.div layoutId="mobile-nav-dot"
+                    style={{ position: 'absolute', bottom: -6, width: 4, height: 4, borderRadius: '50%', background: colors.lime }} />
+                )}
               </motion.div>
             </Link>
           )
