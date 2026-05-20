@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Question } from '@/types'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Trophy, RotateCcw, BookOpen } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Trophy, RotateCcw, BookOpen, ZoomIn, X } from 'lucide-react'
 import Link from 'next/link'
 import { useTheme } from '@/contexts/ThemeContext'
 import { awardXP, XP_REWARDS } from '@/lib/xp'
@@ -23,7 +23,8 @@ function getMsg(pct: number) {
   return pool[Math.floor(Math.random() * pool.length)]
 }
 
-interface Props { cours: { id: string; title: string; subject: string | null; exam_date?: string | null }; questions: Question[]; userId: string; totalAvailable?: number }
+type QuestionWithImage = Question & { fiche_image_url?: string | null }
+interface Props { cours: { id: string; title: string; subject: string | null; exam_date?: string | null }; questions: QuestionWithImage[]; userId: string; totalAvailable?: number }
 
 export default function QcmView({ cours, questions, userId, totalAvailable }: Props) {
   const { colors } = useTheme()
@@ -35,7 +36,6 @@ export default function QcmView({ cours, questions, userId, totalAvailable }: Pr
   const [shakeIdx, setShakeIdx] = useState<number | null>(null)
   const [levelUp, setLevelUp] = useState<number | null>(null)
   const [newBadges, setNewBadges] = useState<BadgeDef[]>([])
-  const [resultMsg] = useState(() => '')
 
   const q = questions[idx]
   const total = questions.length
@@ -174,6 +174,9 @@ export default function QcmView({ cours, questions, userId, totalAvailable }: Pr
             transition={{ type: 'spring', damping: 22, stiffness: 280 }}>
 
             <div style={{ background: 'linear-gradient(135deg, #1C1C2E, #2D1B69)', border: `2px solid ${colors.border}`, borderRadius: 22, padding: '26px', marginBottom: 16, boxShadow: '0 5px 0 #0A0A1A' }}>
+              {q.fiche_image_url && (
+                <QcmImage src={q.fiche_image_url} />
+              )}
               <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 18, color: '#F0F0F8', lineHeight: 1.4 }}>{q.question}</p>
             </div>
 
@@ -230,5 +233,43 @@ export default function QcmView({ cours, questions, userId, totalAvailable }: Pr
         </AnimatePresence>
       </div>
     </div>
+  )
+}
+
+function QcmImage({ src }: { src: string }) {
+  const [open, setOpen] = useState(false)
+  const close = useCallback(() => setOpen(false), [])
+
+  return (
+    <>
+      <div
+        onClick={() => setOpen(true)}
+        style={{ position: 'relative', borderRadius: 12, overflow: 'hidden', marginBottom: 18, cursor: 'zoom-in', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <img src={src} alt="Schéma" style={{ width: '100%', display: 'block', maxHeight: 200, objectFit: 'cover' }} />
+        <div style={{ position: 'absolute', bottom: 8, right: 8, background: 'rgba(0,0,0,0.55)', borderRadius: 8, padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <ZoomIn size={12} color="rgba(255,255,255,0.7)" />
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', fontFamily: 'DM Sans, sans-serif' }}>Agrandir</span>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={close}
+            style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, cursor: 'zoom-out' }}>
+            <motion.img
+              src={src} alt="Schéma"
+              initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.85, opacity: 0 }}
+              transition={{ type: 'spring', damping: 22 }}
+              style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: 16, objectFit: 'contain', boxShadow: '0 0 60px rgba(0,0,0,0.8)' }}
+              onClick={e => e.stopPropagation()} />
+            <button onClick={close} style={{ position: 'absolute', top: 20, right: 20, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+              <X size={18} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   )
 }

@@ -43,10 +43,10 @@ export default function CoursView({ cours, fiches, sessions }: Props) {
   const isMobile = useIsMobile()
   const memorized = fiches.filter(f => f.memorized).length
   const masteryPct = fiches.length > 0 ? Math.round((memorized / fiches.length) * 100) : 0
-  const daysLeft = cours.exam_date ? differenceInDays(parseISO(cours.exam_date), new Date()) : null
+  const daysLeft = cours.exam_date ? differenceInDays(new Date(cours.exam_date + 'T00:00:00'), new Date()) : null
   const avgScore = sessions.length > 0 ? Math.round(sessions.reduce((a, s) => a + ((s.score ?? 0) / (s.total_questions ?? 1)) * 100, 0) / sessions.length) : null
-  const urgent = daysLeft !== null && daysLeft <= 7
-  const examMode = daysLeft !== null && daysLeft <= 14
+  const urgent = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7
+  const examMode = daysLeft !== null && daysLeft >= 0 && daysLeft <= 14
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: isMobile ? '20px 16px 100px' : '28px 32px 60px', transition: 'background 0.25s', position: 'relative' }}>
@@ -137,7 +137,7 @@ export default function CoursView({ cours, fiches, sessions }: Props) {
             {[
               { icon: Brain,  val: `${masteryPct}%`,   label: 'Maîtrise',   color: '#C8FF00', glow: 'rgba(200,255,0,0.15)' },
               { icon: Target, val: avgScore !== null ? `${avgScore}%` : '—', label: 'Moy. QCM', color: '#3CEFFF', glow: 'rgba(60,239,255,0.15)' },
-              { icon: Calendar, val: daysLeft !== null ? `J-${daysLeft}` : '—', label: 'Avant exam', color: urgent ? '#f87171' : 'rgba(240,240,248,0.5)', glow: urgent ? 'rgba(248,113,113,0.15)' : 'transparent' },
+              { icon: Calendar, val: daysLeft !== null && daysLeft >= 0 ? `J-${daysLeft}` : daysLeft !== null ? 'Passé' : '—', label: 'Avant exam', color: urgent ? '#f87171' : 'rgba(240,240,248,0.5)', glow: urgent ? 'rgba(248,113,113,0.15)' : 'transparent' },
             ].map(s => (
               <div key={s.label} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: 16, padding: '14px', boxShadow: `inset 0 0 20px ${s.glow}` }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>

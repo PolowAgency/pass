@@ -10,10 +10,16 @@ import { useTheme } from '@/contexts/ThemeContext'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import toast from 'react-hot-toast'
 
-const SUBJECTS_GENERAL = ['Mathématiques','Physique','Chimie','SVT','Histoire-Géo','Philosophie','Économie','Droit','Informatique','Littérature','Autre']
-const SUBJECTS_MEDICAL = ['Anatomie','Histologie','Pharmacologie','Biologie','Physiologie','Parodontologie','Endodontie','Chirurgie buccale','Prothèse dentaire','Orthodontie','Pathologie buccale','Radiologie','Odontologie conservatrice','Médecine buccale','Autre (médecine)']
-const ALL_SUBJECTS = [...SUBJECTS_MEDICAL, ...SUBJECTS_GENERAL]
-const SUBJECTS = ALL_SUBJECTS
+const SUBJECT_GROUPS: { label: string; subjects: string[] }[] = [
+  { label: 'Lycée (BAC)', subjects: ['Mathématiques', 'Physique-Chimie', 'SVT', 'Histoire-Géo', 'Philosophie', 'Français', 'SES', 'NSI', 'Anglais', 'Espagnol', 'HGGSP', 'Humanités & Littérature'] },
+  { label: 'Médecine / Santé', subjects: ['Anatomie', 'Physiologie', 'Biologie', 'Histologie', 'Pharmacologie', 'Sémiologie', 'Pathologie', 'Radiologie', 'Chirurgie', 'Parodontologie', 'Endodontie', 'Prothèse dentaire', 'Orthodontie', 'Médecine buccale', 'Odontologie', 'Autre (santé)'] },
+  { label: 'Sciences & Ingénierie', subjects: ['Mathématiques', 'Physique', 'Chimie', 'Informatique', 'Mécanique', 'Électronique', 'Sciences de l\'ingénieur', 'Biochimie', 'Statistiques', 'Analyse', 'Algèbre'] },
+  { label: 'Droit & Sciences po', subjects: ['Droit constitutionnel', 'Droit civil', 'Droit pénal', 'Droit administratif', 'Droit commercial', 'Droit international', 'Sciences politiques', 'Relations internationales', 'Finances publiques'] },
+  { label: 'Économie & Gestion', subjects: ['Microéconomie', 'Macroéconomie', 'Comptabilité', 'Finance', 'Marketing', 'Management', 'Gestion de projet', 'Économétrie', 'RH'] },
+  { label: 'Lettres & Langues', subjects: ['Littérature', 'Linguistique', 'Traduction', 'Anglais', 'Espagnol', 'Allemand', 'Arabe', 'Latin', 'Philosophie'] },
+  { label: 'Sciences humaines', subjects: ['Psychologie', 'Sociologie', 'Histoire', 'Géographie', 'Anthropologie', 'Sciences de l\'éducation', 'Communication'] },
+  { label: 'Autre', subjects: ['Autre'] },
+]
 
 export default function UploadPage() {
   const router = useRouter()
@@ -76,7 +82,9 @@ export default function UploadPage() {
 
       toast.loading('Génération des fiches en cours…', { id: 'gen' })
       const fd = new FormData()
-      fd.append('file', file)
+      fd.append('file_url', publicUrl)
+      fd.append('file_type', file.type)
+      fd.append('file_name', file.name)
       fd.append('cours_id', cours.id)
       fd.append('title', title)
       fd.append('lang', lang)
@@ -115,10 +123,6 @@ export default function UploadPage() {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error('Non connecté')
 
-      // Créer un fichier texte à partir du contenu collé
-      const blob = new Blob([pastedText], { type: 'text/plain' })
-      const textFile = new File([blob], `${title}.txt`, { type: 'text/plain' })
-
       const { data: cours, error: coursErr } = await supabase.from('cours').insert({
         user_id: user.id, title, subject: subject || null, exam_date: examDate || null,
         file_type: 'text/plain', status: 'processing',
@@ -127,7 +131,7 @@ export default function UploadPage() {
 
       toast.loading('Génération des fiches en cours…', { id: 'gen' })
       const fd = new FormData()
-      fd.append('file', textFile)
+      fd.append('text_content', pastedText)
       fd.append('cours_id', cours.id)
       fd.append('title', title)
       fd.append('lang', lang)
@@ -240,7 +244,7 @@ export default function UploadPage() {
                         <X size={16} />
                       </button>
                     </div>
-                    <FormFields title={title} setTitle={setTitle} subject={subject} setSubject={setSubject} examDate={examDate} setExamDate={setExamDate} colors={colors} inp={inp} subjects={SUBJECTS} />
+                    <FormFields title={title} setTitle={setTitle} subject={subject} setSubject={setSubject} examDate={examDate} setExamDate={setExamDate} colors={colors} inp={inp} />
                     <LangSelector lang={lang} setLang={setLang} colors={colors} />
                     <SubmitBtn loading={loading} />
                   </form>
@@ -276,7 +280,7 @@ export default function UploadPage() {
 
                 {showForm && (
                   <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-                    <FormFields title={title} setTitle={setTitle} subject={subject} setSubject={setSubject} examDate={examDate} setExamDate={setExamDate} colors={colors} inp={inp} subjects={SUBJECTS} />
+                    <FormFields title={title} setTitle={setTitle} subject={subject} setSubject={setSubject} examDate={examDate} setExamDate={setExamDate} colors={colors} inp={inp} />
                     <LangSelector lang={lang} setLang={setLang} colors={colors} />
                     <SubmitBtn loading={loading} disabled={pastedText.trim().length < 100 || !title} />
                   </motion.div>
@@ -290,13 +294,12 @@ export default function UploadPage() {
   )
 }
 
-function FormFields({ title, setTitle, subject, setSubject, examDate, setExamDate, colors, inp, subjects }: {
+function FormFields({ title, setTitle, subject, setSubject, examDate, setExamDate, colors, inp }: {
   title: string; setTitle: (v: string) => void
   subject: string; setSubject: (v: string) => void
   examDate: string; setExamDate: (v: string) => void
   colors: ReturnType<typeof useTheme>['colors']
   inp: (extra?: React.CSSProperties) => React.CSSProperties
-  subjects: string[]
 }) {
   return (
     <>
@@ -312,22 +315,19 @@ function FormFields({ title, setTitle, subject, setSubject, examDate, setExamDat
 
       <div>
         <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: colors.text, marginBottom: 10, fontFamily: 'Outfit, sans-serif' }}>Matière</label>
-        <p style={{ fontSize: 11, color: colors.muted, marginBottom: 8, fontFamily: 'DM Sans, sans-serif' }}>Médecine / Dentaire</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 12 }}>
-          {SUBJECTS_MEDICAL.map(s => (
-            <button key={s} type="button" onClick={() => setSubject(s === subject ? '' : s)}
-              style={{ padding: '7px 14px', borderRadius: 99, fontSize: 12, fontFamily: 'DM Sans, sans-serif', fontWeight: subject === s ? 700 : 400, cursor: 'pointer', transition: 'all 0.15s', border: '2px solid', background: subject === s ? 'rgba(60,239,255,0.1)' : colors.surface, borderColor: subject === s ? colors.blue : colors.border, color: subject === s ? colors.blue : colors.muted, boxShadow: subject === s ? `0 2px 0 #0088AA` : `0 2px 0 ${colors.border2}` }}>
-              {s}
-            </button>
-          ))}
-        </div>
-        <p style={{ fontSize: 11, color: colors.muted, marginBottom: 8, fontFamily: 'DM Sans, sans-serif' }}>Général</p>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {SUBJECTS_GENERAL.map(s => (
-            <button key={s} type="button" onClick={() => setSubject(s === subject ? '' : s)}
-              style={{ padding: '7px 14px', borderRadius: 99, fontSize: 12, fontFamily: 'DM Sans, sans-serif', fontWeight: subject === s ? 700 : 400, cursor: 'pointer', transition: 'all 0.15s', border: '2px solid', background: subject === s ? colors.limeBg : colors.surface, borderColor: subject === s ? colors.lime : colors.border, color: subject === s ? colors.limeDark : colors.muted, boxShadow: subject === s ? `0 2px 0 ${colors.limeDark}` : `0 2px 0 ${colors.border2}` }}>
-              {s}
-            </button>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {SUBJECT_GROUPS.map(group => (
+            <div key={group.label}>
+              <p style={{ fontSize: 11, color: colors.muted, marginBottom: 7, fontFamily: 'DM Sans, sans-serif', fontWeight: 600, letterSpacing: '0.5px' }}>{group.label}</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+                {group.subjects.map(s => (
+                  <button key={s} type="button" onClick={() => setSubject(s === subject ? '' : s)}
+                    style={{ padding: '6px 13px', borderRadius: 99, fontSize: 12, fontFamily: 'DM Sans, sans-serif', fontWeight: subject === s ? 700 : 400, cursor: 'pointer', transition: 'all 0.15s', border: '2px solid', background: subject === s ? colors.limeBg : colors.surface, borderColor: subject === s ? colors.lime : colors.border, color: subject === s ? colors.limeDark : colors.muted, boxShadow: subject === s ? `0 2px 0 ${colors.limeDark}` : `0 2px 0 ${colors.border2}` }}>
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </div>

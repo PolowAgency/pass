@@ -62,6 +62,7 @@ export interface Fiche {
   next_review: string | null
   ease_factor: number | null
   created_at: string
+  image_url?: string | null
 }
 
 export interface Question {

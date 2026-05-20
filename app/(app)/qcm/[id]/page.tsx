@@ -33,15 +33,21 @@ export default async function QcmPage({ params, searchParams }: {
 
   const { data: allQuestions } = await supabase
     .from('questions')
-    .select('*')
+    .select('*, fiche:fiche_id(image_url)')
     .eq('cours_id', id)
 
   if (!allQuestions || allQuestions.length === 0) redirect(`/cours/${id}`)
 
+  // Aplatir fiche.image_url → fiche_image_url pour simplifier le typage côté client
+  const flatQuestions = allQuestions.map(q => {
+    const { fiche, ...rest } = q as typeof q & { fiche: { image_url: string | null } | null }
+    return { ...rest, fiche_image_url: fiche?.image_url ?? null }
+  })
+
   // Mode "rapide" : 10 questions aléatoires, mode "complet" : toutes
   const questions = mode === 'rapide'
-    ? shuffle(allQuestions).slice(0, Math.min(10, allQuestions.length))
-    : shuffle(allQuestions)
+    ? shuffle(flatQuestions).slice(0, Math.min(10, flatQuestions.length))
+    : shuffle(flatQuestions)
 
   return <QcmView cours={cours} questions={questions} userId={user.id} totalAvailable={allQuestions.length} />
 }

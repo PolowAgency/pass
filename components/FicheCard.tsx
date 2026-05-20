@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { Fiche } from '@/types'
 import { createClient } from '@/lib/supabase/client'
-import { ChevronDown, ChevronUp, CheckCircle2, Brain, Lightbulb, Zap, Tag } from 'lucide-react'
+import { ChevronDown, ChevronUp, CheckCircle2, Brain, Lightbulb, Zap, Tag, Camera, X } from 'lucide-react'
+import { useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import { checkAndAwardBadges } from '@/lib/badges'
@@ -22,8 +23,35 @@ export function FicheCard({ fiche: initialFiche, index, coursId }: FicheCardProp
   const [fiche, setFiche] = useState(initialFiche)
   const [expanded, setExpanded] = useState(false)
   const [memorizing, setMemorizing] = useState(false)
+  const [uploadingImg, setUploadingImg] = useState(false)
+  const imgInputRef = useRef<HTMLInputElement>(null)
 
   const diff = DIFF[fiche.difficulty] ?? DIFF.medium
+
+  async function uploadImage(e: React.ChangeEvent<HTMLInputElement>) {
+    const img = e.target.files?.[0]
+    if (!img) return
+    if (img.size > 5 * 1024 * 1024) { toast.error('Image trop lourde (max 5 Mo)'); return }
+    setUploadingImg(true)
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setUploadingImg(false); return }
+    const path = `${user.id}/${fiche.id}.${img.name.split('.').pop()}`
+    const { error: upErr } = await supabase.storage.from('fiche-images').upload(path, img, { upsert: true })
+    if (upErr) { toast.error('Erreur upload image'); setUploadingImg(false); return }
+    const { data: { publicUrl } } = supabase.storage.from('fiche-images').getPublicUrl(path)
+    await supabase.from('fiches').update({ image_url: publicUrl }).eq('id', fiche.id)
+    setFiche(f => ({ ...f, image_url: publicUrl }))
+    toast.success('Photo ajoutée !')
+    setUploadingImg(false)
+  }
+
+  async function removeImage() {
+    const supabase = createClient()
+    await supabase.from('fiches').update({ image_url: null }).eq('id', fiche.id)
+    setFiche(f => ({ ...f, image_url: null }))
+    toast('Photo supprimée')
+  }
 
   async function toggleMemorized() {
     setMemorizing(true)
@@ -131,6 +159,25 @@ export function FicheCard({ fiche: initialFiche, index, coursId }: FicheCardProp
                   <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif', fontStyle: 'italic' }}>{fiche.content.memory_trick}</p>
                 </div>
               )}
+
+              {/* Photo */}
+              <div>
+                <input ref={imgInputRef} type="file" accept="image/*" capture="environment" onChange={uploadImage} style={{ display: 'none' }} />
+                {fiche.image_url ? (
+                  <div style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', border: `1px solid ${colors.border}` }}>
+                    <img src={fiche.image_url} alt="Note" style={{ width: '100%', display: 'block', maxHeight: 280, objectFit: 'cover' }} />
+                    <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={removeImage}
+                      style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                      <X size={13} />
+                    </motion.button>
+                  </div>
+                ) : (
+                  <motion.button whileHover={{ y: -1 }} whileTap={{ y: 1 }} onClick={() => imgInputRef.current?.click()} disabled={uploadingImg}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px', borderRadius: 13, border: `1px dashed ${colors.border}`, background: 'transparent', color: colors.muted, fontFamily: 'DM Sans, sans-serif', fontSize: 13, cursor: 'pointer' }}>
+                    <Camera size={14} />{uploadingImg ? 'Upload...' : 'Ajouter une photo (schéma, cours...)'}
+                  </motion.button>
+                )}
+              </div>
 
               {/* Actions */}
               <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>

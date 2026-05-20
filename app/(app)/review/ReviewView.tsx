@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Fiche } from '@/types'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CheckCircle2, X, Lightbulb, Tag, Zap } from 'lucide-react'
+import { CheckCircle2, X, Lightbulb, Tag, Zap, ZoomIn } from 'lucide-react'
 import { awardXP, XP_REWARDS } from '@/lib/xp'
 import { useTheme } from '@/contexts/ThemeContext'
 import Link from 'next/link'
@@ -80,7 +80,7 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
         setXpGained(x => x + XP_REWARDS.memorize_fiche)
         setXpPopup(XP_REWARDS.memorize_fiche)
         setTimeout(() => setXpPopup(null), 1400)
-        if (result.leveledUp && result.level) setTimeout(() => setLevelUp(result.level!), 600)
+        if (result.leveledUp && result.level) setTimeout(() => setLevelUp(result.level), 600)
         checkAndAwardBadges().then(b => { if (b.length > 0) setNewBadges(b) })
       }
     }
@@ -306,6 +306,10 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
                       <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.55, fontStyle: 'italic', fontFamily: 'DM Sans, sans-serif' }}>{fiche.content.memory_trick}</p>
                     </div>
                   )}
+
+                  {fiche?.image_url && (
+                    <ImageZoom src={fiche.image_url} />
+                  )}
                 </motion.div>
               )}
             </AnimatePresence>
@@ -336,5 +340,43 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
         </AnimatePresence>
       </div>
     </div>
+  )
+}
+
+function ImageZoom({ src }: { src: string }) {
+  const [open, setOpen] = useState(false)
+  const close = useCallback(() => setOpen(false), [])
+
+  return (
+    <>
+      <div
+        onClick={() => setOpen(true)}
+        style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.08)', cursor: 'zoom-in' }}>
+        <img src={src} alt="Schéma du cours" style={{ width: '100%', display: 'block', maxHeight: 220, objectFit: 'cover' }} />
+        <div style={{ position: 'absolute', bottom: 8, right: 8, background: 'rgba(0,0,0,0.55)', borderRadius: 8, padding: '4px 8px', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <ZoomIn size={12} color="rgba(255,255,255,0.8)" />
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontFamily: 'DM Sans, sans-serif' }}>Agrandir</span>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={close}
+            style={{ position: 'fixed', inset: 0, zIndex: 1000, background: 'rgba(0,0,0,0.88)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, cursor: 'zoom-out' }}>
+            <motion.img
+              src={src} alt="Schéma du cours"
+              initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.85, opacity: 0 }}
+              transition={{ type: 'spring', damping: 22 }}
+              style={{ maxWidth: '100%', maxHeight: '90vh', borderRadius: 16, boxShadow: '0 0 60px rgba(0,0,0,0.8)', objectFit: 'contain' }}
+              onClick={e => e.stopPropagation()} />
+            <button onClick={close} style={{ position: 'absolute', top: 20, right: 20, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '50%', width: 40, height: 40, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+              <X size={18} />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   )
 }

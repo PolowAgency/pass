@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    serverComponentsHmrCache: false,
-  },
-  serverExternalPackages: ['pdf-parse', 'mammoth'],
+  serverExternalPackages: ['pdf-parse', 'mammoth', 'canvas', 'pdfjs-dist'],
   // Optimisation images désactivée pour Supabase Storage URLs
   images: {
     remotePatterns: [

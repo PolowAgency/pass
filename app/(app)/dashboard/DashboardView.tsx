@@ -35,14 +35,56 @@ function useCounter(target: number, duration = 900, delay = 0) {
 }
 
 const SUBJECT: Record<string, { emoji: string; color: string }> = {
-  'Mathématiques': { emoji: '📐', color: '#3CEFFF' },
-  'Physique':      { emoji: '⚡', color: '#C8FF00' },
-  'Chimie':        { emoji: '⚗️', color: '#FF3CAC' },
-  'SVT':           { emoji: '🌿', color: '#4ade80' },
-  'Histoire-Géo':  { emoji: '🌍', color: '#FB923C' },
-  'Droit':         { emoji: '⚖️', color: '#A78BFA' },
-  'Informatique':  { emoji: '💻', color: '#3CEFFF' },
-  default:         { emoji: '📚', color: '#C8FF00' },
+  // Lycée
+  'Mathématiques':        { emoji: '📐', color: '#3CEFFF' },
+  'Physique-Chimie':      { emoji: '⚡', color: '#C8FF00' },
+  'Physique':             { emoji: '⚡', color: '#C8FF00' },
+  'Chimie':               { emoji: '⚗️', color: '#FF3CAC' },
+  'SVT':                  { emoji: '🌿', color: '#4ade80' },
+  'Histoire-Géo':         { emoji: '🌍', color: '#FB923C' },
+  'Philosophie':          { emoji: '🧠', color: '#A78BFA' },
+  'Français':             { emoji: '✍️', color: '#F9A8D4' },
+  'SES':                  { emoji: '📊', color: '#FB923C' },
+  'NSI':                  { emoji: '💻', color: '#3CEFFF' },
+  'Anglais':              { emoji: '🇬🇧', color: '#60A5FA' },
+  'Espagnol':             { emoji: '🇪🇸', color: '#F87171' },
+  'HGGSP':                { emoji: '🌐', color: '#FB923C' },
+  'Humanités & Littérature': { emoji: '📖', color: '#F9A8D4' },
+  // Médecine / Santé
+  'Anatomie':             { emoji: '🫀', color: '#F87171' },
+  'Physiologie':          { emoji: '🔬', color: '#4ade80' },
+  'Biologie':             { emoji: '🧬', color: '#4ade80' },
+  'Pharmacologie':        { emoji: '💊', color: '#A78BFA' },
+  'Histologie':           { emoji: '🔭', color: '#60A5FA' },
+  'Radiologie':           { emoji: '🩻', color: '#94A3B8' },
+  'Chirurgie':            { emoji: '🩺', color: '#F87171' },
+  'Pathologie':           { emoji: '🧫', color: '#FB923C' },
+  // Sciences & Ingé
+  'Informatique':         { emoji: '💻', color: '#3CEFFF' },
+  'Mécanique':            { emoji: '⚙️', color: '#94A3B8' },
+  'Électronique':         { emoji: '🔌', color: '#C8FF00' },
+  "Sciences de l'ingénieur": { emoji: '🛠️', color: '#FB923C' },
+  'Biochimie':            { emoji: '🧪', color: '#4ade80' },
+  'Statistiques':         { emoji: '📈', color: '#3CEFFF' },
+  // Droit & Éco
+  'Droit':                { emoji: '⚖️', color: '#A78BFA' },
+  'Droit civil':          { emoji: '⚖️', color: '#A78BFA' },
+  'Droit pénal':          { emoji: '⚖️', color: '#F87171' },
+  'Droit constitutionnel':{ emoji: '🏛️', color: '#A78BFA' },
+  'Sciences politiques':  { emoji: '🏛️', color: '#60A5FA' },
+  'Microéconomie':        { emoji: '📊', color: '#C8FF00' },
+  'Macroéconomie':        { emoji: '📈', color: '#FB923C' },
+  'Comptabilité':         { emoji: '🧾', color: '#4ade80' },
+  'Finance':              { emoji: '💹', color: '#4ade80' },
+  'Marketing':            { emoji: '🎯', color: '#FF3CAC' },
+  'Management':           { emoji: '🏢', color: '#60A5FA' },
+  // Lettres & Humaines
+  'Littérature':          { emoji: '📖', color: '#F9A8D4' },
+  'Psychologie':          { emoji: '🧠', color: '#A78BFA' },
+  'Sociologie':           { emoji: '👥', color: '#FB923C' },
+  'Histoire':             { emoji: '🏺', color: '#FB923C' },
+  'Géographie':           { emoji: '🗺️', color: '#4ade80' },
+  default:                { emoji: '📚', color: '#C8FF00' },
 }
 
 interface Props {
@@ -61,6 +103,7 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
   const [newBadges, setNewBadges] = useState<BadgeDef[]>([])
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showDailyReward, setShowDailyReward] = useState(false)
+  const [filterSubject, setFilterSubject] = useState<string | null>(null)
 
   const xp = profile?.xp ?? 0
   const level = profile?.level ?? 1
@@ -104,10 +147,8 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
     if (localStorage.getItem(key)) return
     const hasOnboarded = localStorage.getItem('pass-onboarded')
     if (!hasOnboarded && cours.length === 0) return // attendre l'onboarding
-    const timer = setTimeout(() => {
-      setShowDailyReward(true)
-      localStorage.setItem(key, '1')
-    }, 1400)
+    localStorage.setItem(key, '1') // marquer avant le timer pour éviter la race condition
+    const timer = setTimeout(() => setShowDailyReward(true), 1400)
     return () => clearTimeout(timer)
   }, [])
 
@@ -116,7 +157,8 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
     const today = new Date().toDateString()
     const key = `pass-streak-shown-${today}`
     if (localStorage.getItem(key)) return
-    const timer = setTimeout(() => { setShowStreak(true); localStorage.setItem(key, '1') }, 900)
+    localStorage.setItem(key, '1') // marquer avant le timer
+    const timer = setTimeout(() => setShowStreak(true), 900)
     return () => clearTimeout(timer)
   }, [streak])
 
@@ -342,6 +384,25 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
               <span style={{ fontSize: 12, color: colors.muted, background: colors.surface2, border: `1px solid ${colors.border}`, padding: '3px 10px', borderRadius: 99 }}>{cours.length}</span>
             </motion.div>
 
+            {/* Filtre par matière */}
+            {cours.length > 1 && (() => {
+              const subjects = [...new Set(cours.map(c => c.subject).filter(Boolean))] as string[]
+              return subjects.length > 1 ? (
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+                  <button onClick={() => setFilterSubject(null)}
+                    style={{ padding: '4px 12px', borderRadius: 99, fontSize: 11, fontFamily: 'Outfit, sans-serif', fontWeight: 700, cursor: 'pointer', border: '1px solid', background: filterSubject === null ? colors.lime : colors.surface2, color: filterSubject === null ? colors.limeText : colors.muted, borderColor: filterSubject === null ? colors.lime : colors.border, transition: 'all 0.15s' }}>
+                    Tous
+                  </button>
+                  {subjects.map(s => (
+                    <button key={s} onClick={() => setFilterSubject(s === filterSubject ? null : s)}
+                      style={{ padding: '4px 12px', borderRadius: 99, fontSize: 11, fontFamily: 'Outfit, sans-serif', fontWeight: 700, cursor: 'pointer', border: '1px solid', background: filterSubject === s ? (SUBJECT[s] ?? SUBJECT.default).color + '20' : colors.surface2, color: filterSubject === s ? (SUBJECT[s] ?? SUBJECT.default).color : colors.muted, borderColor: filterSubject === s ? (SUBJECT[s] ?? SUBJECT.default).color : colors.border, transition: 'all 0.15s' }}>
+                      {(SUBJECT[s] ?? SUBJECT.default).emoji} {s}
+                    </button>
+                  ))}
+                </div>
+              ) : null
+            })()}
+
             {cours.length === 0 ? (
               <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }}
                 style={{ ...card(), border: `2px dashed ${colors.border}`, textAlign: 'center', padding: '36px 20px' }}>
@@ -351,10 +412,10 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
               </motion.div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {cours.map((c, i) => {
+                {cours.filter(c => !filterSubject || c.subject === filterSubject).map((c, i) => {
                   const ficheCount = c.fiches?.[0]?.count ?? 0
-                  const daysLeft = c.exam_date ? differenceInDays(parseISO(c.exam_date), new Date()) : null
-                  const urgent = daysLeft !== null && daysLeft <= 7
+                  const daysLeft = c.exam_date ? differenceInDays(new Date(c.exam_date + 'T00:00:00'), new Date()) : null
+                  const urgent = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7
                   const subj = SUBJECT[c.subject ?? ''] ?? SUBJECT.default
                   const scoreColor = c.prep_score >= 80 ? '#22c55e' : c.prep_score >= 50 ? colors.limeDark : c.prep_score >= 30 ? '#FB923C' : '#f87171'
 
