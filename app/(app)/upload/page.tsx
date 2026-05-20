@@ -38,13 +38,17 @@ export default function UploadPage() {
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: { 'application/pdf': ['.pdf'], 'image/*': ['.jpg','.jpeg','.png','.webp'] },
+    accept: {
+      'application/pdf': ['.pdf'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'image/*': ['.jpg', '.jpeg', '.png', '.webp'],
+    },
     maxFiles: 1,
     maxSize: 20 * 1024 * 1024,
     onDropRejected: (files) => {
       const err = files[0]?.errors[0]
       if (err?.code === 'file-too-large') toast.error('Fichier trop lourd (max 20 Mo)')
-      else toast.error('Format non supporté. PDF ou image uniquement.')
+      else toast.error('Format non supporté. PDF, Word (.docx) ou image uniquement.')
     },
   })
 
@@ -202,6 +206,7 @@ export default function UploadPage() {
                   <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', justifyContent: 'center' }}>
                     {[
                       { icon: <FileText size={12} />, label: 'PDF' },
+                      { icon: <FileText size={12} />, label: 'Word (.docx)' },
                       { icon: <ImageIcon size={12} />, label: 'JPG / PNG' },
                     ].map(f => (
                       <div key={f.label} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: colors.muted, background: colors.surface2, border: `1px solid ${colors.border}`, borderRadius: 8, padding: '4px 10px' }}>

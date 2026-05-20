@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   experimental: {
     serverComponentsHmrCache: false,
   },
-  serverExternalPackages: ['pdf-parse'],
+  serverExternalPackages: ['pdf-parse', 'mammoth'],
   // Optimisation images désactivée pour Supabase Storage URLs
   images: {
     remotePatterns: [

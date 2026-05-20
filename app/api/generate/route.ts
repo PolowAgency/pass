@@ -130,6 +130,24 @@ async function extractText(file: File): Promise<{ text: string; error?: string }
     }
   }
 
+  // .docx — Word documents
+  const isDocx = file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    || file.name?.endsWith('.docx')
+  if (isDocx) {
+    try {
+      const arrayBuffer = await file.arrayBuffer()
+      const buffer = Buffer.from(arrayBuffer)
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const mammoth = require('mammoth') as { extractRawText: (opts: { buffer: Buffer }) => Promise<{ value: string }> }
+      const result = await mammoth.extractRawText({ buffer })
+      const text = result.value?.trim() ?? ''
+      if (text.length < 50) return { text: '', error: 'Document Word vide ou illisible' }
+      return { text }
+    } catch {
+      return { text: '', error: 'Impossible de lire ce fichier Word. Essaie de coller le texte directement.' }
+    }
+  }
+
   if (file.type === 'text/plain') {
     const text = await file.text()
     if (text.trim().length < 50) return { text: '', error: 'Texte trop court (minimum 50 caractères)' }
