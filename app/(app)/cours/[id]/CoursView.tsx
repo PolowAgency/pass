@@ -10,6 +10,7 @@ import { fr } from 'date-fns/locale'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import PageBg from '@/components/PageBg'
+import CourseTutor from '@/components/CourseTutor'
 
 interface Props {
   cours: Cours
@@ -170,7 +171,7 @@ export default function CoursView({ cours, fiches, sessions }: Props) {
             </Link>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
             <Link href="/review">
               <motion.button
                 whileHover={{ y: -1, borderColor: colors.muted }}
@@ -187,6 +188,7 @@ export default function CoursView({ cours, fiches, sessions }: Props) {
                 <Brain size={14} />Coach IA
               </motion.button>
             </Link>
+            <CourseTutor coursId={cours.id} coursTitle={cours.title} />
           </div>
         </motion.div>
 

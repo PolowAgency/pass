@@ -102,6 +102,7 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 5. Fonction: award_xp v2 avec source_id (idempotent si déjà récompensé)
+DROP FUNCTION IF EXISTS award_xp(uuid, integer, text, text, text);
 CREATE OR REPLACE FUNCTION award_xp(
   p_user_id    UUID,
   p_amount     INTEGER,
