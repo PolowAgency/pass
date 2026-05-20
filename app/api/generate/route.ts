@@ -119,7 +119,8 @@ async function extractText(file: File): Promise<{ text: string; error?: string }
       const arrayBuffer = await file.arrayBuffer()
       const buffer = Buffer.from(arrayBuffer)
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const pdfParse = require('pdf-parse') as (buffer: Buffer) => Promise<{ text: string }>
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const pdfParse = require('pdf-parse/lib/pdf-parse.js') as (buffer: Buffer) => Promise<{ text: string }>
       const data = await pdfParse(buffer)
       const text = data.text?.trim() ?? ''
       if (text.length < 50) return { text: '', error: 'PDF vide ou non lisible (PDF scanné ?)' }
@@ -203,6 +204,7 @@ export async function POST(request: NextRequest) {
       const response = await getGroq().chat.completions.create({
         model: 'llama-3.3-70b-versatile',
         max_tokens: 8000,
+        response_format: { type: 'json_object' }, // force JSON valide
         messages: [
           { role: 'system', content: SYSTEM_PROMPT },
           { role: 'user', content: `Voici le contenu du cours :\n\n${rawContent.slice(0, 40000)}` },
@@ -219,11 +221,12 @@ export async function POST(request: NextRequest) {
     }
     clearTimeout(timeout)
 
-    // Nettoyage markdown si présent
-    const cleaned = rawJson
-      .replace(/^```(?:json)?\s*/m, '')
-      .replace(/\s*```$/m, '')
-      .trim()
+    // Extraction JSON robuste — gère le texte avant/après et les blocs markdown
+    const jsonStart = rawJson.indexOf('{')
+    const jsonEnd = rawJson.lastIndexOf('}')
+    const cleaned = (jsonStart !== -1 && jsonEnd !== -1)
+      ? rawJson.slice(jsonStart, jsonEnd + 1)
+      : rawJson.replace(/^```(?:json)?\s*/m, '').replace(/\s*```$/m, '').trim()
 
     let parsed: unknown
     try {

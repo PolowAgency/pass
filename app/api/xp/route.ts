@@ -74,8 +74,8 @@ export async function POST(request: NextRequest) {
     })
 
     const row = Array.isArray(rpcResult) ? rpcResult[0] : rpcResult
-    const newLevel = row?.level ?? getLevel((before?.xp ?? 0) + amount)
-    const newXp = row?.xp ?? (before?.xp ?? 0) + amount
+    const newLevel = row?.r_level ?? row?.level ?? getLevel((before?.xp ?? 0) + amount)
+    const newXp = row?.r_xp ?? row?.xp ?? (before?.xp ?? 0) + amount
 
     return NextResponse.json({
       xp: newXp,

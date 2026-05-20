@@ -64,15 +64,15 @@ BEGIN
 
   ELSIF last_act_date IS NULL OR last_act_date < CURRENT_DATE - 1 THEN
     -- Inactif depuis 2+ jours → vérifie le freeze
-    IF v_freeze > 0 THEN
-      -- Utilise un freeze (préserve le streak)
+    IF v_freeze > 0 AND cur_streak > 0 THEN
+      -- Utilise un freeze (préserve le streak, seulement si streak > 0)
       UPDATE profiles SET
         streak_freeze_count = streak_freeze_count - 1,
         last_activity_at    = NOW(),
         last_active         = CURRENT_DATE
       WHERE id = p_user_id;
     ELSE
-      -- Pas de freeze → reset
+      -- Pas de freeze ou streak nul → démarre/repart à 1
       UPDATE profiles SET
         streak_days      = 1,
         last_activity_at = NOW(),
@@ -109,7 +109,8 @@ CREATE OR REPLACE FUNCTION award_xp(
   p_source_type TEXT DEFAULT NULL,
   p_source_id   TEXT DEFAULT NULL
 )
-RETURNS TABLE(xp INTEGER, level INTEGER, leveled_up BOOLEAN) AS $$
+-- Colonnes préfixées r_ pour éviter l'ambiguïté avec les colonnes SQL
+RETURNS TABLE(r_xp INTEGER, r_level INTEGER, r_leveled_up BOOLEAN) AS $$
 DECLARE
   new_xp    INTEGER;
   new_level INTEGER;
@@ -123,8 +124,8 @@ BEGIN
         AND source_type = p_source_type
         AND source_id   = p_source_id
     ) THEN
-      SELECT profiles.xp, profiles.level INTO new_xp, new_level
-      FROM profiles WHERE id = p_user_id;
+      SELECT p.xp, p.level INTO new_xp, new_level
+      FROM profiles p WHERE p.id = p_user_id;
       RETURN QUERY SELECT new_xp, new_level, FALSE;
       RETURN;
     END IF;
@@ -135,10 +136,10 @@ BEGIN
     SET daily_reviewed = 0, daily_reset_at = CURRENT_DATE
     WHERE id = p_user_id AND daily_reset_at < CURRENT_DATE;
 
-  SELECT profiles.level INTO old_level FROM profiles WHERE id = p_user_id;
+  SELECT p.level INTO old_level FROM profiles p WHERE p.id = p_user_id;
 
   -- Ajout XP
-  UPDATE profiles SET xp = xp + p_amount WHERE id = p_user_id
+  UPDATE profiles SET xp = profiles.xp + p_amount WHERE id = p_user_id
   RETURNING profiles.xp INTO new_xp;
 
   -- Log event (avec source si fourni)
@@ -176,7 +177,7 @@ BEGIN
     END
   WHERE id = p_user_id;
 
-  RETURN QUERY SELECT new_xp, new_level, new_level > old_level;
+  RETURN QUERY SELECT new_xp, new_level, (new_level > old_level);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
