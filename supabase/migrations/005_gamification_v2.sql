@@ -39,14 +39,14 @@ RETURNS TABLE(streak_days INTEGER, streak_increased BOOLEAN) AS $$
 DECLARE
   last_act_date DATE;
   cur_streak    INTEGER;
-  freeze        INTEGER;
+  v_freeze      INTEGER;
   increased     BOOLEAN := FALSE;
 BEGIN
   SELECT
     (last_activity_at AT TIME ZONE 'UTC')::DATE,
     profiles.streak_days,
     streak_freeze_count
-  INTO last_act_date, cur_streak, freeze
+  INTO last_act_date, cur_streak, v_freeze
   FROM profiles WHERE id = p_user_id;
 
   IF last_act_date = CURRENT_DATE THEN
@@ -64,7 +64,7 @@ BEGIN
 
   ELSIF last_act_date IS NULL OR last_act_date < CURRENT_DATE - 1 THEN
     -- Inactif depuis 2+ jours → vérifie le freeze
-    IF freeze > 0 THEN
+    IF v_freeze > 0 THEN
       -- Utilise un freeze (préserve le streak)
       UPDATE profiles SET
         streak_freeze_count = streak_freeze_count - 1,
