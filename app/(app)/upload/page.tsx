@@ -27,6 +27,7 @@ export default function UploadPage() {
   const [examDate, setExamDate] = useState('')
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState<'drop' | 'form'>('drop')
+  const [lang, setLang] = useState<'fr' | 'en'>('fr')
 
   const onDrop = useCallback((accepted: File[]) => {
     if (accepted[0]) {
@@ -78,6 +79,7 @@ export default function UploadPage() {
       fd.append('file', file)
       fd.append('cours_id', cours.id)
       fd.append('title', title)
+      fd.append('lang', lang)
 
       const res = await fetch('/api/generate', { method: 'POST', body: fd })
       let result: { error?: string; fiches_count?: number } = {}
@@ -128,6 +130,7 @@ export default function UploadPage() {
       fd.append('file', textFile)
       fd.append('cours_id', cours.id)
       fd.append('title', title)
+      fd.append('lang', lang)
 
       const res = await fetch('/api/generate', { method: 'POST', body: fd })
       let result: { error?: string; fiches_count?: number } = {}
@@ -238,6 +241,7 @@ export default function UploadPage() {
                       </button>
                     </div>
                     <FormFields title={title} setTitle={setTitle} subject={subject} setSubject={setSubject} examDate={examDate} setExamDate={setExamDate} colors={colors} inp={inp} subjects={SUBJECTS} />
+                    <LangSelector lang={lang} setLang={setLang} colors={colors} />
                     <SubmitBtn loading={loading} />
                   </form>
                 </motion.div>
@@ -273,6 +277,7 @@ export default function UploadPage() {
                 {showForm && (
                   <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
                     <FormFields title={title} setTitle={setTitle} subject={subject} setSubject={setSubject} examDate={examDate} setExamDate={setExamDate} colors={colors} inp={inp} subjects={SUBJECTS} />
+                    <LangSelector lang={lang} setLang={setLang} colors={colors} />
                     <SubmitBtn loading={loading} disabled={pastedText.trim().length < 100 || !title} />
                   </motion.div>
                 )}
@@ -344,6 +349,25 @@ function FormFields({ title, setTitle, subject, setSubject, examDate, setExamDat
         </p>
       </div>
     </>
+  )
+}
+
+function LangSelector({ lang, setLang, colors }: { lang: 'fr' | 'en'; setLang: (l: 'fr' | 'en') => void; colors: ReturnType<typeof useTheme>['colors'] }) {
+  return (
+    <div>
+      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: colors.text, marginBottom: 8, fontFamily: 'Outfit, sans-serif' }}>
+        Langue des fiches
+      </label>
+      <div style={{ display: 'flex', gap: 8 }}>
+        {(['fr', 'en'] as const).map(l => (
+          <button key={l} type="button" onClick={() => setLang(l)}
+            style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '9px 18px', borderRadius: 100, fontSize: 13, fontFamily: 'Outfit, sans-serif', fontWeight: lang === l ? 700 : 500, cursor: 'pointer', transition: 'all 0.15s', border: '2px solid', background: lang === l ? 'rgba(200,255,0,0.1)' : colors.surface, borderColor: lang === l ? colors.lime : colors.border, color: lang === l ? colors.lime : colors.muted, boxShadow: lang === l ? `0 2px 0 ${colors.limeDark}` : `0 2px 0 ${colors.border2}` }}>
+            <span style={{ fontSize: 16 }}>{l === 'fr' ? '🇫🇷' : '🇬🇧'}</span>
+            {l === 'fr' ? 'Français' : 'English'}
+          </button>
+        ))}
+      </div>
+    </div>
   )
 }
 

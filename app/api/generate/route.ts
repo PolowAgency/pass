@@ -5,13 +5,21 @@ import { cookies } from 'next/headers'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY! }) }
 
-const SYSTEM_PROMPT = `Tu es un expert en pédagogie médicale et universitaire. Tu reçois le contenu brut d'un cours.
-Tu génères des fiches de révision et un QCM d'entraînement à l'examen.
-
-LANGUE :
+function buildSystemPrompt(lang: 'fr' | 'en') {
+  const langBlock = lang === 'en'
+    ? `LANGUAGE:
+- Generate ALL fiches and questions in ENGLISH, regardless of the source language
+- If the course is in French, translate and rephrase in English
+- Keep technical terms in their original language if necessary (Latin anatomical terms, etc.) but explain in English`
+    : `LANGUE :
 - Génère TOUJOURS les fiches et les questions en français, quelle que soit la langue du cours source
 - Si le cours est en anglais, traduis et reformule en français
-- Conserve les termes techniques dans leur langue d'origine si nécessaire (ex: termes anatomiques latins, anglicismes médicaux courants), mais explique en français
+- Conserve les termes techniques dans leur langue d'origine si nécessaire (ex: termes anatomiques latins, anglicismes médicaux courants), mais explique en français`
+
+  return `Tu es un expert en pédagogie médicale et universitaire. Tu reçois le contenu brut d'un cours.
+Tu génères des fiches de révision et un QCM d'entraînement à l'examen.
+
+${langBlock}
 
 RÈGLES GÉNÉRALES :
 - Entre 8 et 15 fiches selon la densité du cours (plus si contenu médical/scientifique dense)
@@ -52,6 +60,7 @@ FORMAT JSON EXACT :
     "explanation": "string (court, factuel, ce qu'il faut retenir)"
   }]
 }`
+}
 
 // Validation stricte de la structure générée
 function validateGenerated(data: unknown): { ok: true; data: GeneratedData } | { ok: false; error: string } {
@@ -195,6 +204,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData()
     const file = formData.get('file') as File
     coursId = formData.get('cours_id') as string
+    const lang = (formData.get('lang') as string) === 'en' ? 'en' : 'fr'
 
     if (!file || !coursId) return NextResponse.json({ error: 'Fichier ou cours manquant' }, { status: 400 })
 
@@ -224,7 +234,7 @@ export async function POST(request: NextRequest) {
         max_tokens: 8000,
         response_format: { type: 'json_object' }, // force JSON valide
         messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'system', content: buildSystemPrompt(lang) },
           { role: 'user', content: `Voici le contenu du cours :\n\n${rawContent.slice(0, 40000)}` },
         ],
       })
