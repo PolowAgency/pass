@@ -12,6 +12,7 @@ import { checkAndAwardBadges } from '@/lib/badges'
 import StreakModal from '@/components/StreakModal'
 import BadgeUnlockModal from '@/components/BadgeUnlockModal'
 import OnboardingWizard from '@/components/OnboardingWizard'
+import DailyRewardModal from '@/components/DailyRewardModal'
 import type { BadgeDef } from '@/lib/badges'
 
 function useCounter(target: number, duration = 900, delay = 0) {
@@ -59,6 +60,7 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
   const [showStreak, setShowStreak] = useState(false)
   const [newBadges, setNewBadges] = useState<BadgeDef[]>([])
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showDailyReward, setShowDailyReward] = useState(false)
 
   const xp = profile?.xp ?? 0
   const level = profile?.level ?? 1
@@ -95,6 +97,20 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
     if (!done && cours.length === 0) setTimeout(() => setShowOnboarding(true), 600)
   }, [])
 
+  // Coffre quotidien — s'ouvre 1 fois par jour après l'onboarding
+  useEffect(() => {
+    const today = new Date().toDateString()
+    const key = `pass-daily-reward-${today}`
+    if (localStorage.getItem(key)) return
+    const hasOnboarded = localStorage.getItem('pass-onboarded')
+    if (!hasOnboarded && cours.length === 0) return // attendre l'onboarding
+    const timer = setTimeout(() => {
+      setShowDailyReward(true)
+      localStorage.setItem(key, '1')
+    }, 1400)
+    return () => clearTimeout(timer)
+  }, [])
+
   useEffect(() => {
     if (streak <= 0) return
     const today = new Date().toDateString()
@@ -113,8 +129,14 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
 
       <AnimatePresence>
         {showOnboarding && <OnboardingWizard onClose={() => setShowOnboarding(false)} />}
-        {showStreak && !showOnboarding && <StreakModal streak={streak} onClose={() => setShowStreak(false)} />}
-        {newBadges.length > 0 && !showStreak && !showOnboarding && <BadgeUnlockModal badges={newBadges} onClose={() => setNewBadges([])} />}
+        {showDailyReward && !showOnboarding && (
+          <DailyRewardModal
+            onClose={() => setShowDailyReward(false)}
+            onXpGained={() => setShowDailyReward(false)}
+          />
+        )}
+        {showStreak && !showOnboarding && !showDailyReward && <StreakModal streak={streak} onClose={() => setShowStreak(false)} />}
+        {newBadges.length > 0 && !showStreak && !showOnboarding && !showDailyReward && <BadgeUnlockModal badges={newBadges} onClose={() => setNewBadges([])} />}
       </AnimatePresence>
 
       <div style={{ maxWidth: 860, margin: '0 auto' }}>

@@ -74,7 +74,11 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
     }).eq('id', fiche.id)
 
     const newReviewed = reviewed + 1
-    await supabase.from('profiles').update({ daily_reviewed: (profile?.daily_reviewed ?? 0) + newReviewed }).eq('id', userId)
+
+    // Incrément atomique +1 (évite la race condition du cumulatif)
+    await supabase.rpc('increment_daily_reviewed', { p_user_id: userId })
+    // Streak uniquement sur activité réelle
+    await supabase.rpc('update_streak_on_activity', { p_user_id: userId })
 
     if (memorized) {
       const result = await awardXP('memorize_fiche')

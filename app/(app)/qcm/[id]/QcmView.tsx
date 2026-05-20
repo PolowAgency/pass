@@ -54,15 +54,23 @@ export default function QcmView({ cours, questions, userId, totalAvailable }: Pr
     if (idx < total - 1) { setIdx(i => i + 1); setRevealed(false) }
     else {
       setSaving(true)
-      const score = questions.reduce((a, q, i) => a + (answers[i] === q.correct_answer ? 1 : 0), 0)
+      // Snapshot immutable des réponses pour éviter la race condition
+      const finalAnswers = { ...answers }
+      const score = questions.reduce((a, q, i) => a + (finalAnswers[i] === q.correct_answer ? 1 : 0), 0)
       const supabase = createClient()
-      await supabase.from('qcm_sessions').insert({ user_id: userId, cours_id: cours.id, score, total_questions: total, answers: Object.fromEntries(Object.entries(answers).map(([k, v]) => [questions[+k].id, v])) })
+      const { data: session } = await supabase.from('qcm_sessions').insert({
+        user_id: userId, cours_id: cours.id, score, total_questions: total,
+        answers: Object.fromEntries(Object.entries(finalAnswers).map(([k, v]) => [questions[+k].id, v]))
+      }).select('id').single()
       const pct = Math.round((score / total) * 100)
       const { data: cd } = await supabase.from('cours').select('prep_score').eq('id', cours.id).single()
       await supabase.from('cours').update({ prep_score: Math.min(100, Math.round((cd?.prep_score ?? 0) * 0.7 + pct * 0.3)) }).eq('id', cours.id)
       const xpKey = pct >= 80 ? 'complete_qcm_perfect' : pct >= 60 ? 'complete_qcm_good' : pct >= 40 ? 'complete_qcm_ok' : 'complete_qcm_bad'
-      const result = await awardXP(xpKey)
+      // source_id = session id pour éviter le double-award sur refresh
+      const result = await awardXP(xpKey, session?.id ?? undefined)
       if (result?.leveledUp && result.level) setTimeout(() => setLevelUp(result.level!), 800)
+      // Streak sur activité réelle
+      await supabase.rpc('update_streak_on_activity', { p_user_id: userId })
       checkAndAwardBadges().then(b => { if (b.length > 0) setNewBadges(b) })
       setSaving(false); setPhase('result')
     }

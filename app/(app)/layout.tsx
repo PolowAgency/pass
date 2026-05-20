@@ -11,8 +11,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  await supabase.rpc('update_streak', { p_user_id: user.id })
-
   const { data: profile } = await supabase
     .from('profiles').select('*').eq('id', user.id).single()
 

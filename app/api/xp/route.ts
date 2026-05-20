@@ -11,6 +11,7 @@ const XP_WHITELIST: Record<string, number> = {
   complete_qcm_ok:       15,
   complete_qcm_bad:       5,
   upload_cours:          25,
+  daily_reward:          50, // montant max — le vrai montant est géré côté client (coffre aléatoire)
 }
 
 // Anti-abus : même action → pas plus de 1 fois toutes les 5 secondes
@@ -29,7 +30,8 @@ export async function POST(request: NextRequest) {
     if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
 
     const body = await request.json()
-    const action: string = body.action ?? body.reason // rétrocompat pendant migration
+    const action: string = body.action ?? body.reason
+    const sourceId: string | undefined = body.source_id
 
     // Vérification action valide
     const amount = XP_WHITELIST[action]
@@ -57,13 +59,26 @@ export async function POST(request: NextRequest) {
     const { data: before } = await supabase.from('profiles').select('xp').eq('id', user.id).single()
     const oldLevel = getLevel(before?.xp ?? 0)
 
-    await supabase.rpc('award_xp', { p_user_id: user.id, p_amount: amount, p_reason: action })
+    // source_type déduit de l'action pour contrainte unique
+    const sourceType = action === 'memorize_fiche' ? 'fiche'
+      : action.startsWith('complete_qcm') ? 'qcm'
+      : action === 'upload_cours' ? 'cours'
+      : undefined
 
-    const { data: after } = await supabase.from('profiles').select('xp, level').eq('id', user.id).single()
-    const newLevel = after?.level ?? getLevel(after?.xp ?? 0)
+    const { data: rpcResult } = await supabase.rpc('award_xp', {
+      p_user_id: user.id,
+      p_amount: amount,
+      p_reason: action,
+      p_source_type: sourceType ?? null,
+      p_source_id: sourceId ?? null,
+    })
+
+    const row = Array.isArray(rpcResult) ? rpcResult[0] : rpcResult
+    const newLevel = row?.level ?? getLevel((before?.xp ?? 0) + amount)
+    const newXp = row?.xp ?? (before?.xp ?? 0) + amount
 
     return NextResponse.json({
-      xp: after?.xp,
+      xp: newXp,
       level: newLevel,
       leveledUp: newLevel > oldLevel,
       oldLevel,

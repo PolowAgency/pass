@@ -9,6 +9,15 @@ export const XP_REWARDS = {
 
 export const LEVEL_THRESHOLDS = [0, 100, 250, 500, 1000, 2000, 4000, 7000, 12000, 20000]
 
+export const LEVEL_TITLES = [
+  'Rookie', 'Débutant', 'Studieux', 'Grinder',
+  'Brain', 'Monster', 'Exam Killer', 'Genius', 'Legend', 'Memory God',
+]
+
+export function getLevelTitle(level: number): string {
+  return LEVEL_TITLES[Math.min(level - 1, LEVEL_TITLES.length - 1)]
+}
+
 export function getLevel(xp: number): number {
   for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
     if (xp >= LEVEL_THRESHOLDS[i]) return i + 1
@@ -25,12 +34,15 @@ export function getXpForNextLevel(xp: number): { current: number; needed: number
 }
 
 // Le client envoie UNIQUEMENT l'action — le serveur calcule le montant (sécurité)
-export async function awardXP(action: string): Promise<{ xp: number; level: number; leveledUp?: boolean; earned?: number } | null> {
+export async function awardXP(
+  action: string,
+  sourceId?: string,
+): Promise<{ xp: number; level: number; leveledUp?: boolean; earned?: number } | null> {
   try {
     const res = await fetch('/api/xp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action }),
+      body: JSON.stringify({ action, source_id: sourceId }),
     })
     if (!res.ok) return null
     return res.json()

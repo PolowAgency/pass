@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { Sun, Moon } from 'lucide-react'
 import { Profile } from '@/types'
-import { getXpForNextLevel } from '@/lib/xp'
+import { getXpForNextLevel, getLevelTitle } from '@/lib/xp'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useIsMobile } from '@/hooks/useIsMobile'
 
@@ -40,12 +40,20 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
       {/* XP bar — masquée sur très petits écrans, visible sinon */}
       <div style={{ flex: 1, maxWidth: isMobile ? 'none' : 340, margin: '0 auto', overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-          {/* Level badge */}
+          {/* Level badge + title */}
           <motion.div
             animate={xpFlash ? { scale: [1, 1.3, 1], rotate: [0, -10, 10, 0] } : {}}
             transition={{ duration: 0.4 }}
-            style={{ width: 26, height: 26, borderRadius: 8, background: colors.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 0 ${colors.limeDark}`, fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 11, color: colors.limeText, flexShrink: 0 }}>
-            {level}
+            title={getLevelTitle(level)}
+            style={{ display: 'flex', alignItems: 'center', gap: 5, flexShrink: 0 }}>
+            <div style={{ width: 26, height: 26, borderRadius: 8, background: colors.lime, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 3px 0 ${colors.limeDark}`, fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 11, color: colors.limeText }}>
+              {level}
+            </div>
+            {!isMobile && (
+              <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 11, color: colors.muted, whiteSpace: 'nowrap' }}>
+                {getLevelTitle(level)}
+              </span>
+            )}
           </motion.div>
 
           {/* Barre XP */}
