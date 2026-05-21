@@ -11,11 +11,13 @@ export const metadata: Metadata = {
     description: 'Tes fiches de révision générées par IA en 30 secondes.',
     type: 'website',
     siteName: 'PASS',
+    images: [{ url: '/opengraph-image.png', width: 1200, height: 630 }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'PASS',
     description: 'Tes fiches de révision générées par IA en 30 secondes.',
+    images: ['/opengraph-image.png'],
   },
   themeColor: '#C8FF00',
   manifest: '/manifest.webmanifest',
@@ -26,7 +28,7 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: '/icon.svg',
-    apple: '/apple-touch-icon.png',
+    apple: '/apple-icon.png',
     shortcut: '/icon.svg',
   },
 }
