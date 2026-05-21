@@ -3,16 +3,19 @@
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Profile } from '@/types'
-import { Plus, ChevronRight, Zap, BookOpen, Play, Clock, Target } from 'lucide-react'
+import { Plus, ChevronRight, Zap, BookOpen, Play, Clock, Target, Trash2, ChevronDown } from 'lucide-react'
 import { parseISO, differenceInDays } from 'date-fns'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { checkAndAwardBadges } from '@/lib/badges'
+import { createClient } from '@/lib/supabase/client'
 import StreakModal from '@/components/StreakModal'
 import BadgeUnlockModal from '@/components/BadgeUnlockModal'
 import OnboardingWizard from '@/components/OnboardingWizard'
 import DailyRewardModal from '@/components/DailyRewardModal'
+import toast from 'react-hot-toast'
 import type { BadgeDef } from '@/lib/badges'
 
 function useCounter(target: number, duration = 900, delay = 0) {
@@ -103,7 +106,25 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
   const [newBadges, setNewBadges] = useState<BadgeDef[]>([])
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showDailyReward, setShowDailyReward] = useState(false)
+  const router = useRouter()
   const [filterSubject, setFilterSubject] = useState<string | null>(null)
+  const [groupBySubject, setGroupBySubject] = useState(true)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
+  async function deleteCours(id: string) {
+    setDeletingId(id)
+    try {
+      const supabase = createClient()
+      const { error } = await supabase.from('cours').delete().eq('id', id)
+      if (error) { toast.error('Erreur lors de la suppression'); return }
+      toast.success('Cours supprimé')
+      router.refresh()
+    } finally {
+      setDeletingId(null)
+      setConfirmDeleteId(null)
+    }
+  }
 
   const xp = profile?.xp ?? 0
   const level = profile?.level ?? 1
@@ -383,11 +404,22 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.25 }}
               style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
               <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 17, color: colors.text }}>Mes cours</h2>
-              <span style={{ fontSize: 12, color: colors.muted, background: colors.surface2, border: `1px solid ${colors.border}`, padding: '3px 10px', borderRadius: 99 }}>{cours.length}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 12, color: colors.muted, background: colors.surface2, border: `1px solid ${colors.border}`, padding: '3px 10px', borderRadius: 99 }}>{cours.length}</span>
+                {(() => {
+                  const subjects = [...new Set(cours.map(c => c.subject).filter(Boolean))]
+                  return subjects.length > 1 ? (
+                    <button onClick={() => setGroupBySubject(g => !g)}
+                      style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 10px', borderRadius: 99, fontSize: 11, fontFamily: 'Outfit, sans-serif', fontWeight: 700, cursor: 'pointer', border: `1px solid ${colors.border}`, background: groupBySubject ? colors.lime + '18' : colors.surface2, color: groupBySubject ? colors.limeDark : colors.muted, transition: 'all 0.15s' }}>
+                      <ChevronDown size={11} />Par matière
+                    </button>
+                  ) : null
+                })()}
+              </div>
             </motion.div>
 
-            {/* Filtre par matière */}
-            {cours.length > 1 && (() => {
+            {/* Filtre par matière (mode liste uniquement) */}
+            {!groupBySubject && cours.length > 1 && (() => {
               const subjects = [...new Set(cours.map(c => c.subject).filter(Boolean))] as string[]
               return subjects.length > 1 ? (
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
@@ -412,53 +444,129 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
                 <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 16, color: colors.text, marginBottom: 6 }}>Aucun cours</p>
                 <p style={{ fontSize: 13, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>Upload ton premier cours pour commencer</p>
               </motion.div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {cours.filter(c => !filterSubject || c.subject === filterSubject).map((c, i) => {
-                  const ficheCount = c.fiches?.[0]?.count ?? 0
-                  const daysLeft = c.exam_date ? differenceInDays(new Date(c.exam_date + 'T00:00:00'), new Date()) : null
-                  const urgent = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7
-                  const subj = SUBJECT[c.subject ?? ''] ?? SUBJECT.default
-                  const scoreColor = c.prep_score >= 80 ? '#22c55e' : c.prep_score >= 50 ? colors.limeDark : c.prep_score >= 30 ? '#FB923C' : '#f87171'
+            ) : (() => {
+              const filteredCours = cours.filter(c => !filterSubject || c.subject === filterSubject)
 
-                  return (
-                    <motion.div key={c.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
-                      transition={{ type: 'spring', damping: 20, stiffness: 200, delay: 0.06 * i + 0.28 }}>
-                      <Link href={`/cours/${c.id}`} style={{ textDecoration: 'none' }}>
-                        <motion.div whileHover={{ y: -3 }} whileTap={{ y: 2 }}
-                          style={{ ...card(), display: 'flex', alignItems: 'center', gap: isMobile ? 10 : 12, cursor: 'pointer' }}>
-                          <div style={{ width: isMobile ? 40 : 46, height: isMobile ? 40 : 46, borderRadius: 12, background: `${subj.color}18`, border: `2px solid ${subj.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isMobile ? 18 : 20, flexShrink: 0 }}>
-                            {subj.emoji}
-                          </div>
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: isMobile ? 13 : 14, color: colors.text, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</p>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: isMobile ? 5 : 6 }}>
-                              {c.subject && <span style={{ fontSize: 10, fontFamily: 'Outfit, sans-serif', fontWeight: 700, color: subj.color }}>{c.subject}</span>}
-                              <span style={{ fontSize: 10, color: colors.muted }}>· {ficheCount} fiches</span>
-                              {urgent && daysLeft !== null && <span style={{ fontSize: 10, color: '#f87171', fontWeight: 700 }}>⚠️ J-{daysLeft}</span>}
-                            </div>
-                            <div style={{ height: 5, background: colors.surface2, borderRadius: 99, overflow: 'hidden' }}>
-                              <motion.div initial={{ width: 0 }} animate={{ width: `${c.prep_score}%` }}
-                                transition={{ duration: 0.8, delay: 0.08 * i + 0.5, ease: [0.22, 1, 0.36, 1] }}
-                                style={{ height: '100%', borderRadius: 99, background: scoreColor }} />
-                            </div>
-                          </div>
-                          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
-                            <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14, color: scoreColor }}>{c.prep_score}%</span>
-                            {!isMobile && (
-                              <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: colors.lime, borderRadius: 9, padding: '5px 10px', boxShadow: `0 3px 0 ${colors.limeDark}` }}>
-                                <Play size={10} color={colors.limeText} fill={colors.limeText} />
-                                <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 11, color: colors.limeText }}>Lancer</span>
+              // Build groups: grouped mode → one section per subject; list mode → single flat group
+              const groups: Array<{ key: string; subj: { emoji: string; color: string } | null; items: typeof cours }> = []
+              if (groupBySubject) {
+                const subjectOrder = [...new Set(filteredCours.map(c => c.subject ?? ''))]
+                  .sort((a, b) => a.localeCompare(b, 'fr'))
+                for (const s of subjectOrder) {
+                  groups.push({
+                    key: s || '__none__',
+                    subj: s ? (SUBJECT[s] ?? SUBJECT.default) : null,
+                    items: filteredCours.filter(c => (c.subject ?? '') === s),
+                  })
+                }
+              } else {
+                groups.push({ key: '__all__', subj: null, items: filteredCours })
+              }
+
+              let globalIdx = 0
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: groupBySubject ? 18 : 10 }}>
+                  {groups.map(group => (
+                    <div key={group.key}>
+                      {/* Section header */}
+                      {groupBySubject && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                          {group.subj ? (
+                            <>
+                              <span style={{ fontSize: 15 }}>{group.subj.emoji}</span>
+                              <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: group.subj.color }}>{group.key}</span>
+                            </>
+                          ) : (
+                            <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: colors.muted }}>📚 Sans matière</span>
+                          )}
+                          <span style={{ fontSize: 11, color: colors.muted, background: colors.surface2, border: `1px solid ${colors.border}`, padding: '1px 7px', borderRadius: 99 }}>{group.items.length}</span>
+                          <div style={{ flex: 1, height: 1, background: colors.border, marginLeft: 4 }} />
+                        </div>
+                      )}
+
+                      {/* Cards */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {group.items.map(c => {
+                          const i = globalIdx++
+                          const ficheCount = c.fiches?.[0]?.count ?? 0
+                          const daysLeft = c.exam_date ? differenceInDays(new Date(c.exam_date + 'T00:00:00'), new Date()) : null
+                          const urgent = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7
+                          const subj = SUBJECT[c.subject ?? ''] ?? SUBJECT.default
+                          const scoreColor = c.prep_score >= 80 ? '#22c55e' : c.prep_score >= 50 ? colors.limeDark : c.prep_score >= 30 ? '#FB923C' : '#f87171'
+                          const isConfirming = confirmDeleteId === c.id
+                          const isDeleting = deletingId === c.id
+
+                          return (
+                            <motion.div key={c.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}
+                              transition={{ type: 'spring', damping: 20, stiffness: 200, delay: 0.06 * i + 0.28 }}
+                              style={{ position: 'relative' }}>
+
+                              {/* Confirmation suppression */}
+                              <AnimatePresence>
+                                {isConfirming && (
+                                  <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                                    style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 20, background: 'rgba(15,10,25,0.92)', border: '1px solid rgba(248,113,113,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '0 16px' }}>
+                                    <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: '#f87171', flex: 1 }}>Supprimer ce cours ?</p>
+                                    <button onClick={() => setConfirmDeleteId(null)}
+                                      style={{ padding: '6px 14px', borderRadius: 99, fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 700, cursor: 'pointer', border: `1px solid ${colors.border}`, background: colors.surface2, color: colors.muted }}>
+                                      Annuler
+                                    </button>
+                                    <button onClick={() => deleteCours(c.id)} disabled={isDeleting}
+                                      style={{ padding: '6px 14px', borderRadius: 99, fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 700, cursor: 'pointer', border: '1px solid rgba(248,113,113,0.5)', background: 'rgba(248,113,113,0.15)', color: '#f87171' }}>
+                                      {isDeleting ? '...' : 'Supprimer'}
+                                    </button>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+
+                              <div style={{ display: 'flex', alignItems: 'stretch', gap: 0 }}>
+                                <Link href={`/cours/${c.id}`} style={{ textDecoration: 'none', flex: 1, minWidth: 0 }}>
+                                  <motion.div whileHover={{ y: -2 }} whileTap={{ y: 2 }}
+                                    style={{ ...card(), display: 'flex', alignItems: 'center', gap: isMobile ? 10 : 12, cursor: 'pointer', borderTopRightRadius: 8, borderBottomRightRadius: 8 }}>
+                                    <div style={{ width: isMobile ? 40 : 46, height: isMobile ? 40 : 46, borderRadius: 12, background: `${subj.color}18`, border: `2px solid ${subj.color}44`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: isMobile ? 18 : 20, flexShrink: 0 }}>
+                                      {subj.emoji}
+                                    </div>
+                                    <div style={{ flex: 1, minWidth: 0 }}>
+                                      <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: isMobile ? 13 : 14, color: colors.text, marginBottom: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</p>
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: isMobile ? 5 : 6 }}>
+                                        {c.subject && !groupBySubject && <span style={{ fontSize: 10, fontFamily: 'Outfit, sans-serif', fontWeight: 700, color: subj.color }}>{c.subject}</span>}
+                                        <span style={{ fontSize: 10, color: colors.muted }}>{ficheCount} fiche{ficheCount > 1 ? 's' : ''}</span>
+                                        {urgent && daysLeft !== null && <span style={{ fontSize: 10, color: '#f87171', fontWeight: 700 }}>⚠️ J-{daysLeft}</span>}
+                                      </div>
+                                      <div style={{ height: 5, background: colors.surface2, borderRadius: 99, overflow: 'hidden' }}>
+                                        <motion.div initial={{ width: 0 }} animate={{ width: `${c.prep_score}%` }}
+                                          transition={{ duration: 0.8, delay: 0.08 * i + 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                          style={{ height: '100%', borderRadius: 99, background: scoreColor }} />
+                                      </div>
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
+                                      <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14, color: scoreColor }}>{c.prep_score}%</span>
+                                      {!isMobile && (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: colors.lime, borderRadius: 9, padding: '5px 10px', boxShadow: `0 3px 0 ${colors.limeDark}` }}>
+                                          <Play size={10} color={colors.limeText} fill={colors.limeText} />
+                                          <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 11, color: colors.limeText }}>Lancer</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  </motion.div>
+                                </Link>
+
+                                {/* Bouton supprimer */}
+                                <motion.button whileHover={{ background: 'rgba(248,113,113,0.12)' }} whileTap={{ scale: 0.92 }}
+                                  onClick={() => setConfirmDeleteId(isConfirming ? null : c.id)}
+                                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 40, flexShrink: 0, background: colors.surface2, border: `1px solid ${colors.border}`, borderLeft: 'none', borderTopRightRadius: 20, borderBottomRightRadius: 20, cursor: 'pointer', color: colors.muted, transition: 'all 0.15s' }}>
+                                  <Trash2 size={14} />
+                                </motion.button>
                               </div>
-                            )}
-                          </div>
-                        </motion.div>
-                      </Link>
-                    </motion.div>
-                  )
-                })}
-              </div>
-            )}
+                            </motion.div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            })()}
           </div>
 
           {/* Panel droit */}
