@@ -276,7 +276,10 @@ export async function POST(request: NextRequest) {
       file = new File([textContent], `${fileName}.txt`, { type: 'text/plain' })
     } else {
       const dlRes = await fetch(fileUrl!)
-      if (!dlRes.ok) return NextResponse.json({ error: 'Impossible de récupérer le fichier' }, { status: 400 })
+      if (!dlRes.ok) {
+        console.error('[generate] fetch file failed', dlRes.status, fileUrl?.substring(0, 80))
+        return NextResponse.json({ error: 'Impossible de récupérer le fichier' }, { status: 400 })
+      }
       const contentLength = dlRes.headers.get('content-length')
       if (contentLength && parseInt(contentLength) > MAX_FILE_SIZE) {
         return NextResponse.json({ error: 'Fichier trop lourd (max 20 Mo)' }, { status: 413 })

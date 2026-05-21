@@ -73,16 +73,21 @@ export default function UploadPage() {
       const { error: uploadErr } = await supabase.storage.from('cours-files').upload(filePath, file)
       if (uploadErr) throw uploadErr
 
-      const { data: { publicUrl } } = supabase.storage.from('cours-files').getPublicUrl(filePath)
+      // Signed URL pour le fetch serveur-side (bucket privé)
+      const { data: signedData, error: signedErr } = await supabase.storage
+        .from('cours-files').createSignedUrl(filePath, 3600)
+      if (signedErr || !signedData?.signedUrl) throw new Error('Impossible de créer une URL sécurisée')
+      const signedUrl = signedData.signedUrl
+
       const { data: cours, error: coursErr } = await supabase.from('cours').insert({
         user_id: user.id, title, subject: subject || null, exam_date: examDate || null,
-        file_url: publicUrl, file_type: file.type, status: 'processing',
+        file_url: filePath, file_type: file.type, status: 'processing',
       }).select().single()
       if (coursErr) throw coursErr
 
       toast.loading('Génération des fiches en cours…', { id: 'gen' })
       const fd = new FormData()
-      fd.append('file_url', publicUrl)
+      fd.append('file_url', signedUrl)
       fd.append('file_type', file.type)
       fd.append('file_name', file.name)
       fd.append('cours_id', cours.id)
