@@ -5,11 +5,24 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'PASS — Révise 10x plus vite avec l\'IA',
   description: 'Upload ton cours, reçois des fiches de révision IA et un QCM en moins de 30 secondes. Un coach IA qui te parle vrai.',
-  keywords: ['révision', 'fiches', 'IA', 'QCM', 'étudiant', 'exam'],
+  keywords: ['révision', 'fiches', 'IA', 'QCM', 'étudiant', 'exam', 'BAC', 'médecine', 'prépa'],
   openGraph: {
     title: 'PASS — Révise 10x plus vite avec l\'IA',
     description: 'Des fiches de révision générées par IA en 30 secondes.',
     type: 'website',
+    siteName: 'PASS',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'PASS — Révise 10x plus vite avec l\'IA',
+    description: 'Des fiches de révision générées par IA en 30 secondes.',
+  },
+  themeColor: '#C8FF00',
+  manifest: '/manifest.webmanifest',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'PASS',
   },
 }
 

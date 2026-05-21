@@ -90,12 +90,6 @@ export default function LandingPage() {
     return () => sobs.disconnect()
   }, [])
 
-  function handleWaitlist() {
-    const input = document.getElementById('emailInput') as HTMLInputElement
-    const msg = document.getElementById('wm')
-    if (input?.value?.includes('@') && msg) { msg.style.display = 'block'; input.value = '' }
-  }
-
   return (
     <>
       <style>{`
@@ -294,7 +288,7 @@ export default function LandingPage() {
 
       {/* HERO */}
       <section className="hero">
-        <div className="hero-badge"><span className="badge-dot" />1 200+ étudiants en liste d&apos;attente</div>
+        <div className="hero-badge"><span className="badge-dot" />Accès gratuit — sans carte bancaire</div>
         <h1>
           Finis de perdre<br />
           <span className="accent-pink">2h</span> à faire<br />
@@ -314,8 +308,8 @@ export default function LandingPage() {
             <span className="stat-label">Pour générer un cours</span>
           </div>
           <div>
-            <span className="stat-num" style={{ color: 'var(--pink)' }}><span className="counter" data-target="4">0</span></span>
-            <span className="stat-label">Thèmes visuels</span>
+            <span className="stat-num" style={{ color: 'var(--pink)' }}>BAC</span>
+            <span className="stat-label">à Bac+5 et plus</span>
           </div>
           <div>
             <span className="stat-num" style={{ color: 'var(--blue)' }}>0€</span>
@@ -384,11 +378,11 @@ export default function LandingPage() {
         <div className="section-title sr" style={{ marginBottom: 40 }}>Simple. Honnête.</div>
         <div className="pricing-grid">
           <div className="price-card sr sr-d1">
-            <div className="price-plan">Free</div>
+            <div className="price-plan">Gratuit</div>
             <div className="price-amount">0€</div>
             <div className="price-period">pour toujours</div>
             <div className="price-divider" />
-            {['5 cours par mois', 'Thème Dark Premium', 'QCM inclus', 'Coach basique'].map(f => (
+            {['3 cours générés', 'QCM + révision inclus', 'Streak & XP', '5 messages coach/jour'].map(f => (
               <div key={f} className="price-feature"><span className="check">✓</span>{f}</div>
             ))}
             <Link href="/signup"><button className="price-cta cta-ghost">Commencer</button></Link>
@@ -396,38 +390,39 @@ export default function LandingPage() {
           <div className="price-card featured sr sr-d2">
             <div className="price-badge">⚡ Le plus populaire</div>
             <div className="price-plan" style={{ color: 'var(--lime)' }}>Premium</div>
-            <div className="price-amount" style={{ color: 'var(--lime)' }}>9€</div>
-            <div className="price-period">par mois sans engagement</div>
+            <div className="price-amount" style={{ color: 'var(--lime)' }}>9,99€</div>
+            <div className="price-period">par mois — sans engagement</div>
             <div className="price-divider" />
-            {['Cours illimités', '4 thèmes visuels', 'Export HD shareable', 'Coach premium 24/7'].map(f => (
+            {['Cours illimités', 'Coach IA illimité', 'Tuteur par fiche', 'Images auto sur les fiches'].map(f => (
               <div key={f} className="price-feature"><span className="check">✓</span>{f}</div>
             ))}
-            <Link href="/signup"><button className="price-cta cta-main">Essayer 1 mois gratuit</button></Link>
+            <Link href="/signup"><button className="price-cta cta-main">Commencer maintenant</button></Link>
           </div>
           <div className="price-card sr sr-d3">
-            <div className="price-plan">Exam</div>
-            <div className="price-amount">19€</div>
-            <div className="price-period">one-shot 2 semaines</div>
+            <div className="price-plan">Exam Boost</div>
+            <div className="price-amount">19,99€</div>
+            <div className="price-period">30 jours — mode intensif</div>
             <div className="price-divider" />
-            {['Tout Premium inclus', 'Plan J-14 personnalisé', 'Coach intensif', 'Mode révision express'].map(f => (
+            {['Tout Premium inclus', 'Parfait J-30 avant un concours', 'Révision express prioritaire', 'Coach en mode urgence'].map(f => (
               <div key={f} className="price-feature"><span className="check">✓</span>{f}</div>
             ))}
-            <button className="price-cta cta-ghost">Choisir Exam</button>
+            <Link href="/signup"><button className="price-cta cta-ghost">Choisir Exam Boost</button></Link>
           </div>
         </div>
       </section>
 
-      {/* WAITLIST */}
+      {/* CTA FINAL */}
       <section className="waitlist-section sr">
         <div className="waitlist-card">
           <h2>T&apos;es prêt à<br /><span style={{ color: 'var(--lime)' }}>cartonner</span> ?</h2>
-          <p>Rejoins la liste d&apos;attente. Accès en avant-première et 1 mois premium offert.</p>
-          <div className="email-form">
-            <input className="email-input" type="email" placeholder="ton@email.com" id="emailInput" />
-            <button className="email-btn" onClick={handleWaitlist}>Je m&apos;inscris →</button>
-          </div>
-          <div id="wm" style={{ marginTop: 16, fontSize: 14, color: 'var(--lime)', display: 'none' }}>
-            ✓ Tu es sur la liste ! On te prévient en premier.
+          <p>Inscription gratuite. Sans carte bancaire. Tes premières fiches en 30 secondes.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+            <Link href="/signup" style={{ width: '100%', maxWidth: 360 }}>
+              <button className="email-btn" style={{ width: '100%', padding: '16px 24px', fontSize: 16 }}>
+                Créer mon compte gratuit →
+              </button>
+            </Link>
+            <p style={{ fontSize: 12, color: 'var(--muted)' }}>Déjà inscrit ? <Link href="/login" style={{ color: 'var(--lime)', textDecoration: 'none' }}>Se connecter</Link></p>
           </div>
         </div>
       </section>
@@ -436,9 +431,7 @@ export default function LandingPage() {
       <footer>
         <div className="footer-logo">PA<span>SS</span> <span style={{ fontWeight: 400, fontSize: 13, color: 'var(--muted)' }}>by POLOW Agency</span></div>
         <div style={{ display: 'flex', gap: 24 }}>
-          <a href="#" style={{ color: 'var(--muted)', textDecoration: 'none' }}>CGU</a>
-          <a href="#" style={{ color: 'var(--muted)', textDecoration: 'none' }}>Confidentialité</a>
-          <a href="#" style={{ color: 'var(--muted)', textDecoration: 'none' }}>Contact</a>
+          <a href="mailto:paulpiot980@gmail.com" style={{ color: 'var(--muted)', textDecoration: 'none' }}>Contact</a>
         </div>
       </footer>
     </>

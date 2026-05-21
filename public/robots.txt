@@ -1,0 +1,14 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /dashboard
+Disallow: /upload
+Disallow: /cours/
+Disallow: /review
+Disallow: /qcm/
+Disallow: /coach
+Disallow: /settings
+Disallow: /stats
+Disallow: /onboarding
+
+Sitemap: https://pass-saas.vercel.app/sitemap.xml
