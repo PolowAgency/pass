@@ -46,6 +46,9 @@ export interface FicheContent {
   key_concepts: KeyConcept[]
   important_points: string[]
   memory_trick: string
+  schema_text?: string        // diagramme texte, tableau ou séquence ASCII
+  exam_traps?: string[]       // erreurs fréquentes en examen
+  key_numbers?: string[]      // chiffres, doses, dates, seuils à retenir
 }
 
 export interface Fiche {

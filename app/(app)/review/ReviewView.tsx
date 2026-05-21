@@ -302,38 +302,65 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
             <AnimatePresence>
               {flipped && (
                 <motion.div initial={{ opacity: 0, y: 14, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', damping: 20 }}
-                  style={{ background: colors.surface, borderRadius: 24, padding: '20px', border: `1px solid ${colors.border}`, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  style={{ background: colors.surface, borderRadius: 24, padding: '18px', border: `1px solid ${colors.border}`, marginBottom: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {(() => {
+                    if (!fiche) return null
+                    const c = fiche.content as { key_concepts?: { term: string; definition: string }[]; important_points?: string[]; memory_trick?: string; key_numbers?: string[]; schema_text?: string | null; exam_traps?: string[] }
+                    return <>
+                      {fiche.image_url && <ImageZoom src={fiche.image_url} />}
 
-                  {fiche?.content?.key_concepts?.slice(0, 3).map((kc, i) => (
-                    <div key={i} style={{ background: 'rgba(60,239,255,0.04)', border: '1px solid rgba(60,239,255,0.12)', borderRadius: 14, padding: '10px 14px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
-                        <Tag size={11} color="#3CEFFF" />
-                        <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: colors.text }}>{kc.term}</p>
-                      </div>
-                      <p style={{ fontSize: 12, color: colors.muted, lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif', paddingLeft: 17 }}>{kc.definition}</p>
-                    </div>
-                  ))}
+                      {(c.key_numbers?.length ?? 0) > 0 && (
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+                          {c.key_numbers!.map((n, i) => (
+                            <span key={i} style={{ background: 'rgba(60,239,255,0.1)', border: '1px solid rgba(60,239,255,0.2)', borderRadius: 99, padding: '3px 9px', fontSize: 11, fontFamily: 'Outfit, sans-serif', fontWeight: 700, color: '#3CEFFF' }}>{n}</span>
+                          ))}
+                        </div>
+                      )}
 
-                  {fiche?.content?.important_points?.slice(0, 3).map((pt, i) => (
-                    <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                      <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#C8FF00', flexShrink: 0, marginTop: 6, boxShadow: '0 0 6px rgba(200,255,0,0.5)' }} />
-                      <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.55, fontFamily: 'DM Sans, sans-serif' }}>{pt}</p>
-                    </div>
-                  ))}
+                      {c.schema_text && (
+                        <div style={{ background: 'rgba(200,255,0,0.04)', border: '1px solid rgba(200,255,0,0.15)', borderRadius: 12, padding: '10px 12px' }}>
+                          <p style={{ fontSize: 9, fontWeight: 700, color: '#C8FF00', fontFamily: 'Outfit, sans-serif', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>🗺️ Schéma</p>
+                          <pre style={{ fontSize: 11, color: '#F0F0F8', lineHeight: 1.7, fontFamily: 'ui-monospace, monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{c.schema_text}</pre>
+                        </div>
+                      )}
 
-                  {fiche?.content?.memory_trick && (
-                    <div style={{ background: 'rgba(251,146,60,0.06)', borderRadius: 14, padding: '12px 14px', border: '1px solid rgba(251,146,60,0.15)' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 5 }}>
-                        <Lightbulb size={12} color="#FB923C" />
-                        <p style={{ fontSize: 10, fontWeight: 700, color: '#FB923C', fontFamily: 'Outfit, sans-serif', textTransform: 'uppercase', letterSpacing: '1px' }}>Astuce mémo</p>
-                      </div>
-                      <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.55, fontStyle: 'italic', fontFamily: 'DM Sans, sans-serif' }}>{fiche.content.memory_trick}</p>
-                    </div>
-                  )}
+                      {c.key_concepts?.slice(0, 3).map((kc, i) => (
+                        <div key={i} style={{ background: 'rgba(60,239,255,0.04)', border: '1px solid rgba(60,239,255,0.1)', borderRadius: 12, padding: '9px 12px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2 }}>
+                            <Tag size={10} color="#3CEFFF" />
+                            <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 12, color: colors.text }}>{kc.term}</p>
+                          </div>
+                          <p style={{ fontSize: 12, color: colors.muted, lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif', paddingLeft: 15 }}>{kc.definition}</p>
+                        </div>
+                      ))}
 
-                  {fiche?.image_url && (
-                    <ImageZoom src={fiche.image_url} />
-                  )}
+                      {c.important_points?.slice(0, 3).map((pt, i) => (
+                        <div key={i} style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
+                          <div style={{ width: 5, height: 5, borderRadius: '50%', background: '#C8FF00', flexShrink: 0, marginTop: 7, boxShadow: '0 0 5px rgba(200,255,0,0.6)' }} />
+                          <p style={{ fontSize: 12, color: colors.text, lineHeight: 1.55, fontFamily: 'DM Sans, sans-serif' }}>{pt}</p>
+                        </div>
+                      ))}
+
+                      {(c.exam_traps?.length ?? 0) > 0 && (
+                        <div style={{ background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.18)', borderRadius: 12, padding: '9px 12px' }}>
+                          <p style={{ fontSize: 9, fontWeight: 700, color: '#f87171', fontFamily: 'Outfit, sans-serif', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 5 }}>⚠️ Pièges</p>
+                          {c.exam_traps!.slice(0, 2).map((t, i) => (
+                            <p key={i} style={{ fontSize: 11, color: '#fca5a5', lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif' }}>{t}</p>
+                          ))}
+                        </div>
+                      )}
+
+                      {c.memory_trick && (
+                        <div style={{ background: 'rgba(251,146,60,0.06)', borderRadius: 12, padding: '10px 12px', border: '1px solid rgba(251,146,60,0.14)' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 4 }}>
+                            <Lightbulb size={11} color="#FB923C" />
+                            <p style={{ fontSize: 9, fontWeight: 700, color: '#FB923C', fontFamily: 'Outfit, sans-serif', textTransform: 'uppercase', letterSpacing: '1px' }}>Mémo</p>
+                          </div>
+                          <p style={{ fontSize: 12, color: colors.text, lineHeight: 1.55, fontStyle: 'italic', fontFamily: 'DM Sans, sans-serif' }}>{c.memory_trick}</p>
+                        </div>
+                      )}
+                    </>
+                  })()}
                 </motion.div>
               )}
             </AnimatePresence>

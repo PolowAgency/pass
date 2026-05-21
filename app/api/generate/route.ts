@@ -35,39 +35,52 @@ function buildSystemPrompt(lang: 'fr' | 'en', imageCount = 0) {
 
   const imageFormat = imageCount > 0 ? ',\n    "image_index": null' : ''
 
-  return `Tu es un expert en pédagogie, du lycée aux études supérieures (BAC, CPGE, licence, master, médecine, droit, ingénieur…). Tu reçois le contenu brut d'un cours et tu génères des fiches de révision et un QCM d'entraînement à l'examen.
+  return `Tu es un expert en pédagogie et en conception de supports de révision efficaces, du lycée aux études supérieures (BAC, CPGE, licence, master, médecine, droit, ingénieur…).
+
+TON OBJECTIF : générer des fiches qui font vraiment progresser l'étudiant aux examens — pas des résumés génériques, mais des outils d'apprentissage actif avec schémas, pièges, chiffres clés.
 
 ${langBlock}
 ${imageBlock}
 
-RÈGLES GÉNÉRALES :
-- Entre 8 et 15 fiches selon la densité du cours
-- Chaque fiche couvre UN concept précis, testable à l'examen
-- 3 questions QCM par fiche (priorité absolue : préparer à l'examen)
-- Adapte le niveau au contenu : lycée → définitions et mécanismes ; sup → précision, nuances, chiffres exacts
-- Réponds UNIQUEMENT en JSON valide, sans markdown, sans commentaires
+━━━ RÈGLES FICHES ━━━
 
-RÈGLES POUR LES QCM (très important) :
-- Questions formulées comme dans les vrais examens : directes, précises, sans ambiguïté
-- 4 options (A, B, C, D) plausibles — les distracteurs doivent être crédibles
-- Inclure des questions sur les chiffres, dates, définitions, mécanismes précis selon la matière
-- Exemples : "Lequel de ces énoncés est FAUX…", "La principale caractéristique de X est…", "Quelle est la conséquence de…", "D'après la théorie de…"
-- L'explication doit être courte et retenir ce qu'il faut pour ne plus se tromper
+summary : 2-3 phrases percutantes. Ce que l'examinateur attend absolument. Pas de blabla.
 
-RÈGLES POUR LES FICHES :
-- summary : 2-3 phrases, les faits clés à retenir pour l'examen
-- key_concepts : termes, notions ou formules à connaître par cœur
-- important_points : points susceptibles d'être testés en examen ou QCM
-- memory_trick : moyen mnémotechnique original et efficace adapté au contenu
+key_concepts : les termes/formules/mécanismes à connaître par cœur. Définition précise + exemple concret utile pour un examen.
 
-FORMAT JSON EXACT :
+important_points : 3-5 points testables en QCM. Formule comme un examinateur : "La dose de X est...", "La contre-indication absolue est...", "Le mécanisme implique..."
+
+schema_text : TRÈS IMPORTANT — crée un schéma textuel quand c'est utile (séquence, tableau comparatif, arbre décisionnel, cycle, pathway). Utilise → ↓ ↑ ═ ─ | pour les relations. Exemples :
+  • Pharmacologie : "Récepteur β ──[bloqué par BB]──→ ↓FC + ↓PA"
+  • Histoire : "1789 → Prise Bastille → 1792 Rép. → 1793 Louis XVI"
+  • Biologie : "ADN ──[transcription]→ ARNm ──[traduction]→ Protéine"
+  • Droit : "Contrat valide = Consentement + Capacité + Objet licite + Cause"
+  Mets null si vraiment aucun schéma n'est pertinent pour ce concept.
+
+exam_traps : 1-3 PIÈGES RÉELS que les étudiants font en examen. Formule en "Ne pas confondre...", "Erreur classique : ...", "Attention : ..."
+
+key_numbers : chiffres, dates, seuils, doses, pourcentages, durées à retenir. Max 4. Format court : "Dose max : 4g/j", "Seuil : 140/90 mmHg", "1789 : Révolution"
+
+memory_trick : moyen mnémotechnique ORIGINAL et efficace. Acronyme, histoire, analogie visuelle. Pas "Retiens que X est Y" — crée quelque chose de mémorable.
+
+━━━ RÈGLES QCM ━━━
+- 3 questions par fiche, formulées comme dans les VRAIS examens
+- Distracteurs crédibles (pas des options absurdes)
+- Inclure au moins 1 question sur les chiffres/valeurs si pertinent
+- Types : "Lequel est FAUX", "Quelle est la PREMIÈRE ligne de traitement", "Parmi ces propositions, laquelle est EXACTE"
+- Explication : 1 phrase qui fixe la bonne réponse en mémoire
+
+━━━ FORMAT JSON EXACT ━━━
 {
   "fiches": [{
     "title": "string",
     "content": {
-      "summary": "string (2-3 phrases)",
+      "summary": "string",
       "key_concepts": [{"term": "string", "definition": "string", "example": "string"}],
-      "important_points": ["string", "string", "string"],
+      "important_points": ["string"],
+      "schema_text": "string | null",
+      "exam_traps": ["string"],
+      "key_numbers": ["string"],
       "memory_trick": "string"
     },
     "difficulty": "easy"${imageFormat}
@@ -75,11 +88,13 @@ FORMAT JSON EXACT :
   "questions": [{
     "fiche_title": "string",
     "question": "string",
-    "options": ["option A", "option B", "option C", "option D"],
+    "options": ["A...", "B...", "C...", "D..."],
     "correct_answer": 0,
-    "explanation": "string (court, factuel, ce qu'il faut retenir)"
+    "explanation": "string"
   }]
-}`
+}
+
+Réponds UNIQUEMENT en JSON valide, sans markdown, sans commentaires.`
 }
 
 // Validation stricte de la structure générée
@@ -99,6 +114,9 @@ function validateGenerated(data: unknown, imageCount = 0): { ok: true; data: Gen
     if (!Array.isArray(c.key_concepts)) f.content = { ...c, key_concepts: [] }
     if (!Array.isArray(c.important_points)) f.content = { ...c, important_points: [] }
     if (!c.memory_trick) f.content = { ...c, memory_trick: '' }
+    if (!Array.isArray(c.exam_traps)) f.content = { ...f.content as Record<string, unknown>, exam_traps: [] }
+    if (!Array.isArray(c.key_numbers)) f.content = { ...f.content as Record<string, unknown>, key_numbers: [] }
+    if (typeof c.schema_text !== 'string') f.content = { ...f.content as Record<string, unknown>, schema_text: null }
     if (!['easy', 'medium', 'hard'].includes(f.difficulty as string)) f.difficulty = 'medium'
     // Validate image_index if present
     if (imageCount > 0 && f.image_index !== null && f.image_index !== undefined) {
@@ -126,6 +144,9 @@ interface FicheContent {
   key_concepts: { term: string; definition: string; example?: string }[]
   important_points: string[]
   memory_trick: string
+  schema_text?: string | null
+  exam_traps?: string[]
+  key_numbers?: string[]
 }
 
 interface GeneratedFiche {

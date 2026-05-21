@@ -106,23 +106,61 @@ export function FicheCard({ fiche: initialFiche, index, coursId }: FicheCardProp
           <motion.div
             initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.22 }} style={{ overflow: 'hidden' }}>
-            <div style={{ background: colors.surface, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <div style={{ background: colors.surface, padding: '16px 18px', display: 'flex', flexDirection: 'column', gap: 14 }}>
+              {(() => {
+              const xc = fiche.content as { key_numbers?: string[]; schema_text?: string | null; exam_traps?: string[] }
+              return <>
+
+              {/* Image du document */}
+              {fiche.image_url && (
+                <div style={{ borderRadius: 12, overflow: 'hidden', border: `1px solid ${colors.border}`, position: 'relative' }}>
+                  <img src={fiche.image_url} alt="Schéma" style={{ width: '100%', display: 'block', maxHeight: 220, objectFit: 'contain', background: '#000' }} />
+                  <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={removeImage}
+                    style={{ position: 'absolute', top: 6, right: 6, width: 26, height: 26, borderRadius: '50%', background: 'rgba(0,0,0,0.7)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                    <X size={12} />
+                  </motion.button>
+                </div>
+              )}
+
+              {/* Chiffres clés */}
+              {(xc.key_numbers?.length ?? 0) > 0 && (
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {xc.key_numbers!.map((n, i) => (
+                    <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 4, background: 'rgba(60,239,255,0.1)', border: '1px solid rgba(60,239,255,0.25)', borderRadius: 99, padding: '4px 10px', fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 700, color: colors.blue }}>
+                      {n}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Schéma textuel */}
+              {xc.schema_text && (
+                <div style={{ background: 'rgba(200,255,0,0.04)', border: `1px solid ${colors.limeBorder}`, borderRadius: 12, padding: '12px 14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
+                    <span style={{ fontSize: 13 }}>🗺️</span>
+                    <h4 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 12, color: colors.limeDark, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Schéma</h4>
+                  </div>
+                  <pre style={{ fontSize: 12, color: colors.text, lineHeight: 1.7, fontFamily: 'ui-monospace, SFMono-Regular, monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
+                    {xc.schema_text}
+                  </pre>
+                </div>
+              )}
 
               {/* Key concepts */}
               {fiche.content.key_concepts?.length > 0 && (
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                    <div style={{ width: 24, height: 24, borderRadius: 8, background: 'rgba(60,239,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Tag size={13} color={colors.blue} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <div style={{ width: 22, height: 22, borderRadius: 7, background: 'rgba(60,239,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Tag size={12} color={colors.blue} />
                     </div>
-                    <h4 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: colors.text }}>Concepts clés</h4>
+                    <h4 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 12, color: colors.text, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Concepts clés</h4>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
                     {fiche.content.key_concepts.map((kc, i) => (
-                      <div key={i} style={{ background: colors.surface2, border: `1px solid ${colors.border}`, borderRadius: 12, padding: '10px 14px' }}>
-                        <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: colors.text, marginBottom: 3 }}>{kc.term}</p>
+                      <div key={i} style={{ background: colors.surface2, border: `1px solid ${colors.border}`, borderRadius: 11, padding: '9px 12px' }}>
+                        <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: colors.text, marginBottom: 2 }}>{kc.term}</p>
                         <p style={{ fontSize: 12, color: colors.muted, lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif' }}>{kc.definition}</p>
-                        {kc.example && <p style={{ fontSize: 11, color: colors.muted, fontStyle: 'italic', marginTop: 4, fontFamily: 'DM Sans, sans-serif' }}>Ex : {kc.example}</p>}
+                        {kc.example && <p style={{ fontSize: 11, color: colors.blue, fontStyle: 'italic', marginTop: 3, fontFamily: 'DM Sans, sans-serif' }}>→ {kc.example}</p>}
                       </div>
                     ))}
                   </div>
@@ -132,16 +170,16 @@ export function FicheCard({ fiche: initialFiche, index, coursId }: FicheCardProp
               {/* Important points */}
               {fiche.content.important_points?.length > 0 && (
                 <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-                    <div style={{ width: 24, height: 24, borderRadius: 8, background: colors.limeBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <Zap size={13} color={colors.limeDark} />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                    <div style={{ width: 22, height: 22, borderRadius: 7, background: colors.limeBg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <Zap size={12} color={colors.limeDark} />
                     </div>
-                    <h4 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: colors.text }}>Points essentiels</h4>
+                    <h4 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 12, color: colors.text, textTransform: 'uppercase', letterSpacing: '0.5px' }}>À l&apos;examen</h4>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                     {fiche.content.important_points.map((pt, i) => (
-                      <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                        <div style={{ width: 6, height: 6, borderRadius: '50%', background: colors.lime, flexShrink: 0, marginTop: 6 }} />
+                      <div key={i} style={{ display: 'flex', gap: 9, alignItems: 'flex-start' }}>
+                        <div style={{ width: 5, height: 5, borderRadius: '50%', background: colors.lime, flexShrink: 0, marginTop: 7, boxShadow: `0 0 6px ${colors.lime}` }} />
                         <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif' }}>{pt}</p>
                       </div>
                     ))}
@@ -149,35 +187,42 @@ export function FicheCard({ fiche: initialFiche, index, coursId }: FicheCardProp
                 </div>
               )}
 
+              {/* Pièges d'examen */}
+              {(xc.exam_traps?.length ?? 0) > 0 && (
+                <div style={{ background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: 12, padding: '11px 13px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7 }}>
+                    <span style={{ fontSize: 13 }}>⚠️</span>
+                    <h4 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 12, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Pièges d&apos;examen</h4>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    {xc.exam_traps!.map((trap, i) => (
+                      <p key={i} style={{ fontSize: 12, color: '#fca5a5', lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif' }}>{trap}</p>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Memory trick */}
               {fiche.content.memory_trick && (
-                <div style={{ background: 'rgba(251,146,60,0.08)', border: '1px solid rgba(251,146,60,0.2)', borderRadius: 14, padding: '12px 14px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                    <Lightbulb size={14} color="#FB923C" />
-                    <h4 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 12, color: '#FB923C' }}>Astuce mémo</h4>
+                <div style={{ background: 'rgba(251,146,60,0.07)', border: '1px solid rgba(251,146,60,0.18)', borderRadius: 12, padding: '11px 13px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
+                    <Lightbulb size={13} color="#FB923C" />
+                    <h4 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 12, color: '#FB923C', textTransform: 'uppercase', letterSpacing: '0.5px' }}>Mémo</h4>
                   </div>
                   <p style={{ fontSize: 13, color: colors.text, lineHeight: 1.5, fontFamily: 'DM Sans, sans-serif', fontStyle: 'italic' }}>{fiche.content.memory_trick}</p>
                 </div>
               )}
 
-              {/* Photo */}
-              <div>
-                <input ref={imgInputRef} type="file" accept="image/*" capture="environment" onChange={uploadImage} style={{ display: 'none' }} />
-                {fiche.image_url ? (
-                  <div style={{ position: 'relative', borderRadius: 14, overflow: 'hidden', border: `1px solid ${colors.border}` }}>
-                    <img src={fiche.image_url} alt="Note" style={{ width: '100%', display: 'block', maxHeight: 280, objectFit: 'cover' }} />
-                    <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={removeImage}
-                      style={{ position: 'absolute', top: 8, right: 8, width: 28, height: 28, borderRadius: '50%', background: 'rgba(0,0,0,0.6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                      <X size={13} />
-                    </motion.button>
-                  </div>
-                ) : (
+              {/* Ajouter photo manuellement si pas d'image auto */}
+              {!fiche.image_url && (
+                <div>
+                  <input ref={imgInputRef} type="file" accept="image/*" capture="environment" onChange={uploadImage} style={{ display: 'none' }} />
                   <motion.button whileHover={{ y: -1 }} whileTap={{ y: 1 }} onClick={() => imgInputRef.current?.click()} disabled={uploadingImg}
-                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px', borderRadius: 13, border: `1px dashed ${colors.border}`, background: 'transparent', color: colors.muted, fontFamily: 'DM Sans, sans-serif', fontSize: 13, cursor: 'pointer' }}>
-                    <Camera size={14} />{uploadingImg ? 'Upload...' : 'Ajouter une photo (schéma, cours...)'}
+                    style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '9px', borderRadius: 11, border: `1px dashed ${colors.border}`, background: 'transparent', color: colors.muted, fontFamily: 'DM Sans, sans-serif', fontSize: 12, cursor: 'pointer' }}>
+                    <Camera size={13} />{uploadingImg ? 'Upload...' : 'Ajouter un schéma photo'}
                   </motion.button>
-                )}
-              </div>
+                </div>
+              )}
 
               {/* Actions */}
               <div style={{ display: 'flex', gap: 10, paddingTop: 4 }}>
@@ -193,6 +238,7 @@ export function FicheCard({ fiche: initialFiche, index, coursId }: FicheCardProp
                   <Brain size={14} />Quiz
                 </motion.button>
               </div>
+              </> })()}
             </div>
           </motion.div>
         )}
