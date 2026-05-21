@@ -35,26 +35,44 @@ function buildSystemPrompt(lang: 'fr' | 'en', imageCount = 0) {
 
   const imageFormat = imageCount > 0 ? ',\n    "image_index": null' : ''
 
-  return `Expert pédagogie médicale/universitaire. Génère des fiches d'examen précises et actives, pas des résumés génériques.
+  return `Tu es un expert en pédagogie médicale/universitaire. Tu génères des fiches d'examen RIGOUREUSES et ACTIVES — jamais des résumés génériques.
 
 ${langBlock}
 ${imageBlock}
 
-FICHES (8-15) — règles absolues :
-• summary: 2-3 phrases de contenu réel — JAMAIS un titre ou une reformulation du titre. Ex valide: "La M1 sup (16/26) a 3 racines (MV, DV, palatine) et 4 cuspides principales + cuspide de Carabelli inconstante. Elle est la plus grosse dent du secteur postérieur supérieur et diffère de la M2 sup par sa taille et ce cuspide surnuméraire." Ex invalide: "Caractéristiques des molaires supérieures" ou "Les molaires supérieures ont des racines"
-• key_concepts: définition précise + exemple testable en examen
-• important_points: formulés comme des QCM — "La prémolaire 1 sup est la SEULE à 2 racines (MV+DV)" pas "les prémolaires ont 1-2 racines"
-• schema_text: OBLIGATOIRE pour anatomie/pharma/biologie/chimie/droit. Tableau comparatif ou séquence. Ex: "MOL SUP 1: 3 rac, 4+1 cusp (Carabelli inconstante) | MOL SUP 2: 3 rac, 4 cusp | MOL INF 1: 2 rac, 5 cusp (3V+2L)"
-• exam_traps: piège PRÉCIS sur ce concept (ex: "Seule PM1 sup a 2 racines, PM2 en a 1 — question classique") pas "confondre les dents"
-• key_numbers: TOUJOURS avec label ("3 : racines molaire sup" pas juste "3")
-• memory_trick: VRAI mnémotechnique — image absurde, acronyme, histoire. JAMAIS une répétition de faits. Ex invalide: "M1 sup : 3 racines" (c'est juste le fait). Ex valide: "3 racines molaire sup = tripode : MV (avant-gauche) + DV (avant-droit) + Palatine (le pied arrière, le plus long)"
+NOMBRE DE FICHES : génère UNE FICHE PAR SECTION/THÈME du cours. Si le cours a 6 sections, fais 6 fiches minimum. JAMAIS moins d'une fiche par thème identifié.
 
-QCM — 2 questions PAR fiche (N fiches = 2N questions OBLIGATOIRES) :
-• Options sans lettre préfixe
-• Types: "Lequel est FAUX", "Combien de racines/cuspides/canaux", "Quelle caractéristique différencie X de Y"
+RÈGLES ABSOLUES par champ (les exemples ci-dessous illustrent le FORMAT uniquement — génère du contenu propre au cours fourni) :
 
-FORMAT JSON:
-{"fiches":[{"title":"str","content":{"summary":"str","key_concepts":[{"term":"str","definition":"str","example":"str"}],"important_points":["str"],"schema_text":"str|null","exam_traps":["str"],"key_numbers":["val:label"],"memory_trick":"str"},"difficulty":"easy"${imageFormat}}],"questions":[{"fiche_title":"str","question":"str","options":["str","str","str","str"],"correct_answer":0,"explanation":"str"}]}
+summary → 2-3 phrases de FAITS PRÉCIS testables. INTERDIT de reformuler le titre.
+  Format attendu: "Tissu X est Y (caractéristique clé). Il diffère de Z par A et B. Sa localisation est C."
+
+schema_text → TOUJOURS une string avec tableau ou diagramme en texte. JAMAIS null pour anatomie/pharma/biologie/chimie/droit.
+  Format tableau: "COL1     | COL2    | COL3\\nValeur1  | Valeur2 | Valeur3"
+
+exam_traps → MINIMUM 2 pièges PRÉCIS sur CE concept (pas des généralités).
+  Format: ["Terme X = caractéristique Y MAIS PAS Z — piège QCM fréquent", "Ne pas confondre X (définition A) et Y (définition B)"]
+
+key_numbers → Format "valeur : label précis" TOUJOURS.
+  Format: ["32 : nombre de dents adulte", "6 mois : début éruption temporaire"]
+
+memory_trick → Vrai mnémotechnique : acronyme, image absurde, histoire courte.
+  JAMAIS une répétition du fait ("X = le plus dur" n'est pas un mnémotechnique).
+
+important_points → Affirmations QCM précises avec le fait testable en gras (majuscules).
+  Format: "La structure X est la SEULE à avoir propriété Y"
+
+key_concepts → Définition précise + exemple clinique ou testable.
+
+QCM : EXACTEMENT 2 questions par fiche (N fiches → 2N questions OBLIGATOIRES).
+Types : "Lequel est FAUX parmi ces affirmations", "Combien de X", "Quelle est la différence entre X et Y".
+Chaque question a exactement 4 options SANS lettre préfixe. correct_answer est l'index (0, 1, 2 ou 3).
+
+STRUCTURE JSON :
+- Racine : objet avec clés "fiches" (tableau) et "questions" (tableau)
+- Chaque fiche : title (string), difficulty ("easy"|"medium"|"hard"), content (objet)
+- content : summary, key_concepts (tableau d'objets term/definition/example), important_points (tableau), schema_text (string), exam_traps (tableau min 2), key_numbers (tableau), memory_trick${imageFormat ? ', image_index (number|null)' : ''}
+- Chaque question : fiche_title, question, options (tableau de 4 strings), correct_answer (entier 0-3), explanation
 
 JSON valide uniquement, sans markdown.`
 }

@@ -317,12 +317,21 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
                         </div>
                       )}
 
-                      {c.schema_text && (
+                      {c.schema_text && (() => {
+                        const lines = c.schema_text.split('\n')
+                        return (
                         <div style={{ background: 'rgba(200,255,0,0.04)', border: '1px solid rgba(200,255,0,0.15)', borderRadius: 12, padding: '10px 12px' }}>
                           <p style={{ fontSize: 9, fontWeight: 700, color: '#C8FF00', fontFamily: 'Outfit, sans-serif', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 6 }}>🗺️ Schéma</p>
-                          <pre style={{ fontSize: 11, color: '#F0F0F8', lineHeight: 1.7, fontFamily: 'ui-monospace, monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>{c.schema_text}</pre>
+                          <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                            <pre style={{ fontSize: 11, lineHeight: 1.7, fontFamily: 'ui-monospace, monospace', whiteSpace: 'pre', margin: 0, minWidth: 'max-content' }}>
+                              {lines.map((line, li) => (
+                                <span key={li} style={{ display: 'block', color: li === 0 ? '#C8FF00' : '#F0F0F8', fontWeight: li === 0 ? 700 : 400 }}>{line}</span>
+                              ))}
+                            </pre>
+                          </div>
                         </div>
-                      )}
+                        )
+                      })()}
 
                       {c.key_concepts?.slice(0, 3).map((kc, i) => (
                         <div key={i} style={{ background: 'rgba(60,239,255,0.04)', border: '1px solid rgba(60,239,255,0.1)', borderRadius: 12, padding: '9px 12px' }}>

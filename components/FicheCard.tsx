@@ -134,17 +134,26 @@ export function FicheCard({ fiche: initialFiche, index, coursId }: FicheCardProp
               )}
 
               {/* Schéma textuel */}
-              {xc.schema_text && (
+              {xc.schema_text && (() => {
+                const lines = xc.schema_text.split('\n')
+                return (
                 <div style={{ background: 'rgba(200,255,0,0.04)', border: `1px solid ${colors.limeBorder}`, borderRadius: 12, padding: '12px 14px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                     <span style={{ fontSize: 13 }}>🗺️</span>
                     <h4 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 12, color: colors.limeDark, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Schéma</h4>
                   </div>
-                  <pre style={{ fontSize: 12, color: colors.text, lineHeight: 1.7, fontFamily: 'ui-monospace, SFMono-Regular, monospace', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
-                    {xc.schema_text}
-                  </pre>
+                  <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                    <pre style={{ fontSize: 12, color: colors.text, lineHeight: 1.8, fontFamily: 'ui-monospace, SFMono-Regular, monospace', whiteSpace: 'pre', margin: 0, minWidth: 'max-content' }}>
+                      {lines.map((line, li) => (
+                        <span key={li} style={{ display: 'block', color: li === 0 ? colors.lime : colors.text, fontWeight: li === 0 ? 700 : 400 }}>
+                          {line}
+                        </span>
+                      ))}
+                    </pre>
+                  </div>
                 </div>
-              )}
+                )
+              })()}
 
               {/* Key concepts */}
               {fiche.content.key_concepts?.length > 0 && (
