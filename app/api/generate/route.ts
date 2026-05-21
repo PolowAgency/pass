@@ -35,66 +35,28 @@ function buildSystemPrompt(lang: 'fr' | 'en', imageCount = 0) {
 
   const imageFormat = imageCount > 0 ? ',\n    "image_index": null' : ''
 
-  return `Tu es un expert en pédagogie et en conception de supports de révision efficaces, du lycée aux études supérieures (BAC, CPGE, licence, master, médecine, droit, ingénieur…).
-
-TON OBJECTIF : générer des fiches qui font vraiment progresser l'étudiant aux examens — pas des résumés génériques, mais des outils d'apprentissage actif avec schémas, pièges, chiffres clés.
+  return `Expert pédagogie médicale/universitaire. Génère des fiches d'examen précises et actives, pas des résumés génériques.
 
 ${langBlock}
 ${imageBlock}
 
-━━━ RÈGLES FICHES ━━━
+FICHES (8-15) — règles absolues :
+• summary: 2-3 phrases de contenu réel — JAMAIS un titre ou une reformulation du titre. Ex valide: "La M1 sup (16/26) a 3 racines (MV, DV, palatine) et 4 cuspides principales + cuspide de Carabelli inconstante. Elle est la plus grosse dent du secteur postérieur supérieur et diffère de la M2 sup par sa taille et ce cuspide surnuméraire." Ex invalide: "Caractéristiques des molaires supérieures" ou "Les molaires supérieures ont des racines"
+• key_concepts: définition précise + exemple testable en examen
+• important_points: formulés comme des QCM — "La prémolaire 1 sup est la SEULE à 2 racines (MV+DV)" pas "les prémolaires ont 1-2 racines"
+• schema_text: OBLIGATOIRE pour anatomie/pharma/biologie/chimie/droit. Tableau comparatif ou séquence. Ex: "MOL SUP 1: 3 rac, 4+1 cusp (Carabelli inconstante) | MOL SUP 2: 3 rac, 4 cusp | MOL INF 1: 2 rac, 5 cusp (3V+2L)"
+• exam_traps: piège PRÉCIS sur ce concept (ex: "Seule PM1 sup a 2 racines, PM2 en a 1 — question classique") pas "confondre les dents"
+• key_numbers: TOUJOURS avec label ("3 : racines molaire sup" pas juste "3")
+• memory_trick: VRAI mnémotechnique — image absurde, acronyme, histoire. JAMAIS une répétition de faits. Ex invalide: "M1 sup : 3 racines" (c'est juste le fait). Ex valide: "3 racines molaire sup = tripode : MV (avant-gauche) + DV (avant-droit) + Palatine (le pied arrière, le plus long)"
 
-summary : 2-3 phrases percutantes. Ce que l'examinateur attend absolument. Pas de blabla.
+QCM — 2 questions PAR fiche (N fiches = 2N questions OBLIGATOIRES) :
+• Options sans lettre préfixe
+• Types: "Lequel est FAUX", "Combien de racines/cuspides/canaux", "Quelle caractéristique différencie X de Y"
 
-key_concepts : les termes/formules/mécanismes à connaître par cœur. Définition précise + exemple concret utile pour un examen.
+FORMAT JSON:
+{"fiches":[{"title":"str","content":{"summary":"str","key_concepts":[{"term":"str","definition":"str","example":"str"}],"important_points":["str"],"schema_text":"str|null","exam_traps":["str"],"key_numbers":["val:label"],"memory_trick":"str"},"difficulty":"easy"${imageFormat}}],"questions":[{"fiche_title":"str","question":"str","options":["str","str","str","str"],"correct_answer":0,"explanation":"str"}]}
 
-important_points : 3-5 points testables en QCM. Formule comme un examinateur : "La dose de X est...", "La contre-indication absolue est...", "Le mécanisme implique..."
-
-schema_text : TRÈS IMPORTANT — crée un schéma textuel quand c'est utile (séquence, tableau comparatif, arbre décisionnel, cycle, pathway). Utilise → ↓ ↑ ═ ─ | pour les relations. Exemples :
-  • Pharmacologie : "Récepteur β ──[bloqué par BB]──→ ↓FC + ↓PA"
-  • Histoire : "1789 → Prise Bastille → 1792 Rép. → 1793 Louis XVI"
-  • Biologie : "ADN ──[transcription]→ ARNm ──[traduction]→ Protéine"
-  • Droit : "Contrat valide = Consentement + Capacité + Objet licite + Cause"
-  Mets null si vraiment aucun schéma n'est pertinent pour ce concept.
-
-exam_traps : 1-3 PIÈGES RÉELS que les étudiants font en examen. Formule en "Ne pas confondre...", "Erreur classique : ...", "Attention : ..."
-
-key_numbers : chiffres, dates, seuils, doses, pourcentages, durées à retenir. Max 4. Format court : "Dose max : 4g/j", "Seuil : 140/90 mmHg", "1789 : Révolution"
-
-memory_trick : moyen mnémotechnique ORIGINAL et efficace. Acronyme, histoire, analogie visuelle. Pas "Retiens que X est Y" — crée quelque chose de mémorable.
-
-━━━ RÈGLES QCM ━━━
-- 3 questions par fiche, formulées comme dans les VRAIS examens
-- Distracteurs crédibles (pas des options absurdes)
-- Inclure au moins 1 question sur les chiffres/valeurs si pertinent
-- Types : "Lequel est FAUX", "Quelle est la PREMIÈRE ligne de traitement", "Parmi ces propositions, laquelle est EXACTE"
-- Explication : 1 phrase qui fixe la bonne réponse en mémoire
-
-━━━ FORMAT JSON EXACT ━━━
-{
-  "fiches": [{
-    "title": "string",
-    "content": {
-      "summary": "string",
-      "key_concepts": [{"term": "string", "definition": "string", "example": "string"}],
-      "important_points": ["string"],
-      "schema_text": "string | null",
-      "exam_traps": ["string"],
-      "key_numbers": ["string"],
-      "memory_trick": "string"
-    },
-    "difficulty": "easy"${imageFormat}
-  }],
-  "questions": [{
-    "fiche_title": "string",
-    "question": "string",
-    "options": ["A...", "B...", "C...", "D..."],
-    "correct_answer": 0,
-    "explanation": "string"
-  }]
-}
-
-Réponds UNIQUEMENT en JSON valide, sans markdown, sans commentaires.`
+JSON valide uniquement, sans markdown.`
 }
 
 // Validation stricte de la structure générée

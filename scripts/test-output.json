@@ -1,0 +1,430 @@
+{
+  "fiches": [
+    {
+      "title": "Molaires supérieures",
+      "content": {
+        "summary": "Caractéristiques des molaires supérieures",
+        "key_concepts": [
+          {
+            "term": "Racines",
+            "definition": "3 racines (MV, DV, palatine)",
+            "example": "M1 sup : 3 racines"
+          },
+          {
+            "term": "Cuspides occlusales",
+            "definition": "4-5 cuspides occlusales",
+            "example": "M1 sup : 4 cuspides + 1 cuspide de Carabelli"
+          }
+        ],
+        "important_points": [
+          "Quelles sont les caractéristiques des molaires supérieures ?",
+          "Quelles sont les différences entre M1 sup et M2 sup ?"
+        ],
+        "schema_text": "| | M1 sup | M2 sup |\n| --- | --- | --- |\n| Racines | 3 | 3 |\n| Cuspides occlusales | 4-5 | 4 |\n| Taille | Plus grosse | Plus petite |\n",
+        "exam_traps": [
+          "Confondre les racines des molaires supérieures et inférieures"
+        ],
+        "key_numbers": [
+          "3 : nombre de racines des molaires supérieures",
+          "4-5 : nombre de cuspides occlusales des molaires supérieures"
+        ],
+        "memory_trick": "M1 sup : 3 racines, 4-5 cuspides"
+      },
+      "difficulty": "facile"
+    },
+    {
+      "title": "Molaires inférieures",
+      "content": {
+        "summary": "Caractéristiques des molaires inférieures",
+        "key_concepts": [
+          {
+            "term": "Racines",
+            "definition": "2 racines (mésiale + distale)",
+            "example": "M1 inf : 2 racines"
+          },
+          {
+            "term": "Cuspides occlusales",
+            "definition": "5 cuspides (3 vestibulaires + 2 linguales) pour M1 inf, 4 cuspides (2 vestibulaires + 2 linguales) pour M2 inf",
+            "example": "M1 inf : 5 cuspides"
+          }
+        ],
+        "important_points": [
+          "Quelles sont les caractéristiques des molaires inférieures ?",
+          "Quelles sont les différences entre M1 inf et M2 inf ?"
+        ],
+        "schema_text": "| | M1 inf | M2 inf |\n| --- | --- | --- |\n| Racines | 2 | 2 |\n| Cuspides occlusales | 5 | 4 |\n| Éruption | 6 ans | 12-14 ans |\n",
+        "exam_traps": [
+          "Confondre les racines des molaires inférieures et supérieures"
+        ],
+        "key_numbers": [
+          "2 : nombre de racines des molaires inférieures",
+          "5 : nombre de cuspides occlusales de M1 inf"
+        ],
+        "memory_trick": "M1 inf : 2 racines, 5 cuspides"
+      },
+      "difficulty": "facile"
+    },
+    {
+      "title": "Prémolaires supérieures",
+      "content": {
+        "summary": "Caractéristiques des prémolaires supérieures",
+        "key_concepts": [
+          {
+            "term": "Racines",
+            "definition": "2 racines (MV + DV) pour PM1 sup, 1 racine pour PM2 sup",
+            "example": "PM1 sup : 2 racines"
+          },
+          {
+            "term": "Cuspides occlusales",
+            "definition": "2 cuspides pour PM1 sup et PM2 sup",
+            "example": "PM1 sup : 2 cuspides"
+          }
+        ],
+        "important_points": [
+          "Quelles sont les caractéristiques des prémolaires supérieures ?",
+          "Quelles sont les différences entre PM1 sup et PM2 sup ?"
+        ],
+        "schema_text": "| | PM1 sup | PM2 sup |\n| --- | --- | --- |\n| Racines | 2 | 1 |\n| Cuspides occlusales | 2 | 2 |\n| Taille | Plus grande | Plus petite |\n",
+        "exam_traps": [
+          "Confondre les racines des prémolaires supérieures"
+        ],
+        "key_numbers": [
+          "2 : nombre de racines de PM1 sup",
+          "1 : nombre de racine de PM2 sup"
+        ],
+        "memory_trick": "PM1 sup : 2 racines, 2 cuspides"
+      },
+      "difficulty": "facile"
+    },
+    {
+      "title": "Prémolaires inférieures",
+      "content": {
+        "summary": "Caractéristiques des prémolaires inférieures",
+        "key_concepts": [
+          {
+            "term": "Racines",
+            "definition": "1 racine",
+            "example": "PM1 inf : 1 racine"
+          },
+          {
+            "term": "Cuspides occlusales",
+            "definition": "1 cuspide vestibulaire dominante pour PM1 inf, 2 cuspides pour PM2 inf",
+            "example": "PM1 inf : 1 cuspide vestibulaire dominante"
+          }
+        ],
+        "important_points": [
+          "Quelles sont les caractéristiques des prémolaires inférieures ?",
+          "Quelles sont les différences entre PM1 inf et PM2 inf ?"
+        ],
+        "schema_text": "| | PM1 inf | PM2 inf |\n| --- | --- | --- |\n| Racines | 1 | 1 |\n| Cuspides occlusales | 1 vestibulaire dominante | 2 |\n| Forme | Cuspide vestibulaire dominante | 2 cuspides équilibrées |\n",
+        "exam_traps": [
+          "Confondre les racines des prémolaires inférieures"
+        ],
+        "key_numbers": [
+          "1 : nombre de racine des prémolaires inférieures",
+          "1 : nombre de cuspide vestibulaire dominante de PM1 inf"
+        ],
+        "memory_trick": "PM1 inf : 1 racine, 1 cuspide vestibulaire dominante"
+      },
+      "difficulty": "facile"
+    },
+    {
+      "title": "Canines",
+      "content": {
+        "summary": "Caractéristiques des canines",
+        "key_concepts": [
+          {
+            "term": "Racines",
+            "definition": "1 racine",
+            "example": "Canine : 1 racine"
+          },
+          {
+            "term": "Cuspides occlusales",
+            "definition": "1 cuspide",
+            "example": "Canine : 1 cuspide"
+          }
+        ],
+        "important_points": [
+          "Quelles sont les caractéristiques des canines ?",
+          "Quelle est la fonction des canines ?"
+        ],
+        "schema_text": "| | Canine |\n| --- | --- |\n| Racines | 1 |\n| Cuspides occlusales | 1 |\n| Longueur | Plus longue de l'arcade |\n",
+        "exam_traps": [
+          "Confondre les racines des canines"
+        ],
+        "key_numbers": [
+          "1 : nombre de racine des canines",
+          "1 : nombre de cuspide des canines"
+        ],
+        "memory_trick": "Canine : 1 racine, 1 cuspide"
+      },
+      "difficulty": "facile"
+    },
+    {
+      "title": "Incisives",
+      "content": {
+        "summary": "Caractéristiques des incisives",
+        "key_concepts": [
+          {
+            "term": "Racines",
+            "definition": "1 racine",
+            "example": "Incisive : 1 racine"
+          },
+          {
+            "term": "Forme",
+            "definition": "Bord incisif tranchant",
+            "example": "Incisive : bord incisif tranchant"
+          }
+        ],
+        "important_points": [
+          "Quelles sont les caractéristiques des incisives ?",
+          "Quelles sont les différences entre les incisives supérieures et inférieures ?"
+        ],
+        "schema_text": "| | Incisive sup | Incisive inf |\n| --- | --- | --- |\n| Racines | 1 | 1 |\n| Forme | Bord incisif tranchant | Bord incisif tranchant |\n| Taille | Plus grande | Plus petite |\n",
+        "exam_traps": [
+          "Confondre les racines des incisives"
+        ],
+        "key_numbers": [
+          "1 : nombre de racine des incisives",
+          "1 : nombre de bord incisif tranchant"
+        ],
+        "memory_trick": "Incisive : 1 racine, bord incisif tranchant"
+      },
+      "difficulty": "facile"
+    },
+    {
+      "title": "Nomenclature FDI",
+      "content": {
+        "summary": "Système de nomenclature FDI",
+        "key_concepts": [
+          {
+            "term": "Quadrants",
+            "definition": "Quadrants 1-4 adulte, 5-8 temporaire",
+            "example": "Quadrant 1 : incisives et canines supérieures droit"
+          },
+          {
+            "term": "Numérotation",
+            "definition": "Numérotation des dents de 11 à 48",
+            "example": "Incisive centrale supérieure gauche : 21"
+          }
+        ],
+        "important_points": [
+          "Qu'est-ce que la nomenclature FDI ?",
+          "Comment fonctionne la numérotation des dents ?"
+        ],
+        "schema_text": "| | Quadrant 1 | Quadrant 2 |\n| --- | --- | --- |\n| Dents | 11-18 | 21-28 |\n| Numérotation | 11-18 | 21-28 |\n",
+        "exam_traps": [
+          "Confondre les quadrants et les numérotations"
+        ],
+        "key_numbers": [
+          "4 : nombre de quadrants adultes",
+          "8 : nombre de quadrants temporaires"
+        ],
+        "memory_trick": "FDI : Quadrants 1-4 adulte, 5-8 temporaire"
+      },
+      "difficulty": "facile"
+    },
+    {
+      "title": "Anatomie endodontique",
+      "content": {
+        "summary": "Structure interne des dents",
+        "key_concepts": [
+          {
+            "term": "Chambre pulpaire",
+            "definition": "Espace dans la couronne",
+            "example": "Chambre pulpaire : espace dans la couronne"
+          },
+          {
+            "term": "Canaux radiculaires",
+            "definition": "Espace dans les racines",
+            "example": "Canaux radiculaires : espace dans les racines"
+          }
+        ],
+        "important_points": [
+          "Qu'est-ce que l'anatomie endodontique ?",
+          "Quelles sont les structures internes des dents ?"
+        ],
+        "schema_text": "| | Chambre pulpaire | Canaux radiculaires |\n| --- | --- | --- |\n| Localisation | Couronne | Racines |\n| Fonction | Contient la pulpe | Contient la pulpe |\n",
+        "exam_traps": [
+          "Confondre les structures internes des dents"
+        ],
+        "key_numbers": [
+          "1 : nombre de chambre pulpaire",
+          "1-4 : nombre de canaux radiculaires"
+        ],
+        "memory_trick": "Anatomie endodontique : Chambre pulpaire + Canaux radiculaires"
+      },
+      "difficulty": "facile"
+    }
+  ],
+  "questions": [
+    {
+      "fiche_title": "Molaires supérieures",
+      "question": "Quelles sont les caractéristiques des molaires supérieures ?",
+      "options": [
+        "3 racines, 5 cuspides occlusales",
+        "2 racines, 4 cuspides occlusales",
+        "3 racines, 4 cuspides occlusales",
+        "1 racine, 1 cuspide occlusale"
+      ],
+      "correct_answer": 2,
+      "explanation": "Les molaires supérieures ont 3 racines et 4-5 cuspides occlusales."
+    },
+    {
+      "fiche_title": "Molaires supérieures",
+      "question": "Quelles sont les différences entre M1 sup et M2 sup ?",
+      "options": [
+        "M1 sup a 3 racines et M2 sup a 2 racines",
+        "M1 sup a 4 cuspides et M2 sup a 5 cuspides",
+        "M1 sup est plus grande que M2 sup",
+        "M1 sup et M2 sup ont le même nombre de racines et de cuspides"
+      ],
+      "correct_answer": 2,
+      "explanation": "M1 sup est plus grande que M2 sup et a un nombre différent de cuspides."
+    },
+    {
+      "fiche_title": "Prémolaires supérieures",
+      "question": "Quelles sont les caractéristiques des prémolaires supérieures ?",
+      "options": [
+        "2 racines, 2 cuspides occlusales",
+        "1 racine, 1 cuspide occlusale",
+        "3 racines, 3 cuspides occlusales",
+        "2 racines, 1 cuspide occlusale"
+      ],
+      "correct_answer": 0,
+      "explanation": "Les prémolaires supérieures ont 2 racines et 2 cuspides occlusales."
+    },
+    {
+      "fiche_title": "Prémolaires inférieures",
+      "question": "Quelles sont les caractéristiques des prémolaires inférieures ?",
+      "options": [
+        "1 racine, 1 cuspide occlusale",
+        "2 racines, 2 cuspides occlusales",
+        "1 racine, 2 cuspides occlusales",
+        "2 racines, 1 cuspide occlusale"
+      ],
+      "correct_answer": 2,
+      "explanation": "Les prémolaires inférieures ont 1 racine et 1 ou 2 cuspides occlusales."
+    },
+    {
+      "fiche_title": "Canines",
+      "question": "Quelles sont les caractéristiques des canines ?",
+      "options": [
+        "1 racine, 1 cuspide occlusale",
+        "2 racines, 2 cuspides occlusales",
+        "3 racines, 3 cuspides occlusales",
+        "1 racine, 2 cuspides occlusales"
+      ],
+      "correct_answer": 0,
+      "explanation": "Les canines ont 1 racine et 1 cuspide occlusale."
+    },
+    {
+      "fiche_title": "Incisives",
+      "question": "Quelles sont les caractéristiques des incisives ?",
+      "options": [
+        "1 racine, bord incisif tranchant",
+        "2 racines, 2 cuspides occlusales",
+        "1 racine, 1 cuspide occlusale",
+        "2 racines, bord incisif tranchant"
+      ],
+      "correct_answer": 0,
+      "explanation": "Les incisives ont 1 racine et un bord incisif tranchant."
+    },
+    {
+      "fiche_title": "Nomenclature FDI",
+      "question": "Qu'est-ce que la nomenclature FDI ?",
+      "options": [
+        "Système de numérotation des dents",
+        "Système de classification des dents",
+        "Système de localisation des dents",
+        "Système de nomenclature des dents"
+      ],
+      "correct_answer": 3,
+      "explanation": "La nomenclature FDI est un système de nomenclature des dents."
+    },
+    {
+      "fiche_title": "Anatomie endodontique",
+      "question": "Qu'est-ce que l'anatomie endodontique ?",
+      "options": [
+        "Étude de la structure interne des dents",
+        "Étude de la structure externe des dents",
+        "Étude de la fonction des dents",
+        "Étude de la morphologie des dents"
+      ],
+      "correct_answer": 0,
+      "explanation": "L'anatomie endodontique est l'étude de la structure interne des dents."
+    },
+    {
+      "fiche_title": "Molaires inférieures",
+      "question": "Quelles sont les caractéristiques des molaires inférieures ?",
+      "options": [
+        "2 racines, 5 cuspides occlusales",
+        "3 racines, 4 cuspides occlusales",
+        "1 racine, 1 cuspide occlusale",
+        "2 racines, 4 cuspides occlusales"
+      ],
+      "correct_answer": 0,
+      "explanation": "Les molaires inférieures ont 2 racines et 5 cuspides occlusales pour M1 inf et 4 cuspides occlusales pour M2 inf."
+    },
+    {
+      "fiche_title": "Prémolaires inférieures",
+      "question": "Quelles sont les caractéristiques des prémolaires inférieures ?",
+      "options": [
+        "1 racine, 1 cuspide occlusale",
+        "2 racines, 2 cuspides occlusales",
+        "1 racine, 2 cuspides occlusales",
+        "2 racines, 1 cuspide occlusale"
+      ],
+      "correct_answer": 2,
+      "explanation": "Les prémolaires inférieures ont 1 racine et 1 ou 2 cuspides occlusales."
+    },
+    {
+      "fiche_title": "Canines",
+      "question": "Quelle est la fonction des canines ?",
+      "options": [
+        "Mastiquer les aliments",
+        "Guidage occlusal",
+        "Morsure des aliments",
+        "Déglutition des aliments"
+      ],
+      "correct_answer": 1,
+      "explanation": "Les canines ont une fonction de guidage occlusal."
+    },
+    {
+      "fiche_title": "Incisives",
+      "question": "Quelles sont les différences entre les incisives supérieures et inférieures ?",
+      "options": [
+        "Les incisives supérieures sont plus grandes que les incisives inférieures",
+        "Les incisives inférieures sont plus grandes que les incisives supérieures",
+        "Les incisives supérieures et inférieures ont la même taille",
+        "Les incisives supérieures et inférieures ont la même forme"
+      ],
+      "correct_answer": 0,
+      "explanation": "Les incisives supérieures sont plus grandes que les incisives inférieures."
+    },
+    {
+      "fiche_title": "Nomenclature FDI",
+      "question": "Comment fonctionne la numérotation des dents ?",
+      "options": [
+        "La numérotation des dents part de 1 et va jusqu'à 32",
+        "La numérotation des dents part de 11 et va jusqu'à 48",
+        "La numérotation des dents part de 1 et va jusqu'à 16",
+        "La numérotation des dents part de 11 et va jusqu'à 28"
+      ],
+      "correct_answer": 1,
+      "explanation": "La numérotation des dents part de 11 et va jusqu'à 48."
+    },
+    {
+      "fiche_title": "Anatomie endodontique",
+      "question": "Quelles sont les structures internes des dents ?",
+      "options": [
+        "Chambre pulpaire et canaux radiculaires",
+        "Chambre pulpaire et racines",
+        "Canaux radiculaires et racines",
+        "Chambre pulpaire et cément"
+      ],
+      "correct_answer": 0,
+      "explanation": "Les structures internes des dents incluent la chambre pulpaire et les canaux radiculaires."
+    }
+  ]
+}
