@@ -1,0 +1,252 @@
+{
+  "fiches": [
+    {
+      "title": "Généralités en anatomie dentaire",
+      "difficulty": "easy",
+      "content": {
+        "summary": "L'anatomie dentaire étudie la forme et la configuration des dents, ainsi que leur disposition et leur orientation dans la cavité buccale. Les formes dentaires sont des formes biologiques présentant des surfaces courbes. Les objectifs de l'anatomie dentaire sont d'étudier la forme et la configuration interne et externe des dents.",
+        "key_concepts": [],
+        "important_points": [],
+        "schema_text": "TISSU      | CELLULAIRE | LOCALISATION | DURETÉ\nÉmail      | NON        | Couronne     | +++\nDentine    | OUI        | Partout      | ++\nCément     | OUI        | Racine       | +\nPulpe      | OUI        | Canal        | mou",
+        "exam_traps": [
+          "La forme des dents ne conditionne pas leurs fonctions",
+          "L'anatomie dentaire n'étudie que la forme externe des dents"
+        ],
+        "key_numbers": [
+          "32 : dents denture permanente adulte",
+          "20 : dents denture temporaire"
+        ],
+        "memory_trick": "ÉDCP dans l'ordre extérieur→intérieur : 'Étudie Dur Car Profond' (Émail→Dentine→Cément→Pulpe)"
+      }
+    },
+    {
+      "title": "Forme générale des dents",
+      "difficulty": "medium",
+      "content": {
+        "summary": "Toutes les dents sont composées de couronne, racine(s) et collet. La couronne est la partie visible en bouche, tandis que la racine est implantée dans l'os alvéolaire. Le collet sépare la couronne de la racine.",
+        "key_concepts": [],
+        "important_points": [],
+        "schema_text": "PARTIE      | DESCRIPTION      | LOCALISATION     \nCouronne   | Partie visible    | En bouche       \nRacine     | Partie implantée  | Os alvéolaire   \nCollet     | Sépare couronne et racine | Entre couronne et racine",
+        "exam_traps": [
+          "La racine est la partie visible en bouche",
+          "Le collet est la partie implantée dans l'os alvéolaire"
+        ],
+        "key_numbers": [],
+        "memory_trick": "CRC : 'Couronne Racine Collet' pour mémoriser les parties d'une dent"
+      }
+    },
+    {
+      "title": "Dentition et denture",
+      "difficulty": "medium",
+      "content": {
+        "summary": "La dentition est l'ensemble des phénomènes de développement des dents, tandis que la denture est l'ensemble des dents présentes en bouche à un instant donné. L'homme est diphyodonte, ce qui signifie qu'il a deux dentitions successives.",
+        "key_concepts": [],
+        "important_points": [],
+        "schema_text": "DENTITION   | DESCRIPTION      | EXEMPLE      \nPremière  | 32 dents de la 1ère lame dentaire | 8 incisives + 4 canines + 20 molaires \nSeconde  | 20 dents de la 2ème lame dentaire | 8 incisives + 4 canines + 8 prémolaires",
+        "exam_traps": [
+          "La dentition est l'ensemble des dents présentes en bouche",
+          "L'homme est monophyodonte"
+        ],
+        "key_numbers": [
+          "32 : dents de la 1ère dentition",
+          "20 : dents de la 2ème dentition"
+        ],
+        "memory_trick": "Dentition vs Denture: 'Denti-TION = ac-TION = dynamique' (phénomène). 'Dent-URE = photogra-PHURE = image fixe = statique'"
+      }
+    },
+    {
+      "title": "Classes de dents",
+      "difficulty": "hard",
+      "content": {
+        "summary": "Il existe quatre classes de dents : les incisives, les canines, les prémolaires et les molaires. Chaque classe a une fonction spécifique : les incisives coupent, les canines déchirent, les prémolaires et les molaires écrasent.",
+        "key_concepts": [],
+        "important_points": [],
+        "schema_text": "CLASSE     | FONCTION      | EXEMPLE      \nIncisives | Coupent      | 4 incisives par maxillaire \nCanines   | Déchirent    | 2 canines par maxillaire \nPrémolaires| Écrasent    | 4 prémolaires par maxillaire \nMolaires  | Écrasent    | 6 molaires par arcade",
+        "exam_traps": [
+          "Les prémolaires ne servent qu'à écraser",
+          "Les molaires ne servent qu'à couper"
+        ],
+        "key_numbers": [],
+        "memory_trick": "ICPM : 'Incisives Canines Prémolaires Molaires' pour mémoriser les classes de dents"
+      }
+    },
+    {
+      "title": "Nomenclature des faces dentaires",
+      "difficulty": "hard",
+      "content": {
+        "summary": "Chaque dent a cinq faces : la face vestibulaire, la face linguale ou palatine, la face mésiale, la face distale et la face occlusale ou le bord incisif.",
+        "key_concepts": [],
+        "important_points": [],
+        "schema_text": "FACE      | DESCRIPTION      | EXEMPLE      \nVestibulaire| Face visible lors du sourire | Face visible en bouche \nLinguale/Palatine| Face opposée à la langue/au palais | Face opposée à la langue ou au palais \nMésiale    | Face la plus proche du plan sagittal médian | Face la plus proche du plan médian \nDistale    | Face la plus distante du plan sagittal médian | Face la plus distante du plan médian \nOcclusale  | Face qui entre en contact avec l'arcade antagoniste | Face qui entre en contact avec l'arcade opposée",
+        "exam_traps": [
+          "La face vestibulaire est la face opposée à la langue",
+          "La face mésiale est la face la plus distante du plan sagittal médian"
+        ],
+        "key_numbers": [],
+        "memory_trick": "VLMOD : 'Vestibulaire Linguale Mésiale Occlusale Distale' pour mémoriser les faces dentaires"
+      }
+    },
+    {
+      "title": "Éléments constitutifs de la couronne",
+      "difficulty": "hard",
+      "content": {
+        "summary": "La couronne est composée de surfaces convexes et concaves. Les surfaces convexes comprennent les cuspides, les tubercules et les crêtes. Les surfaces concaves comprennent les sillons, les fosses et les fossettes.",
+        "key_concepts": [],
+        "important_points": [],
+        "schema_text": "ÉLÉMENT   | DESCRIPTION      | EXEMPLE      \nCuspides  | Élévation sur la face occlusale | Cuspide vestibulaire \nTubercules| Élévation sur une face autre que la face occlusale | Tubercule de Carabelli \nCrêtes    | Éminences allongées | Crête marginale \nSillons   | Dépressions longitudinales | Sillon central \nFosses    | Intersection de deux sillons | Fosse centrale \nFossettes | Dépressions sur les faces vestibulaires ou linguales | Fossette vestibulaire",
+        "exam_traps": [
+          "Les cuspides sont des surfaces concaves",
+          "Les sillons sont des surfaces convexes"
+        ],
+        "key_numbers": [],
+        "memory_trick": "CCTSF : 'Cuspides Crêtes Tubercules Sillons Fosses' pour mémoriser les éléments constitutifs de la couronne"
+      }
+    }
+  ],
+  "questions": [
+    {
+      "fiche_title": "Généralités en anatomie dentaire",
+      "question": "Quelle est la principale différence entre la dentition et la denture ?",
+      "options": [
+        "La dentition est l'ensemble des dents présentes en bouche à un instant donné, tandis que la denture est l'ensemble des phénomènes de développement des dents",
+        "La dentition est l'ensemble des phénomènes de développement des dents, tandis que la denture est l'ensemble des dents présentes en bouche à un instant donné",
+        "La dentition est l'ensemble des dents permanente, tandis que la denture est l'ensemble des dents temporaire",
+        "La dentition est l'ensemble des dents temporaire, tandis que la denture est l'ensemble des dents permanente"
+      ],
+      "correct_answer": 1,
+      "explanation": "La dentition est l'ensemble des phénomènes de développement des dents, tandis que la denture est l'ensemble des dents présentes en bouche à un instant donné."
+    },
+    {
+      "fiche_title": "Généralités en anatomie dentaire",
+      "question": "Quels sont les quatre tissus dentaires ?",
+      "options": [
+        "Émail, dentine, cément et os",
+        "Émail, dentine, cément et pulpe",
+        "Émail, dentine, os et pulpe",
+        "Émail, cément, os et pulpe"
+      ],
+      "correct_answer": 1,
+      "explanation": "Les quatre tissus dentaires sont l'émail, la dentine, le cément et la pulpe."
+    },
+    {
+      "fiche_title": "Forme générale des dents",
+      "question": "Quelle est la fonction du collet ?",
+      "options": [
+        "De séparer la couronne de la racine",
+        "De séparer la racine de l'os alvéolaire",
+        "De réunir la couronne et la racine",
+        "De séparer la dent de l'os alvéolaire"
+      ],
+      "correct_answer": 0,
+      "explanation": "Le collet sépare la couronne de la racine."
+    },
+    {
+      "fiche_title": "Forme générale des dents",
+      "question": "Quelles sont les trois parties d'une dent ?",
+      "options": [
+        "La couronne, la racine et le collet",
+        "La couronne, la racine et la pulpe",
+        "La couronne, le collet et la pulpe",
+        "La racine, le collet et la pulpe"
+      ],
+      "correct_answer": 0,
+      "explanation": "Les trois parties d'une dent sont la couronne, la racine et le collet."
+    },
+    {
+      "fiche_title": "Dentition et denture",
+      "question": "Qu'est-ce que la dentition ?",
+      "options": [
+        "L'ensemble des phénomènes de développement des dents",
+        "L'ensemble des dents présentes en bouche à un instant donné",
+        "L'ensemble des dents permanente",
+        "L'ensemble des dents temporaire"
+      ],
+      "correct_answer": 0,
+      "explanation": "La dentition est l'ensemble des phénomènes de développement des dents."
+    },
+    {
+      "fiche_title": "Dentition et denture",
+      "question": "Qu'est-ce que la denture ?",
+      "options": [
+        "L'ensemble des phénomènes de développement des dents",
+        "L'ensemble des dents présentes en bouche à un instant donné",
+        "L'ensemble des dents permanente",
+        "L'ensemble des dents temporaire"
+      ],
+      "correct_answer": 1,
+      "explanation": "La denture est l'ensemble des dents présentes en bouche à un instant donné."
+    },
+    {
+      "fiche_title": "Classes de dents",
+      "question": "Quelles sont les quatre classes de dents ?",
+      "options": [
+        "Les incisives, les canines, les prémolaires et les molaires",
+        "Les incisives, les canines, les molaires et les prémolaires",
+        "Les canines, les prémolaires, les molaires et les incisives",
+        "Les prémolaires, les molaires, les incisives et les canines"
+      ],
+      "correct_answer": 0,
+      "explanation": "Les quatre classes de dents sont les incisives, les canines, les prémolaires et les molaires."
+    },
+    {
+      "fiche_title": "Classes de dents",
+      "question": "Quelle est la fonction des incisives ?",
+      "options": [
+        "De couper",
+        "De déchirer",
+        "D'écraser",
+        "De mâcher"
+      ],
+      "correct_answer": 0,
+      "explanation": "La fonction des incisives est de couper."
+    },
+    {
+      "fiche_title": "Nomenclature des faces dentaires",
+      "question": "Quelles sont les cinq faces d'une dent ?",
+      "options": [
+        "La face vestibulaire, la face linguale, la face mésiale, la face distale et la face occlusale",
+        "La face vestibulaire, la face linguale, la face mésiale, la face distale et la face palatine",
+        "La face vestibulaire, la face linguale, la face mésiale, la face occlusale et la face palatine",
+        "La face vestibulaire, la face mésiale, la face distale, la face occlusale et la face palatine"
+      ],
+      "correct_answer": 0,
+      "explanation": "Les cinq faces d'une dent sont la face vestibulaire, la face linguale, la face mésiale, la face distale et la face occlusale."
+    },
+    {
+      "fiche_title": "Nomenclature des faces dentaires",
+      "question": "Quelle est la face opposée à la langue ou au palais ?",
+      "options": [
+        "La face vestibulaire",
+        "La face linguale ou palatine",
+        "La face mésiale",
+        "La face distale"
+      ],
+      "correct_answer": 1,
+      "explanation": "La face opposée à la langue ou au palais est la face linguale ou palatine."
+    },
+    {
+      "fiche_title": "Éléments constitutifs de la couronne",
+      "question": "Quels sont les éléments constitutifs de la couronne ?",
+      "options": [
+        "Les cuspides, les tubercules, les crêtes, les sillons, les fosses et les fossettes",
+        "Les cuspides, les tubercules, les crêtes, les sillons et les fosses",
+        "Les cuspides, les tubercules, les crêtes et les sillons",
+        "Les cuspides, les tubercules et les crêtes"
+      ],
+      "correct_answer": 0,
+      "explanation": "Les éléments constitutifs de la couronne sont les cuspides, les tubercules, les crêtes, les sillons, les fosses et les fossettes."
+    },
+    {
+      "fiche_title": "Éléments constitutifs de la couronne",
+      "question": "Qu'est-ce qu'une cuspide ?",
+      "options": [
+        "Une éminence allongée",
+        "Une dépression longitudinale",
+        "Une élévation sur la face occlusale",
+        "Une intersection de deux sillons"
+      ],
+      "correct_answer": 2,
+      "explanation": "Une cuspide est une élévation sur la face occlusale."
+    }
+  ]
+}

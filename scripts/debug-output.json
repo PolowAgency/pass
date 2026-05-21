@@ -1,0 +1,272 @@
+{
+  "fiches": [
+    {
+      "title": "Forme Générale des Dents",
+      "content": {
+        "summary": "La dent est composée de la couronne, visible en bouche, et de la racine, implantée dans l'os alvéolaire. L'émail est le tissu le plus dur de l'organisme.",
+        "key_concepts": [
+          {
+            "term": "Émail",
+            "definition": "tissu le PLUS DUR de l'organisme, ACELLULAIRE",
+            "example": "Émail de la couronne"
+          },
+          {
+            "term": "Dentine",
+            "definition": "tissu cellulaire, MOINS minéralisé que l'émail",
+            "example": "Dentine de la couronne"
+          }
+        ],
+        "important_points": [
+          "Couronne : partie visible en bouche",
+          "Racine(s) : partie implantée dans l'os alvéolaire"
+        ],
+        "schema_text": "",
+        "exam_traps": [
+          "Confondre émail et dentine"
+        ],
+        "key_numbers": [
+          "20 : dents temporaire"
+        ],
+        "memory_trick": "Émail est dur comme l'acier"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "title": "Dentition et Denture",
+      "content": {
+        "summary": "La dentition et la denture sont deux termes liés aux dents. La dentition est un terme dynamique qui fait référence au développement des dents, tandis que la denture est un terme statique qui fait référence aux dents présentes à un instant donné.",
+        "key_concepts": [
+          {
+            "term": "Dentition",
+            "definition": "terme DYNAMIQUE = phénomènes de développement",
+            "example": "Dentition temporaire"
+          },
+          {
+            "term": "Denture",
+            "definition": "terme STATIQUE = dents présentes à un instant T",
+            "example": "Denture permanente"
+          }
+        ],
+        "important_points": [
+          "3 dentures : temporaire, mixte, permanente"
+        ],
+        "schema_text": "",
+        "exam_traps": [
+          "Confondre dentition et denture"
+        ],
+        "key_numbers": [
+          "32 : dents permanentes"
+        ],
+        "memory_trick": "Dentition : Dynamique, Denture : Statique"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "title": "Classes de Dents",
+      "content": {
+        "summary": "Les dents sont classées en quatre catégories : incisives, canines, prémolaires et molaires. Chaque catégorie a une fonction spécifique.",
+        "key_concepts": [
+          {
+            "term": "Incisives",
+            "definition": "bord coupant, inciser/couper",
+            "example": "Incisive centrale"
+          },
+          {
+            "term": "Canines",
+            "definition": "dent la plus longue, déchiqueter",
+            "example": "Canine supérieure"
+          }
+        ],
+        "important_points": [
+          "Incisives, Canines, Prémolaires, Molaires"
+        ],
+        "schema_text": "",
+        "exam_traps": [
+          "Confondre les fonctions des dents"
+        ],
+        "key_numbers": [
+          "4 : classes de dents"
+        ],
+        "memory_trick": "ICPM : Incisives, Canines, Prémolaires, Molaires"
+      },
+      "difficulty": "easy"
+    },
+    {
+      "title": "Nomenclature FDI",
+      "content": {
+        "summary": "La nomenclature FDI est un système de classification des dents qui utilise des nombres pour identifier chaque dent.",
+        "key_concepts": [
+          {
+            "term": "Nomenclature FDI",
+            "definition": "système de classification des dents",
+            "example": "16 = 1ère molaire maxillaire droite"
+          }
+        ],
+        "important_points": [
+          "2 chiffres : 1er = quadrant, 2ème = position"
+        ],
+        "schema_text": "",
+        "exam_traps": [
+          "Erreur de numérotation"
+        ],
+        "key_numbers": [
+          "1 : quadrant maxillaire droit"
+        ],
+        "memory_trick": "1er chiffre : quadrant, 2ème chiffre : position"
+      },
+      "difficulty": "medium"
+    },
+    {
+      "title": "Éléments Constitutifs de la Couronne",
+      "content": {
+        "summary": "La couronne est composée de plusieurs éléments, dont les cuspides, les tubercules, les sillons et les fosses.",
+        "key_concepts": [
+          {
+            "term": "Cuspides",
+            "definition": "élévation face occlusale",
+            "example": "Cuspide de la molaire"
+          },
+          {
+            "term": "Tubercule de Carabelli",
+            "definition": "sur M1 maxillaire, FRÉQUENT mais PAS constant",
+            "example": "Tubercule de Carabelli"
+          }
+        ],
+        "important_points": [
+          "Cuspides, Tubercule de Carabelli, Sillons, Fosses"
+        ],
+        "schema_text": "",
+        "exam_traps": [
+          "Confondre les éléments de la couronne"
+        ],
+        "key_numbers": [
+          "5 : éléments constitutifs de la couronne"
+        ],
+        "memory_trick": "Cuspide, Tubercule, Sillon, Fosse"
+      },
+      "difficulty": "hard"
+    }
+  ],
+  "questions": [
+    {
+      "fiche_title": "Forme Générale des Dents",
+      "question": "Quel est le tissu le plus dur de l'organisme ?",
+      "options": [
+        "Émail",
+        "Dentine",
+        "Os",
+        "Cément"
+      ],
+      "correct_answer": 0,
+      "explanation": "L'émail est le tissu le plus dur de l'organisme, ACELLULAIRE"
+    },
+    {
+      "fiche_title": "Forme Générale des Dents",
+      "question": "Quelle est la partie implantée dans l'os alvéolaire ?",
+      "options": [
+        "Couronne",
+        "Racine",
+        "Émail",
+        "Dentine"
+      ],
+      "correct_answer": 1,
+      "explanation": "La racine est la partie implantée dans l'os alvéolaire"
+    },
+    {
+      "fiche_title": "Dentition et Denture",
+      "question": "Quel est le terme dynamique qui fait référence au développement des dents ?",
+      "options": [
+        "Dentition",
+        "Denture",
+        "Dent",
+        "Couronne"
+      ],
+      "correct_answer": 0,
+      "explanation": "La dentition est un terme dynamique qui fait référence au développement des dents"
+    },
+    {
+      "fiche_title": "Dentition et Denture",
+      "question": "Combien de dents y a-t-il dans la denture permanente ?",
+      "options": [
+        "20",
+        "24",
+        "28",
+        "32"
+      ],
+      "correct_answer": 3,
+      "explanation": "La denture permanente compte 32 dents"
+    },
+    {
+      "fiche_title": "Classes de Dents",
+      "question": "Quelle est la fonction des incisives ?",
+      "options": [
+        "Inciser/Couper",
+        "Déchiqueter",
+        "Triturer",
+        "Mastiquer"
+      ],
+      "correct_answer": 0,
+      "explanation": "Les incisives ont une fonction de coupe/incision"
+    },
+    {
+      "fiche_title": "Classes de Dents",
+      "question": "Quelle est la dent la plus longue ?",
+      "options": [
+        "Incisive",
+        "Canine",
+        "Prémolaire",
+        "Molaire"
+      ],
+      "correct_answer": 1,
+      "explanation": "La canine est la dent la plus longue"
+    },
+    {
+      "fiche_title": "Nomenclature FDI",
+      "question": "Qu'est-ce que la nomenclature FDI ?",
+      "options": [
+        "Système de classification des dents",
+        "Système de numérotation des dents",
+        "Système de description des dents",
+        "Système de traitement des dents"
+      ],
+      "correct_answer": 0,
+      "explanation": "La nomenclature FDI est un système de classification des dents"
+    },
+    {
+      "fiche_title": "Nomenclature FDI",
+      "question": "Qu'est-ce que le 1er chiffre de la nomenclature FDI ?",
+      "options": [
+        "Quadrant",
+        "Position",
+        "Dent",
+        "Racine"
+      ],
+      "correct_answer": 0,
+      "explanation": "Le 1er chiffre de la nomenclature FDI représente le quadrant"
+    },
+    {
+      "fiche_title": "Éléments Constitutifs de la Couronne",
+      "question": "Qu'est-ce qu'une cuspide ?",
+      "options": [
+        "Élévation face occlusale",
+        "Tubercule de Carabelli",
+        "Sillon",
+        "Fosse"
+      ],
+      "correct_answer": 0,
+      "explanation": "Une cuspide est une élévation face occlusale"
+    },
+    {
+      "fiche_title": "Éléments Constitutifs de la Couronne",
+      "question": "Qu'est-ce que le tubercule de Carabelli ?",
+      "options": [
+        "Cuspide",
+        "Tubercule de Carabelli",
+        "Sillon",
+        "Fosse"
+      ],
+      "correct_answer": 1,
+      "explanation": "Le tubercule de Carabelli est un tubercule sur la molaire maxillaire"
+    }
+  ]
+}

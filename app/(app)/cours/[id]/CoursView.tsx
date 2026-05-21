@@ -1,16 +1,19 @@
 'use client'
 
 import Link from 'next/link'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Cours, Fiche } from '@/types'
 import { FicheCard } from '@/components/FicheCard'
-import { motion } from 'framer-motion'
-import { ArrowLeft, Calendar, BookOpen, Brain, Target, Play, Zap } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ArrowLeft, Calendar, BookOpen, Brain, Target, Play, Zap, Trash2 } from 'lucide-react'
 import { format, differenceInDays, parseISO } from 'date-fns'
 import { fr } from 'date-fns/locale'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import PageBg from '@/components/PageBg'
 import CourseTutor from '@/components/CourseTutor'
+import toast from 'react-hot-toast'
 
 interface Props {
   cours: Cours
@@ -41,6 +44,22 @@ const spring = (delay = 0) => ({ type: 'spring' as const, damping: 20, stiffness
 export default function CoursView({ cours, fiches, sessions }: Props) {
   const { colors } = useTheme()
   const isMobile = useIsMobile()
+  const router = useRouter()
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+
+  async function deleteCours() {
+    setDeleting(true)
+    try {
+      const res = await fetch(`/api/cours/${cours.id}`, { method: 'DELETE' })
+      if (!res.ok) { toast.error('Erreur lors de la suppression'); return }
+      toast.success('Cours supprimé')
+      router.push('/dashboard')
+    } finally {
+      setDeleting(false)
+      setConfirmDelete(false)
+    }
+  }
   const memorized = fiches.filter(f => f.memorized).length
   const masteryPct = fiches.length > 0 ? Math.round((memorized / fiches.length) * 100) : 0
   const daysLeft = cours.exam_date ? differenceInDays(new Date(cours.exam_date + 'T00:00:00'), new Date()) : null
@@ -54,11 +73,35 @@ export default function CoursView({ cours, fiches, sessions }: Props) {
 
       <div style={{ maxWidth: 860, margin: '0 auto', position: 'relative', zIndex: 1 }}>
 
-        {/* Back */}
-        <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={spring(0)}>
-          <Link href="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: colors.muted, textDecoration: 'none', marginBottom: 24, fontFamily: 'DM Sans, sans-serif', transition: 'color 0.2s' }}>
+        {/* Back + Delete */}
+        <motion.div initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={spring(0)}
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+          <Link href="/dashboard" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13, color: colors.muted, textDecoration: 'none', fontFamily: 'DM Sans, sans-serif', transition: 'color 0.2s' }}>
             <ArrowLeft size={14} />Dashboard
           </Link>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <AnimatePresence>
+              {confirmDelete && (
+                <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: 12, color: '#f87171', fontFamily: 'Outfit, sans-serif', fontWeight: 700 }}>Supprimer ?</span>
+                  <button onClick={() => setConfirmDelete(false)}
+                    style={{ padding: '5px 12px', borderRadius: 99, fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 700, cursor: 'pointer', border: `1px solid ${colors.border}`, background: colors.surface2, color: colors.muted }}>
+                    Annuler
+                  </button>
+                  <motion.button whileTap={{ scale: 0.95 }} onClick={deleteCours} disabled={deleting}
+                    style={{ padding: '5px 14px', borderRadius: 99, fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 700, cursor: 'pointer', border: '1px solid rgba(248,113,113,0.5)', background: 'rgba(248,113,113,0.12)', color: '#f87171' }}>
+                    {deleting ? '...' : 'Confirmer'}
+                  </motion.button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <motion.button whileHover={{ background: 'rgba(248,113,113,0.1)' }} whileTap={{ scale: 0.92 }}
+              onClick={() => setConfirmDelete(c => !c)}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '6px 12px', borderRadius: 99, fontSize: 12, fontFamily: 'DM Sans, sans-serif', fontWeight: 600, cursor: 'pointer', border: `1px solid ${colors.border}`, background: colors.surface2, color: colors.muted, transition: 'all 0.15s' }}>
+              <Trash2 size={13} />Supprimer
+            </motion.button>
+          </div>
         </motion.div>
 
         {/* Exam urgency banner */}

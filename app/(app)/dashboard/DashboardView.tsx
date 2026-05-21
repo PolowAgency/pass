@@ -10,7 +10,6 @@ import { parseISO, differenceInDays } from 'date-fns'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { checkAndAwardBadges } from '@/lib/badges'
-import { createClient } from '@/lib/supabase/client'
 import StreakModal from '@/components/StreakModal'
 import BadgeUnlockModal from '@/components/BadgeUnlockModal'
 import OnboardingWizard from '@/components/OnboardingWizard'
@@ -115,9 +114,8 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
   async function deleteCours(id: string) {
     setDeletingId(id)
     try {
-      const supabase = createClient()
-      const { error } = await supabase.from('cours').delete().eq('id', id)
-      if (error) { toast.error('Erreur lors de la suppression'); return }
+      const res = await fetch(`/api/cours/${id}`, { method: 'DELETE' })
+      if (!res.ok) { toast.error('Erreur lors de la suppression'); return }
       toast.success('Cours supprimé')
       router.refresh()
     } finally {

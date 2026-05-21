@@ -3,19 +3,19 @@ import { Toaster } from 'react-hot-toast'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'PASS — Révise 10x plus vite avec l\'IA',
-  description: 'Upload ton cours, reçois des fiches de révision IA et un QCM en moins de 30 secondes. Un coach IA qui te parle vrai.',
+  title: 'PASS — Tu uploads ton cours. On s\'occupe du reste.',
+  description: 'Génère tes fiches de révision en 30 secondes grâce à l\'IA. QCM, coach personnel, design premium.',
   keywords: ['révision', 'fiches', 'IA', 'QCM', 'étudiant', 'exam', 'BAC', 'médecine', 'prépa'],
   openGraph: {
-    title: 'PASS — Révise 10x plus vite avec l\'IA',
-    description: 'Des fiches de révision générées par IA en 30 secondes.',
+    title: 'PASS',
+    description: 'Tes fiches de révision générées par IA en 30 secondes.',
     type: 'website',
     siteName: 'PASS',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'PASS — Révise 10x plus vite avec l\'IA',
-    description: 'Des fiches de révision générées par IA en 30 secondes.',
+    title: 'PASS',
+    description: 'Tes fiches de révision générées par IA en 30 secondes.',
   },
   themeColor: '#C8FF00',
   manifest: '/manifest.webmanifest',
@@ -25,12 +25,9 @@ export const metadata: Metadata = {
     title: 'PASS',
   },
   icons: {
-    icon: [
-      { url: '/favicon-32.png', sizes: '32x32', type: 'image/png' },
-      { url: '/icon-192.png',   sizes: '192x192', type: 'image/png' },
-    ],
+    icon: '/icon.svg',
     apple: '/apple-touch-icon.png',
-    shortcut: '/icon-192.png',
+    shortcut: '/icon.svg',
   },
 }
 

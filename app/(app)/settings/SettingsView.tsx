@@ -11,9 +11,9 @@ import Link from 'next/link'
 import { BADGES, BADGE_MAP, RARITY_COLORS } from '@/lib/badges'
 
 const PLANS = [
-  { id: 'free',    name: 'Gratuit', price: '0€',  period: '/mois', emoji: '🆓', features: ['3 uploads par mois', '5 messages coach/jour', 'Fiches illimitées', 'QCM illimité'], cta: 'Plan actuel', accent: '#7B7B96' },
-  { id: 'premium', name: 'Premium', price: '9€',  period: '/mois', emoji: '⚡', features: ['Uploads illimités', 'Coach IA sans limite', 'Export PDF des fiches', 'Priorité génération'], cta: 'Passer à Premium', accent: '#C8FF00' },
-  { id: 'exam',    name: 'Exam',    price: '19€', period: '/mois', emoji: '🎯', features: ['Tout Premium', 'Planning IA J-14', 'Analyses de progression', 'Support prioritaire'], cta: 'Mode Exam', accent: '#FF3CAC' },
+  { id: 'free',    name: 'Gratuit',  price: '0€',     period: '',      emoji: '🆓', features: ['3 cours au total', '5 messages coach/jour', 'Fiches illimitées', 'QCM illimité'], cta: 'Plan actuel', accent: '#7B7B96' },
+  { id: 'premium', name: 'Premium', price: '9,99€', period: '/mois', emoji: '⚡', features: ['Uploads illimités', 'Coach IA sans limite', 'Export PDF des fiches', 'Priorité génération'], cta: 'Passer à Premium', accent: '#C8FF00' },
+  { id: 'exam',    name: 'Exam',    price: '19,99€', period: '/30j', emoji: '🎯', features: ['Tout Premium', 'Planning IA J-14', 'Analyses de progression', 'Support prioritaire'], cta: 'Mode Exam', accent: '#FF3CAC' },
 ]
 
 function NotificationPrefs({ profile, colors }: { profile: Profile | null; colors: ReturnType<typeof useTheme>['colors'] }) {
@@ -127,7 +127,7 @@ export default function SettingsView({ profile, success }: { profile: Profile | 
               Plan {profile?.plan === 'free' ? 'Gratuit' : profile?.plan === 'premium' ? 'Premium ⚡' : 'Exam 🎯'}
             </p>
             <p style={{ fontSize: 13, color: 'rgba(240,240,248,0.6)', marginTop: 2, fontFamily: 'DM Sans, sans-serif' }}>
-              {profile?.plan === 'free' ? `${Math.max(0, 3 - (profile?.uploads_count ?? 0))} upload(s) restant(s) ce mois` : 'Uploads illimités · Coach IA sans limite'}
+              {profile?.plan === 'free' ? `${Math.max(0, 3 - (profile?.uploads_count ?? 0))} cours restant(s) au total` : 'Uploads illimités · Coach IA sans limite'}
             </p>
           </div>
         </motion.div>
@@ -211,7 +211,7 @@ export default function SettingsView({ profile, success }: { profile: Profile | 
           {[
             { label: 'Prénom', value: profile?.full_name ?? '—' },
             { label: 'Email', value: profile?.email ?? '—' },
-            { label: 'Uploads ce mois', value: String(profile?.uploads_count ?? 0) },
+            { label: 'Cours uploadés', value: String(profile?.uploads_count ?? 0) },
             { label: 'Streak', value: `${profile?.streak_days ?? 0} jours 🔥` },
           ].map((row, i, arr) => (
             <div key={row.label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 0', borderBottom: i < arr.length - 1 ? `1px solid ${colors.border}` : 'none' }}>
