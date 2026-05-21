@@ -16,7 +16,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   // Redirect to onboarding if not completed
   // /onboarding is outside (app) so no loop
-  if (profile && !profile.onboarding_completed) {
+  // Redirect uniquement si explicitement false (pas null — les anciens comptes ont null)
+  if (profile && profile.onboarding_completed === false) {
     redirect('/onboarding')
   }
 
