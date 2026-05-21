@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import Groq from 'groq-sdk'
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
+import { getPlan, PLANS } from '@/lib/plans'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY! }) }
 
@@ -229,8 +230,27 @@ export async function POST(request: NextRequest) {
 
   try {
     const { data: profile } = await supabase.from('profiles').select('plan, uploads_count').eq('id', user.id).single()
-    if (profile?.plan === 'free' && (profile?.uploads_count ?? 0) >= 3) {
-      return NextResponse.json({ error: 'Limite atteinte. Passe à Premium !' }, { status: 403 })
+    const plan = getPlan(profile?.plan)
+    const limits = PLANS[plan]
+
+    // Limite total uploads (plan gratuit)
+    if (limits.max_uploads_total !== Infinity && (profile?.uploads_count ?? 0) >= limits.max_uploads_total) {
+      return NextResponse.json({ error: 'Limite atteinte. Passe à Premium pour générer plus de cours !', upgrade: true }, { status: 403 })
+    }
+
+    // Rate limit horaire via xp_events (réutilise le log existant)
+    const oneHourAgo = new Date(Date.now() - 3_600_000).toISOString()
+    const { count: recentGens } = await supabase
+      .from('xp_events')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('source_type', 'cours')
+      .gte('created_at', oneHourAgo)
+    if ((recentGens ?? 0) >= limits.max_generations_per_hour) {
+      return NextResponse.json({
+        error: `Trop de générations. Limite : ${limits.max_generations_per_hour}/heure. Réessaie dans quelques minutes.`,
+        retry_after: 3600,
+      }, { status: 429 })
     }
 
     const formData = await request.formData()

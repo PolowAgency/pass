@@ -58,16 +58,40 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
     }
     const supabase = createClient()
     const newCount = fiche.review_count + 1
-    const intervals = [1, 3, 7, 14, 30]
-    const daysAhead = memorized ? intervals[Math.min(newCount - 1, intervals.length - 1)] : 1
+
+    // SM-2 : qualité 5 = bien su, 2 = à revoir
+    const quality = memorized ? 5 : 2
+    const ef = fiche.ease_factor ?? 2.5
+    const reps = (fiche as { sm2_repetitions?: number }).sm2_repetitions ?? 0
+    const prevInterval = (fiche as { interval_days?: number }).interval_days ?? 1
+
+    let newEF = Math.max(1.3, ef + 0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02))
+    let newReps: number
+    let newInterval: number
+
+    if (quality < 3) {
+      newReps = 0
+      newInterval = 1
+    } else if (reps === 0) {
+      newReps = 1; newInterval = 1
+    } else if (reps === 1) {
+      newReps = 2; newInterval = 6
+    } else {
+      newReps = reps + 1
+      newInterval = Math.round(prevInterval * newEF)
+    }
+
     const nextReview = new Date()
-    nextReview.setDate(nextReview.getDate() + daysAhead)
+    nextReview.setDate(nextReview.getDate() + newInterval)
 
     await supabase.from('fiches').update({
-      memorized: memorized && newCount >= 3,
+      memorized: newReps >= 3 && quality >= 3,
       review_count: newCount,
       last_reviewed: new Date().toISOString(),
       next_review: nextReview.toISOString().split('T')[0],
+      ease_factor: newEF,
+      interval_days: newInterval,
+      sm2_repetitions: newReps,
     }).eq('id', fiche.id)
 
     const newReviewed = reviewed + 1

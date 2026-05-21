@@ -14,6 +14,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const { data: profile } = await supabase
     .from('profiles').select('*').eq('id', user.id).single()
 
+  // Redirect to onboarding if not completed
+  // /onboarding is outside (app) so no loop
+  if (profile && !profile.onboarding_completed) {
+    redirect('/onboarding')
+  }
+
   return (
     <ThemeProvider>
       <div style={{ display: 'flex', minHeight: '100vh' }}>

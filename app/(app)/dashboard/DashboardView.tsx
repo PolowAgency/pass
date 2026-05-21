@@ -141,16 +141,16 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
     if (!done && cours.length === 0) setTimeout(() => setShowOnboarding(true), 600)
   }, [])
 
-  // Coffre quotidien — s'ouvre 1 fois par jour après l'onboarding
+  // Coffre quotidien — vérifié côté serveur
   useEffect(() => {
-    const today = new Date().toDateString()
-    const key = `pass-daily-reward-${today}`
-    if (localStorage.getItem(key)) return
     const hasOnboarded = localStorage.getItem('pass-onboarded')
-    if (!hasOnboarded && cours.length === 0) return // attendre l'onboarding
-    localStorage.setItem(key, '1') // marquer avant le timer pour éviter la race condition
-    const timer = setTimeout(() => setShowDailyReward(true), 1400)
-    return () => clearTimeout(timer)
+    if (!hasOnboarded && cours.length === 0) return
+    fetch('/api/chest').then(r => r.json()).then(data => {
+      if (data.available) {
+        const timer = setTimeout(() => setShowDailyReward(true), 1400)
+        return () => clearTimeout(timer)
+      }
+    }).catch(() => {})
   }, [])
 
   useEffect(() => {
