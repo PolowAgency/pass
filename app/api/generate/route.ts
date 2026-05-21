@@ -410,7 +410,7 @@ export async function POST(request: NextRequest) {
     }))
 
     const { data: insertedFiches, error: ficheError } = await supabase.from('fiches').insert(ficheInserts).select()
-    if (ficheError) throw ficheError
+    if (ficheError) throw new Error(`DB fiches: ${ficheError.message} (code: ${ficheError.code})`)
 
     // Map titre → id pour les questions
     const ficheMap = new Map(insertedFiches?.map(f => [f.title, f.id]) ?? [])
@@ -437,8 +437,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true, fiches_count: ficheInserts.length })
 
   } catch (err) {
-    console.error('Generate error:', err)
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('Generate error:', msg, err)
     if (coursId) { try { await supabase.from('cours').update({ status: 'error' }).eq('id', coursId) } catch {} }
-    return NextResponse.json({ error: 'Erreur serveur, réessaie dans quelques instants' }, { status: 500 })
+    return NextResponse.json({ error: `Erreur: ${msg}` }, { status: 500 })
   }
 }
