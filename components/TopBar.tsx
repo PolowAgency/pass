@@ -155,7 +155,10 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
       {/* Bouton aide / relancer tour */}
       <motion.button
         whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }}
-        onClick={() => { localStorage.removeItem('pass-tour-done'); window.location.reload() }}
+        onClick={() => {
+          localStorage.removeItem('pass-tour-done')
+          window.dispatchEvent(new CustomEvent('pass:start-tour'))
+        }}
         title="Revoir le tutoriel"
         style={{ width: 34, height: 34, borderRadius: 10, background: colors.surface2, border: `2px solid ${colors.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 0 ${colors.border2}`, fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 13, color: colors.muted, flexShrink: 0 }}>
         ?

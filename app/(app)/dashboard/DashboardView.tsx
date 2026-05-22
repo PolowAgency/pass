@@ -164,8 +164,11 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
 
   useEffect(() => {
     const tourDone = localStorage.getItem('pass-tour-done')
-    const onboarded = localStorage.getItem('pass-onboarded')
-    if (!tourDone && onboarded) setTimeout(() => setShowTour(true), 1200)
+    if (!tourDone) setTimeout(() => setShowTour(true), 1200)
+
+    const handler = () => setShowTour(true)
+    window.addEventListener('pass:start-tour', handler)
+    return () => window.removeEventListener('pass:start-tour', handler)
   }, [])
 
   // Coffre quotidien — vérifié côté serveur
