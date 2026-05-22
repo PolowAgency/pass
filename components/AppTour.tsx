@@ -82,12 +82,21 @@ function getRect(selector: string): Rect | null {
   return { top: r.top, left: r.left, width: r.width, height: r.height }
 }
 
+const SIDEBAR_W = 240 // lg:ml-60 = 240px
+
 function tooltipStyle(rect: Rect | null, position: Step['position'], isMobile: boolean): React.CSSProperties {
   const GAP = 16
-  const W = isMobile ? Math.min(280, window.innerWidth - 32) : 300
+  const W = isMobile ? Math.min(300, window.innerWidth - 32) : 320
+  // Sur desktop la zone de contenu commence après la sidebar
+  const contentLeft = isMobile ? 0 : SIDEBAR_W
+  const contentW = window.innerWidth - contentLeft
+  const centerLeft = contentLeft + contentW / 2
 
   if (!rect || position === 'center') {
-    return { position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: W, zIndex: 10001 }
+    return {
+      position: 'fixed', top: '50%', width: W, zIndex: 10001,
+      left: centerLeft, transform: 'translate(-50%, -50%)',
+    }
   }
 
   const base: React.CSSProperties = { position: 'fixed', width: W, zIndex: 10001 }
@@ -170,29 +179,58 @@ export default function AppTour({ onDone }: Props) {
         style={{ position: 'fixed', inset: 0, zIndex: 9999, pointerEvents: 'none' }}
       >
         {/* Dark overlay */}
-        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.72)', pointerEvents: 'all' }} onClick={finish} />
+        <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.75)', pointerEvents: 'all' }} onClick={finish} />
 
-        {/* Spotlight — découpe le fond autour de l'élément ciblé */}
+        {/* Spotlight + glow sur l'élément ciblé */}
         <AnimatePresence mode="wait">
           {highlightRect && (
-            <motion.div
-              key={current.target}
-              initial={{ opacity: 0, scale: 0.92 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ type: 'spring', damping: 22, stiffness: 260 }}
-              style={{
-                position: 'absolute',
-                top:    highlightRect.top,
-                left:   highlightRect.left,
-                width:  highlightRect.width,
-                height: highlightRect.height,
-                borderRadius: 18,
-                boxShadow: `0 0 0 9999px rgba(0,0,0,0.72), 0 0 0 3px #C8FF00`,
-                pointerEvents: 'none',
-                zIndex: 10000,
-              }}
-            />
+            <>
+              {/* Découpe du fond — crée la fenêtre transparente */}
+              <motion.div
+                key={`cut-${current.target}`}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ type: 'spring', damping: 20, stiffness: 280 }}
+                style={{
+                  position: 'fixed',
+                  top:    highlightRect.top,
+                  left:   highlightRect.left,
+                  width:  highlightRect.width,
+                  height: highlightRect.height,
+                  borderRadius: 16,
+                  boxShadow: `0 0 0 9999px rgba(0,0,0,0.75)`,
+                  pointerEvents: 'none',
+                  zIndex: 10000,
+                }}
+              />
+              {/* Glow pulsant — illumine l'élément */}
+              <motion.div
+                key={`glow-${current.target}`}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{
+                  opacity: [0, 1, 1],
+                  scale: 1,
+                  boxShadow: [
+                    '0 0 0 2px #C8FF00, 0 0 0px 0px rgba(200,255,0,0)',
+                    '0 0 0 2px #C8FF00, 0 0 32px 8px rgba(200,255,0,0.35)',
+                    '0 0 0 2px #C8FF00, 0 0 16px 4px rgba(200,255,0,0.2)',
+                  ],
+                }}
+                transition={{ duration: 0.4, delay: 0.15, boxShadow: { repeat: Infinity, duration: 1.4, repeatType: 'reverse', delay: 0.4 } }}
+                style={{
+                  position: 'fixed',
+                  top:    highlightRect.top,
+                  left:   highlightRect.left,
+                  width:  highlightRect.width,
+                  height: highlightRect.height,
+                  borderRadius: 16,
+                  background: 'rgba(200,255,0,0.06)',
+                  pointerEvents: 'none',
+                  zIndex: 10001,
+                }}
+              />
+            </>
           )}
         </AnimatePresence>
 
