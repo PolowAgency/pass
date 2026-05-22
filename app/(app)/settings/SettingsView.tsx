@@ -77,6 +77,11 @@ export default function SettingsView({ profile, success }: { profile: Profile | 
   const isMobile = useIsMobile()
   const [loading, setLoading] = useState<string | null>(null)
   const [earnedBadgeIds, setEarnedBadgeIds] = useState<Set<string>>(new Set())
+  const [referralCode, setReferralCode] = useState<string | null>(null)
+  const [referralCount, setReferralCount] = useState(0)
+  const [referralInput, setReferralInput] = useState('')
+  const [referralLoading, setReferralLoading] = useState(false)
+  const [referralDone, setReferralDone] = useState(false)
 
   useEffect(() => { if (success) toast.success('Abonnement activé ! 🎉') }, [success])
 
@@ -84,7 +89,24 @@ export default function SettingsView({ profile, success }: { profile: Profile | 
     fetch('/api/badges').then(r => r.json()).then(({ badges }) => {
       setEarnedBadgeIds(new Set((badges ?? []).map((b: { badge_id: string }) => b.badge_id)))
     }).catch(() => {})
+    fetch('/api/referral').then(r => r.json()).then(d => {
+      setReferralCode(d.code)
+      setReferralCount(d.count ?? 0)
+      setReferralDone(d.has_been_referred)
+    }).catch(() => {})
   }, [])
+
+  async function claimReferral() {
+    if (!referralInput.trim() || referralLoading) return
+    setReferralLoading(true)
+    try {
+      const res = await fetch('/api/referral', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code: referralInput.trim() }) })
+      const data = await res.json()
+      if (data.success) { toast.success('Code validé ! +30 💎 offerts 🎉'); setReferralDone(true) }
+      else toast.error(data.message ?? 'Code invalide.')
+    } catch { toast.error('Erreur réseau.') }
+    setReferralLoading(false)
+  }
 
   const stripeConfigured = !!(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
 
@@ -114,6 +136,60 @@ export default function SettingsView({ profile, success }: { profile: Profile | 
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
           <p style={{ fontSize: 11, color: colors.muted, fontFamily: 'Outfit, sans-serif', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '1px' }}>Compte</p>
           <h1 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 26 : 32, color: colors.text, letterSpacing: '-0.5px', marginBottom: isMobile ? 20 : 28 }}>Paramètres</h1>
+        </motion.div>
+
+        {/* Referral */}
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 }}
+          style={{ ...card({ padding: isMobile ? '18px 16px' : '22px 24px', marginBottom: 20 }) }}>
+          <h3 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 16, color: colors.text, marginBottom: 4 }}>💎 Parrainage</h3>
+          <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: colors.muted, marginBottom: 16 }}>
+            Invite un ami → vous recevez chacun <strong style={{ color: '#60A5FA' }}>+30 gems</strong>
+          </p>
+
+          {/* Ton code */}
+          {referralCode && (
+            <div style={{ marginBottom: 16 }}>
+              <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 12, color: colors.muted, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>
+                Ton code · {referralCount} ami{referralCount !== 1 ? 's' : ''} parrainé{referralCount !== 1 ? 's' : ''}
+              </p>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <div style={{ flex: 1, padding: '12px 16px', borderRadius: 12, background: 'rgba(96,165,250,0.1)', border: '2px solid rgba(96,165,250,0.3)', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 20, color: '#60A5FA', letterSpacing: '3px', textAlign: 'center' }}>
+                  {referralCode}
+                </div>
+                <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                  onClick={() => { navigator.clipboard.writeText(referralCode); toast.success('Code copié !') }}
+                  style={{ padding: '12px 16px', borderRadius: 12, background: colors.surface2, border: `2px solid ${colors.border}`, cursor: 'pointer', fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: colors.text, boxShadow: `0 3px 0 ${colors.border2}` }}>
+                  Copier
+                </motion.button>
+              </div>
+            </div>
+          )}
+
+          {/* Utiliser un code */}
+          {!referralDone ? (
+            <div>
+              <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 12, color: colors.muted, textTransform: 'uppercase', letterSpacing: '1px', marginBottom: 8 }}>
+                Entrer un code d&apos;ami
+              </p>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input
+                  value={referralInput}
+                  onChange={e => setReferralInput(e.target.value.toUpperCase())}
+                  placeholder="EX: A1B2C3D4"
+                  maxLength={8}
+                  style={{ flex: 1, padding: '12px 14px', borderRadius: 12, background: colors.surface2, border: `2px solid ${colors.border}`, color: colors.text, fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 16, letterSpacing: '2px', outline: 'none' }} />
+                <motion.button whileHover={{ y: -2 }} whileTap={{ y: 2 }}
+                  onClick={claimReferral} disabled={referralLoading || !referralInput.trim()}
+                  style={{ padding: '12px 18px', borderRadius: 12, background: referralInput.trim() ? '#60A5FA' : colors.surface2, border: 'none', cursor: referralInput.trim() ? 'pointer' : 'not-allowed', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14, color: referralInput.trim() ? '#fff' : colors.muted, boxShadow: referralInput.trim() ? '0 4px 0 #1D4ED8' : `0 3px 0 ${colors.border2}` }}>
+                  {referralLoading ? '…' : 'Valider'}
+                </motion.button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ padding: '10px 14px', borderRadius: 12, background: 'rgba(34,197,94,0.08)', border: '1px solid #22c55e', fontFamily: 'DM Sans, sans-serif', fontSize: 13, color: '#22c55e' }}>
+              ✓ Code de parrainage utilisé — merci !
+            </div>
+          )}
         </motion.div>
 
         {/* Current plan */}

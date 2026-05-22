@@ -10,7 +10,7 @@ import { ArrowLeft, Share2 } from 'lucide-react'
 interface StatsData {
   heatmap: Record<string, number>
   scores: { date: string; pct: number }[]
-  profile: { xp?: number; level?: number; streak_days?: number; uploads_count?: number }
+  profile: { xp?: number; level?: number; streak_days?: number; max_streak_days?: number; uploads_count?: number }
 }
 
 function Heatmap({ data, colors }: { data: Record<string, number>; colors: ReturnType<typeof useTheme>['colors'] }) {
@@ -235,7 +235,7 @@ export default function StatsPage() {
             {[
               { label: 'Niveau actuel', val: `Niveau ${data?.profile?.level ?? 1}`, emoji: '⭐' },
               { label: 'XP total all-time', val: `${data?.profile?.xp ?? 0} XP`, emoji: '⚡' },
-              { label: 'Streak record', val: `${data?.profile?.streak_days ?? 0} jours`, emoji: '🔥' },
+              { label: 'Streak record', val: `${data?.profile?.max_streak_days ?? data?.profile?.streak_days ?? 0} jours`, emoji: '🔥' },
               { label: 'Cours uploadés', val: `${data?.profile?.uploads_count ?? 0}`, emoji: '📚' },
               { label: 'QCM complétés', val: `${data?.scores?.length ?? 0}`, emoji: '🎯' },
             ].map((row, i, arr) => (

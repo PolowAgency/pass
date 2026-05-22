@@ -1,7 +1,10 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useEffect } from 'react'
 import { useTheme } from '@/contexts/ThemeContext'
+import { playSound } from '@/lib/sounds'
+import { celebrate } from '@/lib/confetti'
 
 interface Props { streak: number; onClose: () => void }
 
@@ -19,6 +22,11 @@ function getMessage(streak: number): string {
 
 export default function StreakModal({ streak, onClose }: Props) {
   const { colors } = useTheme()
+
+  useEffect(() => {
+    playSound('streak')
+    celebrate('streak')
+  }, [])
 
   return (
     <motion.div

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect } from 'react'
-import { Sun, Moon } from 'lucide-react'
+import { Sun, Moon, Heart } from 'lucide-react'
 import { Profile } from '@/types'
 import { getXpForNextLevel, getLevelTitle } from '@/lib/xp'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -15,6 +15,10 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
   const streak = profile?.streak_days ?? 0
   const xp = profile?.xp ?? 0
   const level = profile?.level ?? 1
+  const hearts = profile?.hearts ?? 5
+  const maxHearts = profile?.max_hearts ?? 5
+  const gems = profile?.gems ?? 0
+  const isPremium = profile?.plan === 'premium' || profile?.plan === 'exam'
   const { pct } = getXpForNextLevel(xp)
 
   const [xpFlash, setXpFlash] = useState(false)
@@ -36,6 +40,29 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
           <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 14 : 15, color: streak > 0 ? colors.streakText : colors.muted }}>{streak}</span>
         </motion.div>
       </Link>
+
+      {/* Hearts */}
+      <motion.div
+        style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 3 : 5, padding: isMobile ? '5px 9px' : '6px 13px', borderRadius: 99, background: hearts > 0 ? 'rgba(248,113,113,0.1)' : colors.surface2, border: `2px solid ${hearts > 0 ? 'rgba(248,113,113,0.4)' : colors.border}`, boxShadow: hearts > 0 ? '0 2px 0 #CC2200' : `0 2px 0 ${colors.border2}`, flexShrink: 0, cursor: 'default' }}>
+        {isPremium ? (
+          <>
+            <Heart size={isMobile ? 13 : 14} fill="#f87171" color="#f87171" />
+            <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 13 : 14, color: '#f87171' }}>∞</span>
+          </>
+        ) : isMobile ? (
+          <>
+            <Heart size={13} fill={hearts > 0 ? '#f87171' : 'transparent'} color="#f87171" />
+            <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 13, color: hearts > 0 ? '#f87171' : colors.muted }}>{hearts}</span>
+          </>
+        ) : (
+          Array.from({ length: maxHearts }).map((_, i) => (
+            <Heart key={i} size={14}
+              fill={i < hearts ? '#f87171' : 'transparent'}
+              color={i < hearts ? '#f87171' : colors.muted}
+              strokeWidth={i < hearts ? 0 : 1.5} />
+          ))
+        )}
+      </motion.div>
 
       {/* XP bar — masquée sur très petits écrans, visible sinon */}
       <div style={{ flex: 1, maxWidth: isMobile ? 'none' : 340, margin: '0 auto', overflow: 'hidden' }}>
@@ -76,6 +103,15 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
           )}
         </div>
       </div>
+
+      {/* Gems — link vers /shop sur toutes tailles */}
+      <Link href="/shop" style={{ textDecoration: 'none', flexShrink: 0 }}>
+        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+          style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 3 : 5, padding: isMobile ? '5px 9px' : '6px 13px', borderRadius: 99, background: 'rgba(96,165,250,0.1)', border: '2px solid rgba(96,165,250,0.3)', boxShadow: '0 2px 0 #1D4ED8', cursor: 'pointer' }}>
+          <span style={{ fontSize: isMobile ? 13 : 14, lineHeight: 1 }}>💎</span>
+          <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 13 : 14, color: '#60A5FA' }}>{gems}</span>
+        </motion.div>
+      </Link>
 
       {/* Theme toggle */}
       <motion.button onClick={toggle} whileHover={{ rotate: 20 }} whileTap={{ scale: 0.9 }}

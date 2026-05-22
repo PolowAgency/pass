@@ -5,7 +5,9 @@ import { createClient } from '@/lib/supabase/client'
 import { Fiche } from '@/types'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle2, X, Lightbulb, Tag, Zap, ZoomIn } from 'lucide-react'
-import { awardXP, XP_REWARDS } from '@/lib/xp'
+import { awardXP, awardGems, XP_REWARDS } from '@/lib/xp'
+import { playSound } from '@/lib/sounds'
+import { celebrate } from '@/lib/confetti'
 import { useTheme } from '@/contexts/ThemeContext'
 import Link from 'next/link'
 import LevelUpModal from '@/components/LevelUpModal'
@@ -99,14 +101,19 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
     await supabase.rpc('update_streak_on_activity', { p_user_id: userId })
 
     if (memorized) {
+      playSound('correct')
       const result = await awardXP('memorize_fiche')
       if (result) {
         setXpGained(x => x + XP_REWARDS.memorize_fiche)
         setXpPopup(XP_REWARDS.memorize_fiche)
         setTimeout(() => setXpPopup(null), 1400)
-        if (result.leveledUp && result.level) setTimeout(() => setLevelUp(result.level), 600)
-        checkAndAwardBadges().then(b => { if (b.length > 0) setNewBadges(b) })
+        if (result.leveledUp && result.level) {
+          setTimeout(() => { setLevelUp(result.level); playSound('levelup'); celebrate('levelup') }, 600)
+        }
+        checkAndAwardBadges().then(b => { if (b.length > 0) { setNewBadges(b); playSound('badge'); celebrate('badge') } })
       }
+    } else {
+      playSound('wrong')
     }
 
     setReviewed(newReviewed)
@@ -115,6 +122,7 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
     const totalReviewed = (profile?.daily_reviewed ?? 0) + newReviewed
     const goal = profile?.daily_goal ?? 5
     if (totalReviewed >= goal && totalReviewed - 1 < goal) {
+      awardGems('daily_goal')
       setTimeout(() => { setGoalXP(xpGained + (memorized ? XP_REWARDS.memorize_fiche : 0)); setShowGoalModal(true) }, 700)
       return
     }

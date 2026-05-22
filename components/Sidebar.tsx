@@ -10,19 +10,22 @@ import { useTheme } from '@/contexts/ThemeContext'
 import toast from 'react-hot-toast'
 
 const NAV = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', emoji: '🏠' },
-  { href: '/review',    icon: BookOpen,        label: 'Révision',  emoji: '🧠' },
-  { href: '/upload',    icon: Upload,          label: 'Upload',    emoji: '📤' },
-  { href: '/coach',     icon: MessageCircle,   label: 'Coach IA',  emoji: '🤖' },
-  { href: '/stats',     icon: BarChart2,       label: 'Stats',     emoji: '📊' },
+  { href: '/dashboard',   icon: LayoutDashboard, label: 'Dashboard',   emoji: '🏠' },
+  { href: '/review',      icon: BookOpen,        label: 'Révision',    emoji: '🧠' },
+  { href: '/upload',      icon: Upload,          label: 'Upload',      emoji: '📤' },
+  { href: '/coach',       icon: MessageCircle,   label: 'Coach IA',    emoji: '🤖' },
+  { href: '/leaderboard', icon: BarChart2,       label: 'Classement',  emoji: '🏆' },
+  { href: '/stats',       icon: BarChart2,       label: 'Stats',       emoji: '📊' },
+  { href: '/badges',      icon: BarChart2,       label: 'Badges',      emoji: '🏅' },
+  { href: '/shop',        icon: BarChart2,       label: 'Shop',        emoji: '💎' },
 ]
 
 const MOBILE_NAV = [
-  { href: '/dashboard', label: 'Home',    emoji: '🏠' },
-  { href: '/review',    label: 'Réviser', emoji: '🧠' },
-  { href: '/upload',    label: 'Upload',  emoji: '📤' },
-  { href: '/coach',     label: 'Coach',   emoji: '🤖' },
-  { href: '/stats',     label: 'Stats',   emoji: '📊' },
+  { href: '/dashboard',   label: 'Home',    emoji: '🏠' },
+  { href: '/review',      label: 'Réviser', emoji: '🧠' },
+  { href: '/leaderboard', label: 'Top',     emoji: '🏆' },
+  { href: '/coach',       label: 'Coach',   emoji: '🤖' },
+  { href: '/shop',        label: 'Shop',    emoji: '💎' },
 ]
 
 export default function Sidebar({ profile }: { profile: Profile | null }) {

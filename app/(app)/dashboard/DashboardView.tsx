@@ -91,7 +91,7 @@ const SUBJECT: Record<string, { emoji: string; color: string }> = {
 
 interface Props {
   profile: Profile | null
-  cours: Array<{ id: string; title: string; subject: string | null; status: string; prep_score: number; exam_date: string | null; created_at: string; fiches: { count: number }[] }>
+  cours: Array<{ id: string; title: string; subject: string | null; status: string; prep_score: number; exam_date: string | null; created_at: string; fiches: { id: string; memorized: boolean }[] }>
   sessions: Array<{ score: number | null; total_questions: number | null; completed_at: string; cours_id: string }>
   dueCount: number
   weakFiches: Array<{ title: string; review_count: number; cours_id: string }>
@@ -130,7 +130,7 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
   const dailyGoal = profile?.daily_goal ?? 5
   const dailyReviewed = profile?.daily_reviewed ?? 0
   const goalPct = Math.min(100, Math.round((dailyReviewed / dailyGoal) * 100))
-  const totalFiches = cours.reduce((a, c) => a + (c.fiches?.[0]?.count ?? 0), 0)
+  const totalFiches = cours.reduce((a, c) => a + (c.fiches?.length ?? 0), 0)
   const avgScore = sessions.length > 0
     ? Math.round(sessions.reduce((a, s) => a + ((s.score ?? 0) / (s.total_questions ?? 1)) * 100, 0) / sessions.length)
     : null
@@ -486,11 +486,14 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
                       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                         {group.items.map(c => {
                           const i = globalIdx++
-                          const ficheCount = c.fiches?.[0]?.count ?? 0
+                          const ficheCount = c.fiches?.length ?? 0
+                          const memorizedCount = c.fiches?.filter(f => f.memorized).length ?? 0
+                          const masteryPct = ficheCount > 0 ? Math.round((memorizedCount / ficheCount) * 100) : 0
                           const daysLeft = c.exam_date ? differenceInDays(new Date(c.exam_date + 'T00:00:00'), new Date()) : null
                           const urgent = daysLeft !== null && daysLeft >= 0 && daysLeft <= 7
                           const subj = SUBJECT[c.subject ?? ''] ?? SUBJECT.default
                           const scoreColor = c.prep_score >= 80 ? '#22c55e' : c.prep_score >= 50 ? colors.limeDark : c.prep_score >= 30 ? '#FB923C' : '#f87171'
+                          const masteryColor = masteryPct >= 80 ? '#22c55e' : masteryPct >= 50 ? colors.limeDark : masteryPct >= 30 ? '#FB923C' : '#f87171'
                           const isConfirming = confirmDeleteId === c.id
                           const isDeleting = deletingId === c.id
 
@@ -531,10 +534,14 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
                                         <span style={{ fontSize: 10, color: colors.muted }}>{ficheCount} fiche{ficheCount > 1 ? 's' : ''}</span>
                                         {urgent && daysLeft !== null && <span style={{ fontSize: 10, color: '#f87171', fontWeight: 700 }}>⚠️ J-{daysLeft}</span>}
                                       </div>
-                                      <div style={{ height: 5, background: colors.surface2, borderRadius: 99, overflow: 'hidden' }}>
-                                        <motion.div initial={{ width: 0 }} animate={{ width: `${c.prep_score}%` }}
-                                          transition={{ duration: 0.8, delay: 0.08 * i + 0.5, ease: [0.22, 1, 0.36, 1] }}
-                                          style={{ height: '100%', borderRadius: 99, background: scoreColor }} />
+                                      {/* Barre de maîtrise (fiches mémorisées) */}
+                                      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                        <div style={{ flex: 1, height: 5, background: colors.surface2, borderRadius: 99, overflow: 'hidden' }}>
+                                          <motion.div initial={{ width: 0 }} animate={{ width: `${masteryPct}%` }}
+                                            transition={{ duration: 0.8, delay: 0.08 * i + 0.5, ease: [0.22, 1, 0.36, 1] }}
+                                            style={{ height: '100%', borderRadius: 99, background: masteryColor }} />
+                                        </div>
+                                        <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 10, color: masteryColor, flexShrink: 0 }}>{masteryPct}%</span>
                                       </div>
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>

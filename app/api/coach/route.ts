@@ -67,10 +67,10 @@ export async function POST(request: NextRequest) {
 
     // Fetch rich context: memorized vs not memorized fiches, recent QCM scores
     const [{ data: cours }, { data: fichesMem }, { data: fichesNotMem }, { data: sessions }] = await Promise.all([
-      supabase.from('cours').select('title, subject, exam_date, prep_score').eq('user_id', user.id).order('exam_date', { ascending: true }).limit(8),
-      supabase.from('fiches').select('title, cours_id').eq('user_id', user.id).eq('memorized', true).limit(20),
-      supabase.from('fiches').select('title, review_count').eq('user_id', user.id).eq('memorized', false).order('review_count', { ascending: false }).limit(10),
-      supabase.from('qcm_sessions').select('score, total_questions, completed_at, cours_id').eq('user_id', user.id).order('completed_at', { ascending: false }).limit(5),
+      supabase.from('cours').select('title, subject, exam_date, prep_score').eq('user_id', user.id).order('exam_date', { ascending: true }).limit(5),
+      supabase.from('fiches').select('title').eq('user_id', user.id).eq('memorized', true).limit(5),
+      supabase.from('fiches').select('title').eq('user_id', user.id).eq('memorized', false).order('review_count', { ascending: false }).limit(5),
+      supabase.from('qcm_sessions').select('score, total_questions').eq('user_id', user.id).order('completed_at', { ascending: false }).limit(3),
     ])
 
     const memorizedCount = fichesMem?.length ?? 0
@@ -96,7 +96,7 @@ NOTE : Utilise ces données pour donner des conseils ULTRA-PERSONNALISÉS. Si le
     // Fetch conversation history
     const { data: history } = await supabase
       .from('coach_messages').select('role, content')
-      .eq('user_id', user.id).order('created_at', { ascending: false }).limit(12)
+      .eq('user_id', user.id).order('created_at', { ascending: false }).limit(6)
 
     const messages = (history ?? []).reverse().map(m => ({ role: m.role as 'user' | 'assistant', content: m.content }))
 

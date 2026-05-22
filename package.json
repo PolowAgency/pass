@@ -9,12 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.96.0",
+    "@sentry/nextjs": "^10.53.1",
     "@stripe/stripe-js": "^9.5.0",
     "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.106.0",
     "@types/pdf-parse": "^1.1.5",
     "canvas": "^3.2.3",
+    "canvas-confetti": "^1.9.3",
     "clsx": "^2.1.1",
     "date-fns": "^4.2.1",
     "framer-motion": "^12.39.0",
@@ -35,6 +36,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

@@ -33,6 +33,31 @@ export function getXpForNextLevel(xp: number): { current: number; needed: number
   return { current: xp - from, needed: to - from, pct: Math.round(((xp - from) / (to - from)) * 100) }
 }
 
+export const GEMS_REWARDS = {
+  complete_qcm_perfect: 5,
+  complete_qcm_good:    3,
+  complete_qcm_ok:      1,
+  daily_goal:           3,
+  upload_cours:         2,
+} as const
+
+export async function awardGems(
+  action: string,
+  sourceId?: string,
+): Promise<{ gems: number; earned: number } | null> {
+  try {
+    const res = await fetch('/api/gems', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action, source_id: sourceId }),
+    })
+    if (!res.ok) return null
+    return res.json()
+  } catch {
+    return null
+  }
+}
+
 // Le client envoie UNIQUEMENT l'action — le serveur calcule le montant (sécurité)
 export async function awardXP(
   action: string,

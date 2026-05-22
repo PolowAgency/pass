@@ -12,7 +12,7 @@ export default async function CoursPage({ params }: { params: Promise<{ id: stri
 
   const { data: cours } = await supabase
     .from('cours')
-    .select('*')
+    .select('id, user_id, title, subject, exam_date, file_url, file_type, raw_content, status, prep_score, created_at')
     .eq('id', id)
     .eq('user_id', user.id)
     .single()
@@ -21,7 +21,7 @@ export default async function CoursPage({ params }: { params: Promise<{ id: stri
 
   const { data: fiches } = await supabase
     .from('fiches')
-    .select('*')
+    .select('id, cours_id, user_id, title, content, key_concepts, difficulty, memorized, review_count, last_reviewed, next_review, ease_factor, created_at, image_url')
     .eq('cours_id', id)
     .order('created_at', { ascending: true })
 

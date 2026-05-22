@@ -9,7 +9,7 @@ export default async function CoachPage() {
 
   const { data: history } = await supabase
     .from('coach_messages')
-    .select('*')
+    .select('id, user_id, role, content, created_at')
     .eq('user_id', user.id)
     .order('created_at', { ascending: true })
     .limit(50)

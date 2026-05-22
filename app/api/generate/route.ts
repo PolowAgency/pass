@@ -355,15 +355,23 @@ export async function POST(request: NextRequest) {
       const response = await getGroq().chat.completions.create({
         model: 'llama-3.3-70b-versatile',
         max_tokens: 8000,
-        response_format: { type: 'json_object' }, // force JSON valide
+        response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: buildSystemPrompt(lang, imageCount) },
-          { role: 'user', content: `Voici le contenu du cours :${visualContext}\n\n${rawContent.slice(0, 38000)}` },
+          { role: 'user', content: `Voici le contenu du cours :${visualContext}\n\n${rawContent.slice(0, 15000)}` },
         ],
       })
       rawJson = response.choices[0]?.message?.content ?? ''
     } catch (err: unknown) {
       clearTimeout(timeout)
+      const status = (err as { status?: number })?.status
+      if (status === 429) {
+        await supabase.from('cours').update({ status: 'error' }).eq('id', coursId)
+        return NextResponse.json({
+          error: 'Limite de génération atteinte pour aujourd\'hui. Réessaie dans quelques heures.',
+          retry_after: 3600,
+        }, { status: 429 })
+      }
       if ((err as Error)?.name === 'AbortError') {
         await supabase.from('cours').update({ status: 'error' }).eq('id', coursId)
         return NextResponse.json({ error: 'Génération trop longue, réessaie avec un cours plus court' }, { status: 408 })

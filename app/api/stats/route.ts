@@ -22,7 +22,7 @@ export async function GET() {
     ] = await Promise.all([
       supabase.from('xp_events').select('amount, created_at').eq('user_id', user.id).gte('created_at', since90).order('created_at', { ascending: true }),
       supabase.from('qcm_sessions').select('score, total_questions, completed_at').eq('user_id', user.id).order('completed_at', { ascending: true }).limit(30),
-      supabase.from('profiles').select('xp, level, streak_days, uploads_count').eq('id', user.id).single(),
+      supabase.from('profiles').select('xp, level, streak_days, max_streak_days, uploads_count').eq('id', user.id).single(),
     ])
     const fichesBySubject = null
 

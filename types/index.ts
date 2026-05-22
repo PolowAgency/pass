@@ -18,6 +18,12 @@ export interface Profile {
   email_notifications: boolean | null
   daily_reminder_time: string | null
   notification_streak_alert: boolean | null
+  hearts: number
+  max_hearts: number
+  last_heart_refill_at: string | null
+  gems: number
+  weekly_xp: number
+  max_streak_days: number
   created_at: string
 }
 
