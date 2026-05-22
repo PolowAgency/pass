@@ -5,26 +5,29 @@ import { cookies } from 'next/headers'
 
 function getGroq() { return new Groq({ apiKey: process.env.GROQ_API_KEY! }) }
 
-const SYSTEM = `Tu es le Coach de PASS. Tes règles absolues :
+const SYSTEM = `Tu es le Coach IA de PASS — à la fois coach de motivation ET tuteur pédagogique.
 
 TON : Direct, sans bullshit, parfois provocateur mais jamais méchant. Toujours tutoyer.
-FORMAT : Max 3 phrases. Pas de liste sauf si explicitement demandé.
-ACTION : Chaque réponse finit par UNE action concrète et précise.
-  Exemples : "Fais le QCM maintenant.", "Révise 3 fiches ce soir.", "Upload ton cours là."
 
-CONTEXTE EXAMEN :
-- Si exam_date existe et < 21 jours → mode prépa intensive
-- Si exam_date < 7 jours → mode urgence totale, pas de fioritures
-- Adapte tes conseils à la matière et au niveau de l'étudiant : lycéen, prépas, licence, master, médecine, droit, ingénieur — les méthodes de révision varient
+MODE TUTEUR (si des fiches de cours sont fournies dans le contexte) :
+- L'étudiant pose une question sur un concept → explique-le clairement, avec des exemples concrets
+- Structure tes explications : définition simple → mécanisme → exemple → piège d'exam
+- Utilise le contenu exact des fiches (résumé, concepts, points clés) pour répondre avec précision
+- Si plusieurs fiches sont pertinentes, fais les liens entre elles
+- Termine par une question de vérification ou un conseil d'exam précis
 
-COMPORTEMENT :
+MODE COACH (questions de motivation/organisation) :
+- Format : max 3 phrases + UNE action concrète ("Fais le QCM maintenant.", "Révise 3 fiches ce soir.")
 - Streak faible → rappelle-le avec humour mais clairement
 - Scores QCM mauvais → nomme le sujet précis à retravailler
-- Étudiant procrastine → "T'as Netflix ouvert là, non ?", "Dans 3 semaines c'est l'exam, go."
-- Étudiant stressé → valide en 1 phrase, puis recentre sur ce qui est actionnable
-- Félicite rapidement puis donne la prochaine étape
+- Étudiant stressé → valide en 1 phrase, puis recentre sur l'actionnable
 
-INTERDIT : réponses vagues, "c'est bien", "continue comme ça", explications de cours.`
+CONTEXTE EXAMEN :
+- Si exam_date < 21 jours → mode prépa intensive
+- Si exam_date < 7 jours → mode urgence totale
+- Adapte à la filière : médecine, droit, prépas, licence, ingénieur — les méthodes varient
+
+INTERDIT : réponses vagues, "c'est bien", "continue comme ça".`
 
 const FREE_LIMIT = 5
 
@@ -65,17 +68,61 @@ export async function POST(request: NextRequest) {
       }).eq('id', user.id)
     }
 
-    // Fetch rich context: memorized vs not memorized fiches, recent QCM scores
-    const [{ data: cours }, { data: fichesMem }, { data: fichesNotMem }, { data: sessions }] = await Promise.all([
+    // Fetch rich context: memorized vs not memorized fiches, recent QCM scores + fiche search
+    const searchTerms = message
+      .replace(/[?!.,;:]/g, ' ')
+      .split(/\s+/)
+      .filter(w => w.length > 3)
+      .slice(0, 5)
+
+    const orFilter = searchTerms.length > 0
+      ? searchTerms.map(t => `title.ilike.%${t}%`).join(',')
+      : null
+
+    const [{ data: cours }, { data: fichesMem }, { data: fichesNotMem }, { data: sessions }, { data: matchingFiches }] = await Promise.all([
       supabase.from('cours').select('title, subject, exam_date, prep_score').eq('user_id', user.id).order('exam_date', { ascending: true }).limit(5),
       supabase.from('fiches').select('title').eq('user_id', user.id).eq('memorized', true).limit(5),
       supabase.from('fiches').select('title').eq('user_id', user.id).eq('memorized', false).order('review_count', { ascending: false }).limit(5),
       supabase.from('qcm_sessions').select('score, total_questions').eq('user_id', user.id).order('completed_at', { ascending: false }).limit(3),
+      orFilter
+        ? supabase.from('fiches').select('title, content, cours:cours_id(title, subject)').eq('user_id', user.id).or(orFilter).limit(3)
+        : Promise.resolve({ data: [] }),
     ])
 
     const memorizedCount = fichesMem?.length ?? 0
     const weakFiches = fichesNotMem?.slice(0, 5).map(f => f.title).join(', ') || 'aucune identifiée'
     const recentScores = sessions?.map(s => `${Math.round((s.score / (s.total_questions || 1)) * 100)}%`).join(', ') || 'aucun'
+
+    // Build fiche content block if relevant fiches found
+    type FicheRow = { title: string; content: Record<string, unknown>; cours?: { title: string; subject: string } | null }
+    const fichesFound = (matchingFiches ?? []) as FicheRow[]
+    let ficheContentBlock = ''
+    if (fichesFound.length > 0) {
+      ficheContentBlock = '\n\n--- FICHES DE COURS PERTINENTES (utilise-les pour expliquer) ---\n'
+      ficheContentBlock += fichesFound.map(f => {
+        const c = f.content as {
+          summary?: string
+          key_concepts?: { term: string; definition: string; example?: string }[]
+          important_points?: string[]
+          exam_traps?: string[]
+          key_numbers?: string[]
+          memory_trick?: string
+        }
+        const cours = (f.cours as { title?: string } | null)?.title ?? ''
+        const concepts = (c.key_concepts ?? []).map(k => `  • ${k.term} : ${k.definition}${k.example ? ` (ex: ${k.example})` : ''}`).join('\n')
+        const points = (c.important_points ?? []).map(p => `  • ${p}`).join('\n')
+        const traps = (c.exam_traps ?? []).map(t => `  ⚠️ ${t}`).join('\n')
+        return [
+          `📚 ${f.title}${cours ? ` (${cours})` : ''}`,
+          `Résumé : ${c.summary ?? ''}`,
+          concepts ? `Concepts :\n${concepts}` : '',
+          points ? `Points clés :\n${points}` : '',
+          traps ? `Pièges d'exam :\n${traps}` : '',
+          c.memory_trick ? `Mnémotechnique : ${c.memory_trick}` : '',
+        ].filter(Boolean).join('\n')
+      }).join('\n\n')
+      ficheContentBlock += '\n---'
+    }
 
     const contextBlock = `
 DONNÉES RÉELLES DE L'ÉTUDIANT :
@@ -84,11 +131,9 @@ DONNÉES RÉELLES DE L'ÉTUDIANT :
 - Niveau : ${profile?.level ?? 1} | XP total : ${profile?.xp ?? 0}
 - Objectif quotidien : ${profile?.daily_reviewed ?? 0}/${profile?.daily_goal ?? 5} fiches révisées aujourd'hui
 - Fiches mémorisées : ${memorizedCount} au total
-- Fiches difficiles (pas encore mémorisées après révision) : ${weakFiches}
+- Fiches difficiles : ${weakFiches}
 - Scores QCM récents : ${recentScores}
-- Cours : ${cours?.map(c => `"${c.title}" — prep score ${c.prep_score}/100${c.exam_date ? `, exam le ${c.exam_date}` : ''}`).join(' | ') || 'aucun cours'}
-
-NOTE : Utilise ces données pour donner des conseils ULTRA-PERSONNALISÉS. Si les scores QCM sont faibles, dis-le. Si certaines fiches reviennent souvent en révision, c'est un point faible à travailler.`
+- Cours : ${cours?.map(c => `"${c.title}" — prep score ${c.prep_score}/100${c.exam_date ? `, exam le ${c.exam_date}` : ''}`).join(' | ') || 'aucun cours'}${ficheContentBlock}`
 
     // Save user message
     await supabase.from('coach_messages').insert({ user_id: user.id, role: 'user', content: message })

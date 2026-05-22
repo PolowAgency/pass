@@ -9,9 +9,9 @@ import { awardXP, XP_REWARDS } from '@/lib/xp'
 import toast from 'react-hot-toast'
 
 const SUGGESTIONS = [
-  { icon: Target,    text: 'Comment je me situe pour mes examens ?' },
+  { icon: BookOpen,  text: 'Explique-moi un concept que je comprends pas' },
+  { icon: Target,    text: 'Quel cours réviser en priorité ?' },
   { icon: Brain,     text: 'Donne-moi une méthode de révision efficace' },
-  { icon: BookOpen,  text: 'Quel cours réviser en priorité ?' },
   { icon: Sparkles,  text: 'Motive-moi, j\'ai la flemme' },
 ]
 
@@ -75,7 +75,7 @@ export default function CoachView({ initialHistory, profile }: Props) {
           <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, color: colors.text }}>Coach PASS</p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', display: 'inline-block', boxShadow: '0 0 6px #22c55e' }} />
-            <span style={{ fontSize: 11, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>En ligne · sans filtre</span>
+            <span style={{ fontSize: 11, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>En ligne · coach + tuteur IA</span>
           </div>
         </div>
         {(profile?.streak_days ?? 0) > 0 && (
@@ -97,7 +97,7 @@ export default function CoachView({ initialHistory, profile }: Props) {
               <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 20, color: colors.text, marginBottom: 6 }}>
                 Yo {profile?.full_name?.split(' ')[0] ?? ''} ! C&apos;est ton coach 🎯
               </p>
-              <p style={{ fontSize: 14, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>Pose-moi tes questions, je t&apos;aide à cartonner.</p>
+              <p style={{ fontSize: 14, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>Pose-moi n&apos;importe quelle question — sur ton cours, ta méthode, ou pour te motiver.</p>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, width: '100%', maxWidth: 480 }}>
               {SUGGESTIONS.map((s, i) => (
