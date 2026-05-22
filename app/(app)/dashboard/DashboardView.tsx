@@ -463,10 +463,12 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
                 const subjectOrder = [...new Set(filteredCours.map(c => c.subject ?? ''))]
                   .sort((a, b) => a.localeCompare(b, 'fr'))
                 for (const s of subjectOrder) {
+                  const items = filteredCours.filter(c => (c.subject ?? '') === s)
+                  if (items.length === 0) continue
                   groups.push({
                     key: s || '__none__',
                     subj: s ? (SUBJECT[s] ?? SUBJECT.default) : null,
-                    items: filteredCours.filter(c => (c.subject ?? '') === s),
+                    items,
                   })
                 }
               } else {

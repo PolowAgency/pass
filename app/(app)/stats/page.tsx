@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import Link from 'next/link'
-import { ArrowLeft, Share2 } from 'lucide-react'
+import { ArrowLeft, Share2, Play } from 'lucide-react'
 
 interface StatsData {
   heatmap: Record<string, number>
@@ -77,8 +77,17 @@ function Heatmap({ data, colors }: { data: Record<string, number>; colors: Retur
 
 function ScoreChart({ scores, colors }: { scores: { date: string; pct: number }[]; colors: ReturnType<typeof useTheme>['colors'] }) {
   if (scores.length < 2) return (
-    <div style={{ textAlign: 'center', padding: '32px 0', color: colors.muted, fontSize: 13, fontFamily: 'DM Sans, sans-serif' }}>
-      Fais au moins 2 QCM pour voir ta progression 📊
+    <div style={{ textAlign: 'center', padding: '32px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+      <div style={{ fontSize: 40 }}>📊</div>
+      <p style={{ color: colors.muted, fontSize: 14, fontFamily: 'DM Sans, sans-serif', lineHeight: 1.5 }}>
+        Fais au moins 2 QCM pour voir ta progression
+      </p>
+      <Link href="/dashboard" style={{ textDecoration: 'none' }}>
+        <motion.button whileHover={{ y: -2 }} whileTap={{ y: 2 }}
+          style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: colors.lime, color: colors.limeText, border: 'none', borderRadius: 14, padding: '12px 22px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 14, cursor: 'pointer', boxShadow: `0 4px 0 ${colors.limeDark}` }}>
+          <Play size={14} fill={colors.limeText} />Lancer un QCM
+        </motion.button>
+      </Link>
     </div>
   )
 

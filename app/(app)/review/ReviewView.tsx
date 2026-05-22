@@ -9,6 +9,7 @@ import { awardXP, awardGems, XP_REWARDS } from '@/lib/xp'
 import { playSound } from '@/lib/sounds'
 import { celebrate } from '@/lib/confetti'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useIsMobile } from '@/hooks/useIsMobile'
 import Link from 'next/link'
 import LevelUpModal from '@/components/LevelUpModal'
 import GoalModal from '@/components/GoalModal'
@@ -34,6 +35,7 @@ const MOTIVATIONS = [
 
 export default function ReviewView({ fiches, profile, userId }: Props) {
   const { colors } = useTheme()
+  const isMobile = useIsMobile()
   const [queue] = useState(fiches)
   const [current, setCurrent] = useState(0)
   const [flipped, setFlipped] = useState(false)
@@ -140,14 +142,21 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
         <p style={{ fontSize: 11, fontWeight: 700, color: '#C8FF00', fontFamily: 'Outfit, sans-serif', textTransform: 'uppercase', letterSpacing: '2px', marginBottom: 12 }}>Tout à jour</p>
         <h2 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 28, color: colors.text, marginBottom: 12, letterSpacing: '-0.5px' }}>Rien à réviser !</h2>
         <p style={{ fontSize: 15, color: colors.muted, fontFamily: 'DM Sans, sans-serif', marginBottom: 32, lineHeight: 1.6 }}>
-          Toutes tes fiches sont à jour. Reviens demain ou ajoute un cours.
+          Toutes tes fiches sont à jour. Reviens demain ou ajoute un nouveau cours.
         </p>
-        <Link href="/dashboard">
-          <motion.button whileHover={{ y: -2, boxShadow: '0 0 28px rgba(200,255,0,0.3), 0 6px 0 #4A7400' }} whileTap={{ y: 3 }}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#C8FF00', color: '#0C0C10', border: 'none', borderRadius: 100, padding: '14px 28px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, cursor: 'pointer', boxShadow: '0 4px 0 #4A7400', transition: 'all 0.2s' }}>
-            Retour au dashboard
-          </motion.button>
-        </Link>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
+          <Link href="/upload">
+            <motion.button whileHover={{ y: -2, boxShadow: '0 0 28px rgba(200,255,0,0.3), 0 6px 0 #4A7400' }} whileTap={{ y: 3 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 8, background: '#C8FF00', color: '#0C0C10', border: 'none', borderRadius: 100, padding: '14px 28px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, cursor: 'pointer', boxShadow: '0 4px 0 #4A7400', transition: 'all 0.2s' }}>
+              ➕ Ajouter un cours
+            </motion.button>
+          </Link>
+          <Link href="/dashboard">
+            <button style={{ background: 'none', border: 'none', color: colors.muted, fontFamily: 'DM Sans, sans-serif', fontSize: 14, cursor: 'pointer', padding: '8px 16px' }}>
+              Retour au dashboard
+            </button>
+          </Link>
+        </div>
       </motion.div>
     </div>
   )
@@ -209,12 +218,19 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
     <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: '24px 20px', transition: 'background 0.25s', position: 'relative' }}>
       <PageBg />
 
-      {/* Modals */}
+      {/* Modals — séquencés : levelUp → goalModal → badges */}
       <AnimatePresence>
-        {levelUp && <LevelUpModal level={levelUp} onClose={() => { setLevelUp(null); if (current + 1 >= total) setDone(true); else setCurrent(i => i + 1) }} />}
+        {levelUp && <LevelUpModal level={levelUp} onClose={() => {
+          setLevelUp(null)
+          // Si le goal modal est aussi en attente, c'est lui qui avancera la carte
+          if (!showGoalModal) {
+            if (current + 1 >= total) setDone(true)
+            else setCurrent(i => i + 1)
+          }
+        }} />}
       </AnimatePresence>
       <AnimatePresence>
-        {showGoalModal && <GoalModal reviewed={(profile?.daily_reviewed ?? 0) + reviewed} goal={profile?.daily_goal ?? 5} xpGained={goalXP} onClose={() => { setShowGoalModal(false); if (current + 1 >= total) setDone(true); else setCurrent(i => i + 1) }} />}
+        {showGoalModal && !levelUp && <GoalModal reviewed={(profile?.daily_reviewed ?? 0) + reviewed} goal={profile?.daily_goal ?? 5} xpGained={goalXP} onClose={() => { setShowGoalModal(false); if (current + 1 >= total) setDone(true); else setCurrent(i => i + 1) }} />}
       </AnimatePresence>
       <AnimatePresence>
         {newBadges.length > 0 && !levelUp && !showGoalModal && <BadgeUnlockModal badges={newBadges} onClose={() => setNewBadges([])} />}
@@ -298,7 +314,7 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
                 {fiche?.content?.summary}
               </p>
 
-              {!flipped && (
+              {!flipped && isMobile && (
                 <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}
                   style={{ marginTop: 22, textAlign: 'center', fontSize: 12, color: 'rgba(240,240,248,0.3)', fontFamily: 'DM Sans, sans-serif' }}>
                   Tape pour voir les détails 👆

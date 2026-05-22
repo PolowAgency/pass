@@ -6,6 +6,7 @@ import { Question } from '@/types'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Trophy, RotateCcw, BookOpen, ZoomIn, X, Heart } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import { awardXP, awardGems, XP_REWARDS, GEMS_REWARDS } from '@/lib/xp'
@@ -41,6 +42,7 @@ interface Props {
 export default function QcmView({ cours, questions, userId, totalAvailable, initialHearts, initialGems, plan, mode = 'rapide' }: Props) {
   const { colors } = useTheme()
   const isMobile = useIsMobile()
+  const router = useRouter()
   const isPremium = plan === 'premium' || plan === 'exam'
 
   const [phase, setPhase] = useState<'quiz' | 'result' | 'dead'>('quiz')
@@ -284,14 +286,14 @@ export default function QcmView({ cours, questions, userId, totalAvailable, init
             {/* Encore 10 questions — CTA principal en mode rapide */}
             <motion.button initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
               whileHover={{ y: -3 }} whileTap={{ y: 4 }}
-              onClick={() => window.location.href = `/qcm/${cours.id}?mode=rapide`}
+              onClick={() => router.push(`/qcm/${cours.id}?mode=rapide`)}
               style={{ background: colors.lime, color: colors.limeText, border: 'none', borderRadius: 16, padding: isMobile ? '14px' : '15px', fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 15, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: `0 5px 0 ${colors.limeDark}` }}>
               🔥 {mode === 'rapide' ? 'Encore 10 questions' : 'Recommencer'}
             </motion.button>
             {mode === 'complet' && (
               <motion.button initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.75 }}
                 whileHover={{ y: -3 }} whileTap={{ y: 4 }}
-                onClick={() => window.location.href = `/qcm/${cours.id}?mode=rapide`}
+                onClick={() => router.push(`/qcm/${cours.id}?mode=rapide`)}
                 style={{ background: colors.surface2, color: colors.text, border: `2px solid ${colors.border}`, borderRadius: 16, padding: isMobile ? '12px' : '13px', fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: `0 4px 0 ${colors.border2}` }}>
                 <RotateCcw size={14} />Session rapide (10 questions)
               </motion.button>
