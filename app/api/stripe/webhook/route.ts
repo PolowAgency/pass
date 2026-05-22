@@ -35,6 +35,19 @@ export async function POST(request: NextRequest) {
     case 'checkout.session.completed': {
       const session = event.data.object as Stripe.Checkout.Session
       const userId = session.metadata?.user_id
+      // Achat de gems (one-time)
+      if (session.metadata?.gems && userId) {
+        const amount = parseInt(session.metadata.gems)
+        if (amount > 0) {
+          await supabaseAdmin.rpc('award_gems', {
+            p_user_id: userId,
+            p_amount: amount,
+            p_reason: `purchase_${session.metadata.pack ?? 'gems'}`,
+          })
+        }
+        break
+      }
+      // Abonnement
       const plan = session.metadata?.plan ?? 'premium'
       if (userId) await supabaseAdmin.from('profiles').update({ plan }).eq('id', userId)
       break

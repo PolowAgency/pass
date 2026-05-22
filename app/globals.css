@@ -39,7 +39,7 @@ html {
 body {
   background-color: #0C0C10;
   color: #F0F0F8;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Outfit', sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   min-height: 100dvh; /* Dynamic viewport height — évite le bug barre URL iOS */
