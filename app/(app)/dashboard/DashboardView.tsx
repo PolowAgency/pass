@@ -514,17 +514,29 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
                               {/* Confirmation suppression */}
                               <AnimatePresence>
                                 {isConfirming && (
-                                  <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-                                    style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 20, background: 'rgba(15,10,25,0.92)', border: '1px solid rgba(248,113,113,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, padding: '0 16px' }}>
-                                    <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, color: '#f87171', flex: 1 }}>Supprimer ce cours ?</p>
-                                    <button onClick={() => setConfirmDeleteId(null)}
-                                      style={{ padding: '6px 14px', borderRadius: 99, fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 700, cursor: 'pointer', border: `1px solid ${colors.border}`, background: colors.surface2, color: colors.muted }}>
-                                      Annuler
-                                    </button>
-                                    <button onClick={() => deleteCours(c.id)} disabled={isDeleting}
-                                      style={{ padding: '6px 14px', borderRadius: 99, fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 700, cursor: 'pointer', border: '1px solid rgba(248,113,113,0.5)', background: 'rgba(248,113,113,0.15)', color: '#f87171' }}>
-                                      {isDeleting ? '...' : 'Supprimer'}
-                                    </button>
+                                  <motion.div
+                                    initial={{ opacity: 0, scale: 0.96, y: 4 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.96, y: 4 }}
+                                    transition={{ type: 'spring', damping: 22, stiffness: 320 }}
+                                    style={{ position: 'absolute', inset: 0, zIndex: 10, borderRadius: 20, background: colors.surface, border: '2px solid #f87171', boxShadow: '0 4px 0 #CC2200', display: 'flex', alignItems: 'center', gap: 12, padding: '0 14px' }}>
+                                    <span style={{ fontSize: 20, flexShrink: 0 }}>🗑️</span>
+                                    <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: isMobile ? 12 : 13, color: colors.text, flex: 1, lineHeight: 1.3 }}>
+                                      Supprimer<br />
+                                      <span style={{ color: '#f87171', fontSize: isMobile ? 11 : 12, fontWeight: 600 }}>Action irréversible</span>
+                                    </p>
+                                    <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                                      <motion.button whileHover={{ y: -1 }} whileTap={{ y: 1 }}
+                                        onClick={() => setConfirmDeleteId(null)}
+                                        style={{ padding: isMobile ? '7px 12px' : '8px 16px', borderRadius: 12, fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 700, cursor: 'pointer', border: `2px solid ${colors.border}`, background: colors.surface2, color: colors.text, boxShadow: `0 3px 0 ${colors.border2}` }}>
+                                        Annuler
+                                      </motion.button>
+                                      <motion.button whileHover={{ y: -1 }} whileTap={{ y: 1 }}
+                                        onClick={() => deleteCours(c.id)} disabled={isDeleting}
+                                        style={{ padding: isMobile ? '7px 12px' : '8px 16px', borderRadius: 12, fontSize: 12, fontFamily: 'Outfit, sans-serif', fontWeight: 800, cursor: isDeleting ? 'not-allowed' : 'pointer', border: 'none', background: '#f87171', color: '#fff', boxShadow: '0 3px 0 #CC2200', opacity: isDeleting ? 0.7 : 1 }}>
+                                        {isDeleting ? '…' : 'Supprimer'}
+                                      </motion.button>
+                                    </div>
                                   </motion.div>
                                 )}
                               </AnimatePresence>
