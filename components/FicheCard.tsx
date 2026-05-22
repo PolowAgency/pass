@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ChevronDown, ChevronUp, CheckCircle2, Brain, Lightbulb, Zap, Tag, Camera, X } from 'lucide-react'
 import { useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
 import { useTheme } from '@/contexts/ThemeContext'
 import { checkAndAwardBadges } from '@/lib/badges'
 import toast from 'react-hot-toast'
@@ -31,6 +32,7 @@ export function FicheCard({ fiche: initialFiche, index, coursId }: FicheCardProp
   async function uploadImage(e: React.ChangeEvent<HTMLInputElement>) {
     const img = e.target.files?.[0]
     if (!img) return
+    if (!img.type.startsWith('image/')) { toast.error('Format non supporté (image uniquement)'); return }
     if (img.size > 5 * 1024 * 1024) { toast.error('Image trop lourde (max 5 Mo)'); return }
     setUploadingImg(true)
     const supabase = createClient()
@@ -114,7 +116,7 @@ export function FicheCard({ fiche: initialFiche, index, coursId }: FicheCardProp
               {/* Image du document */}
               {fiche.image_url && (
                 <div style={{ borderRadius: 12, overflow: 'hidden', border: `1px solid ${colors.border}`, position: 'relative' }}>
-                  <img src={fiche.image_url} alt="Schéma" style={{ width: '100%', display: 'block', maxHeight: 220, objectFit: 'contain', background: '#000' }} />
+                  <img src={fiche.image_url} alt="Schéma" style={{ width: '100%', display: 'block', maxHeight: 220, objectFit: 'cover' }} />
                   <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={removeImage}
                     style={{ position: 'absolute', top: 6, right: 6, width: 26, height: 26, borderRadius: '50%', background: 'rgba(0,0,0,0.7)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                     <X size={12} />
@@ -142,14 +144,18 @@ export function FicheCard({ fiche: initialFiche, index, coursId }: FicheCardProp
                     <span style={{ fontSize: 13 }}>🗺️</span>
                     <h4 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 12, color: colors.limeDark, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Schéma</h4>
                   </div>
-                  <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                    <pre style={{ fontSize: 12, color: colors.text, lineHeight: 1.8, fontFamily: 'ui-monospace, SFMono-Regular, monospace', whiteSpace: 'pre', margin: 0, minWidth: 'max-content' }}>
-                      {lines.map((line, li) => (
-                        <span key={li} style={{ display: 'block', color: li === 0 ? colors.lime : colors.text, fontWeight: li === 0 ? 700 : 400 }}>
-                          {line}
-                        </span>
-                      ))}
-                    </pre>
+                  <div style={{ position: 'relative' }}>
+                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                      <pre style={{ fontSize: 11, color: colors.text, lineHeight: 1.8, fontFamily: 'ui-monospace, SFMono-Regular, monospace', whiteSpace: 'pre', margin: 0, minWidth: 'max-content', paddingRight: 24 }}>
+                        {lines.map((line, li) => (
+                          <span key={li} style={{ display: 'block', color: li === 0 ? colors.lime : colors.text, fontWeight: li === 0 ? 700 : 400 }}>
+                            {line}
+                          </span>
+                        ))}
+                      </pre>
+                    </div>
+                    {/* Fade droite — indicateur scroll */}
+                    <div style={{ position: 'absolute', top: 0, right: 0, bottom: 0, width: 32, background: 'linear-gradient(to right, transparent, rgba(200,255,0,0.04))', pointerEvents: 'none', borderRadius: '0 8px 8px 0' }} />
                   </div>
                 </div>
                 )
@@ -241,11 +247,12 @@ export function FicheCard({ fiche: initialFiche, index, coursId }: FicheCardProp
                   <CheckCircle2 size={14} />
                   {fiche.memorized ? 'Mémorisée ✓' : 'Mémoriser'}
                 </motion.button>
-                <motion.button whileHover={{ y: -2 }} whileTap={{ y: 3 }}
-                  onClick={() => window.location.href = `/qcm/${coursId}`}
-                  style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '11px 16px', borderRadius: 13, border: `2px solid ${colors.border}`, background: colors.surface2, color: colors.muted, fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, cursor: 'pointer', boxShadow: `0 3px 0 ${colors.border2}` }}>
-                  <Brain size={14} />Quiz
-                </motion.button>
+                <Link href={`/qcm/${coursId}`} style={{ textDecoration: 'none' }}>
+                  <motion.button whileHover={{ y: -2 }} whileTap={{ y: 3 }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '11px 16px', borderRadius: 13, border: `2px solid ${colors.border}`, background: colors.surface2, color: colors.muted, fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 13, cursor: 'pointer', boxShadow: `0 3px 0 ${colors.border2}` }}>
+                    <Brain size={14} />Quiz
+                  </motion.button>
+                </Link>
               </div>
               </> })()}
             </div>

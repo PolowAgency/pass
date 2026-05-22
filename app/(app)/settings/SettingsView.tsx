@@ -127,7 +127,7 @@ export default function SettingsView({ profile, success }: { profile: Profile | 
 
   const card = (extra?: React.CSSProperties): React.CSSProperties => ({
     background: colors.surface, border: `2px solid ${colors.border}`,
-    borderRadius: 20, boxShadow: colors.cardShadow, ...extra,
+    borderRadius: 20, boxShadow: `0 4px 0 ${colors.border2}`, ...extra,
   })
 
   return (

@@ -24,6 +24,7 @@ export default async function CoursPage({ params }: { params: Promise<{ id: stri
     .select('id, cours_id, user_id, title, content, key_concepts, difficulty, memorized, review_count, last_reviewed, next_review, ease_factor, created_at, image_url')
     .eq('cours_id', id)
     .order('created_at', { ascending: true })
+    .limit(100)
 
   const { data: sessions } = await supabase
     .from('qcm_sessions')
