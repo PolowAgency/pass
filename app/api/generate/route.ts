@@ -354,11 +354,11 @@ export async function POST(request: NextRequest) {
     try {
       const response = await getGroq().chat.completions.create({
         model: 'llama-3.3-70b-versatile',
-        max_tokens: 8000,
+        max_tokens: 4000,
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: buildSystemPrompt(lang, imageCount) },
-          { role: 'user', content: `Voici le contenu du cours :${visualContext}\n\n${rawContent.slice(0, 15000)}` },
+          { role: 'user', content: `Voici le contenu du cours :${visualContext}\n\n${rawContent.slice(0, 8000)}` },
         ],
       })
       rawJson = response.choices[0]?.message?.content ?? ''

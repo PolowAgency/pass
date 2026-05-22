@@ -7,14 +7,16 @@ export default async function ReviewPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  // Fiches dues aujourd'hui ou en retard
+  const today = new Date().toISOString().split('T')[0]
+
+  // Fiches dues aujourd'hui, en retard, OU jamais révisées (next_review = null)
   const { data: fiches } = await supabase
     .from('fiches')
     .select('*, cours:cours_id(title, subject)')
     .eq('user_id', user.id)
-    .lte('next_review', new Date().toISOString().split('T')[0])
     .eq('memorized', false)
-    .order('next_review', { ascending: true })
+    .or(`next_review.lte.${today},next_review.is.null`)
+    .order('next_review', { ascending: true, nullsFirst: false })
     .limit(20)
 
   const { data: profile } = await supabase
