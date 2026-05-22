@@ -87,31 +87,32 @@ const SIDEBAR_W = 240 // lg:ml-60 = 240px
 function tooltipStyle(rect: Rect | null, position: Step['position'], isMobile: boolean): React.CSSProperties {
   const GAP = 16
   const W = isMobile ? Math.min(300, window.innerWidth - 32) : 320
-  // Sur desktop la zone de contenu commence après la sidebar
-  const contentLeft = isMobile ? 0 : SIDEBAR_W
-  const contentW = window.innerWidth - contentLeft
-  const centerLeft = contentLeft + contentW / 2
 
+  // Modal centré : pure CSS, indépendant de la sidebar
   if (!rect || position === 'center') {
     return {
-      position: 'fixed', top: '50%', width: W, zIndex: 10001,
-      left: centerLeft, transform: 'translate(-50%, -50%)',
+      position: 'fixed', top: '50%', left: '50%',
+      width: isMobile ? 'calc(100vw - 32px)' : W,
+      maxWidth: 340,
+      zIndex: 10001,
+      transform: 'translate(-50%, -50%)',
     }
   }
 
   const base: React.CSSProperties = { position: 'fixed', width: W, zIndex: 10001 }
+  const safeLeft = (x: number) => Math.max(12, Math.min(x, window.innerWidth - W - 12))
 
   if (position === 'bottom') {
-    return { ...base, top: rect.top + rect.height + GAP, left: Math.max(12, Math.min(rect.left + rect.width / 2 - W / 2, window.innerWidth - W - 12)) }
+    return { ...base, top: rect.top + rect.height + GAP, left: safeLeft(rect.left + rect.width / 2 - W / 2) }
   }
   if (position === 'top') {
-    return { ...base, top: rect.top - GAP - 160, left: Math.max(12, Math.min(rect.left + rect.width / 2 - W / 2, window.innerWidth - W - 12)) }
+    return { ...base, top: rect.top - GAP - 200, left: safeLeft(rect.left + rect.width / 2 - W / 2) }
   }
   if (position === 'right') {
     const left = rect.left + rect.width + GAP
-    // Sur mobile la sidebar est en bas — force un placement centré-haut
+    // Sur mobile la nav est en bas — positionne au-dessus d'elle
     if (isMobile || left + W > window.innerWidth - 12) {
-      return { ...base, bottom: 90 + GAP, left: Math.max(12, Math.min(rect.left + rect.width / 2 - W / 2, window.innerWidth - W - 12)) }
+      return { ...base, bottom: 80 + GAP, left: safeLeft(rect.left + rect.width / 2 - W / 2) }
     }
     return { ...base, top: Math.max(12, rect.top + rect.height / 2 - 80), left }
   }
