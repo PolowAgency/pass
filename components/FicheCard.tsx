@@ -134,7 +134,7 @@ export function FicheCard({ fiche: initialFiche, index, coursId }: FicheCardProp
               )}
 
               {/* Schéma textuel */}
-              {xc.schema_text && (() => {
+              {xc.schema_text && xc.schema_text !== 'null' && xc.schema_text.trim() && (() => {
                 const lines = xc.schema_text.split('\n')
                 return (
                 <div style={{ background: 'rgba(200,255,0,0.04)', border: `1px solid ${colors.limeBorder}`, borderRadius: 12, padding: '12px 14px' }}>

@@ -325,7 +325,7 @@ export default function ReviewView({ fiches, profile, userId }: Props) {
                         </div>
                       )}
 
-                      {c.schema_text && (() => {
+                      {c.schema_text && c.schema_text !== 'null' && c.schema_text.trim() && (() => {
                         const lines = c.schema_text.split('\n')
                         return (
                         <div style={{ background: 'rgba(200,255,0,0.04)', border: '1px solid rgba(200,255,0,0.15)', borderRadius: 12, padding: '10px 12px' }}>

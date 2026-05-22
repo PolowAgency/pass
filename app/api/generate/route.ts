@@ -61,7 +61,7 @@ function validateGenerated(data: unknown, imageCount = 0): { ok: true; data: Gen
     if (!c.memory_trick) f.content = { ...c, memory_trick: '' }
     if (!Array.isArray(c.exam_traps)) f.content = { ...f.content as Record<string, unknown>, exam_traps: [] }
     if (!Array.isArray(c.key_numbers)) f.content = { ...f.content as Record<string, unknown>, key_numbers: [] }
-    if (typeof c.schema_text !== 'string') f.content = { ...f.content as Record<string, unknown>, schema_text: null }
+    if (typeof c.schema_text !== 'string' || c.schema_text === 'null' || !c.schema_text.trim()) f.content = { ...f.content as Record<string, unknown>, schema_text: null }
     if (!['easy', 'medium', 'hard'].includes(f.difficulty as string)) f.difficulty = 'medium'
     // Validate image_index if present
     if (imageCount > 0 && f.image_index !== null && f.image_index !== undefined) {
