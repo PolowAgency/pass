@@ -35,15 +35,30 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
       {/* Streak */}
       <Link href="/review" style={{ textDecoration: 'none', flexShrink: 0 }}>
         <motion.div data-tour="streak" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: isMobile ? '5px 10px' : '6px 14px', borderRadius: 99, background: streak > 0 ? colors.streakBg : colors.surface2, border: `2px solid ${streak > 0 ? colors.streakBorder : colors.border}`, cursor: 'pointer', boxShadow: streak > 0 ? `0 2px 0 ${theme === 'dark' ? '#CC5500' : '#B84400'}` : `0 2px 0 ${colors.border2}` }}>
-          <span style={{ fontSize: isMobile ? 14 : 16, lineHeight: 1 }}>{streak > 0 ? '🔥' : '💤'}</span>
-          <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 14 : 15, color: streak > 0 ? colors.streakText : colors.muted }}>{streak}</span>
+          style={{ display: 'flex', alignItems: 'center', gap: 5, padding: isMobile ? '5px 10px' : '6px 14px', borderRadius: 99, cursor: 'pointer',
+            background: streak > 0 ? 'linear-gradient(135deg, rgba(251,146,60,0.18), rgba(234,88,12,0.08))' : colors.surface2,
+            border: `1.5px solid ${streak > 0 ? 'rgba(251,146,60,0.28)' : colors.border}`,
+            backdropFilter: streak > 0 ? 'blur(12px)' : 'none',
+            boxShadow: streak > 0 ? '0 2px 20px rgba(251,146,60,0.18), inset 0 1px 0 rgba(255,255,255,0.06)' : `0 2px 0 ${colors.border2}`,
+          }}>
+          <span style={{ fontSize: isMobile ? 14 : 15, lineHeight: 1, filter: streak > 0 ? 'drop-shadow(0 0 4px rgba(251,146,60,0.5))' : 'none' }}>{streak > 0 ? '🔥' : '💤'}</span>
+          <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 13 : 14,
+            background: streak > 0 ? 'linear-gradient(135deg, #FCD34D, #FB923C)' : 'none',
+            WebkitBackgroundClip: streak > 0 ? 'text' : 'unset',
+            WebkitTextFillColor: streak > 0 ? 'transparent' : colors.muted,
+            color: streak > 0 ? 'transparent' : colors.muted,
+          }}>{streak}</span>
         </motion.div>
       </Link>
 
       {/* Hearts */}
       <motion.div data-tour="hearts"
-        style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 3 : 5, padding: isMobile ? '5px 9px' : '6px 13px', borderRadius: 99, background: hearts > 0 ? 'rgba(248,113,113,0.1)' : colors.surface2, border: `2px solid ${hearts > 0 ? 'rgba(248,113,113,0.4)' : colors.border}`, boxShadow: hearts > 0 ? '0 2px 0 #CC2200' : `0 2px 0 ${colors.border2}`, flexShrink: 0, cursor: 'default' }}>
+        style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 3 : 5, padding: isMobile ? '5px 9px' : '6px 12px', borderRadius: 99, flexShrink: 0, cursor: 'default',
+          background: hearts > 0 ? 'linear-gradient(135deg, rgba(248,113,113,0.18), rgba(239,68,68,0.08))' : colors.surface2,
+          border: `1.5px solid ${hearts > 0 ? 'rgba(248,113,113,0.28)' : colors.border}`,
+          backdropFilter: hearts > 0 ? 'blur(12px)' : 'none',
+          boxShadow: hearts > 0 ? '0 2px 20px rgba(248,113,113,0.18), inset 0 1px 0 rgba(255,255,255,0.06)' : `0 2px 0 ${colors.border2}`,
+        }}>
         {isPremium ? (
           <>
             <Heart size={isMobile ? 13 : 14} fill="#f87171" color="#f87171" />
@@ -51,8 +66,14 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
           </>
         ) : isMobile ? (
           <>
-            <Heart size={13} fill={hearts > 0 ? '#f87171' : 'transparent'} color="#f87171" />
-            <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 13, color: hearts > 0 ? '#f87171' : colors.muted }}>{hearts}</span>
+            <Heart size={13} fill={hearts > 0 ? '#f87171' : 'transparent'} color="#f87171"
+              style={{ filter: hearts > 0 ? 'drop-shadow(0 0 4px rgba(248,113,113,0.5))' : 'none' }} />
+            <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 13,
+              background: hearts > 0 ? 'linear-gradient(135deg, #FCA5A5, #F87171)' : 'none',
+              WebkitBackgroundClip: hearts > 0 ? 'text' : 'unset',
+              WebkitTextFillColor: hearts > 0 ? 'transparent' : colors.muted,
+              color: hearts > 0 ? 'transparent' : colors.muted,
+            }}>{hearts}</span>
           </>
         ) : (
           Array.from({ length: maxHearts }).map((_, i) => (
@@ -107,9 +128,17 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
       {/* Gems — link vers /shop sur toutes tailles */}
       <Link href="/shop" style={{ textDecoration: 'none', flexShrink: 0 }}>
         <motion.div data-tour="gems" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
-          style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 3 : 5, padding: isMobile ? '5px 9px' : '6px 13px', borderRadius: 99, background: 'rgba(96,165,250,0.1)', border: '2px solid rgba(96,165,250,0.3)', boxShadow: '0 2px 0 #1D4ED8', cursor: 'pointer' }}>
-          <span style={{ fontSize: isMobile ? 13 : 14, lineHeight: 1 }}>💎</span>
-          <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 13 : 14, color: '#60A5FA' }}>{gems}</span>
+          style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 3 : 5, padding: isMobile ? '5px 9px' : '6px 13px', borderRadius: 99, cursor: 'pointer',
+            background: 'linear-gradient(135deg, rgba(96,165,250,0.18), rgba(59,130,246,0.08))',
+            border: '1.5px solid rgba(96,165,250,0.25)',
+            backdropFilter: 'blur(12px)',
+            boxShadow: '0 2px 20px rgba(96,165,250,0.15), inset 0 1px 0 rgba(255,255,255,0.06)',
+          }}>
+          <span style={{ fontSize: isMobile ? 13 : 14, lineHeight: 1, filter: 'drop-shadow(0 0 4px rgba(96,165,250,0.5))' }}>💎</span>
+          <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 13 : 14,
+            background: 'linear-gradient(135deg, #93C5FD, #60A5FA)',
+            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+          }}>{gems}</span>
         </motion.div>
       </Link>
 
