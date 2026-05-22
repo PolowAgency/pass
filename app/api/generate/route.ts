@@ -48,9 +48,9 @@ QUALITÉ ATTENDUE PAR CHAMP :
 - schema_text : tableau ASCII ou arbre texte UNIQUEMENT si le concept a une structure hiérarchique ou un processus. null sinon.
 - memory_trick : vrai moyen mnémotechnique — acronyme, phrase-image, histoire courte. JAMAIS "retiens que...".
 
-STRUCTURE : 1 fiche par thème majeur (min 3, max 8 fiches).${imageFormat ? ' image_index : numéro ou null.' : ''}
+LIMITES : 1 fiche par thème (min 3, max 5 fiches). Max 4 key_concepts, max 4 important_points, max 2 exam_traps.${imageFormat ? ' image_index : numéro ou null.' : ''}
 QCM : 2 questions par fiche, 4 options, distracteurs plausibles, explication utile (correct_answer = index 0-3).
-JSON : {"fiches":[{"title":"...","difficulty":"easy|medium|hard","content":{"summary":"...","key_concepts":[{"term":"...","definition":"...","example":"..."}],"important_points":["..."],"schema_text":"...ou null","exam_traps":["..."],"key_numbers":["..."],"memory_trick":"..."${imageFormat}}}],"questions":[{"fiche_title":"...","question":"...","options":["...","...","...","..."],"correct_answer":0,"explanation":"..."}]}`
+JSON : {"fiches":[{"title":"...","difficulty":"easy|medium|hard","content":{"summary":"...","key_concepts":[{"term":"...","definition":"...","example":"..."}],"important_points":["..."],"schema_text":null,"exam_traps":["..."],"key_numbers":["..."],"memory_trick":"..."${imageFormat}}}],"questions":[{"fiche_title":"...","question":"...","options":["A","B","C","D"],"correct_answer":0,"explanation":"..."}]}`
 }
 
 // Validation stricte de la structure générée
@@ -330,7 +330,7 @@ export async function POST(request: NextRequest) {
     try {
       const response = await getGroq().chat.completions.create({
         model: 'llama-3.3-70b-versatile',
-        max_tokens: 5000,
+        max_tokens: 4000,
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: buildSystemPrompt(lang, imageCount) },
