@@ -630,6 +630,21 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
               </Link>
             </motion.div>
 
+            {/* Referral card */}
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.4)}>
+              <Link href="/settings#referral" style={{ textDecoration: 'none' }}>
+                <motion.div whileHover={{ y: -3 }} whileTap={{ y: 2 }}
+                  style={{ background: 'linear-gradient(135deg, rgba(167,139,250,0.12), rgba(200,255,0,0.07))', border: '2px solid rgba(167,139,250,0.35)', borderRadius: 20, padding: '16px', cursor: 'pointer', boxShadow: '0 5px 0 rgba(167,139,250,0.12)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <span style={{ fontSize: 26, flexShrink: 0 }}>🎁</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 13, color: '#A78BFA', marginBottom: 2 }}>Invite un ami</p>
+                    <p style={{ fontSize: 11, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>+30 gems + 1 mois Premium offert</p>
+                  </div>
+                  <ChevronRight size={16} color="#A78BFA" />
+                </motion.div>
+              </Link>
+            </motion.div>
+
             {profile?.plan === 'free' && (
               <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={spring(0.4)}>
                 <Link href="/settings#billing" style={{ textDecoration: 'none' }}>

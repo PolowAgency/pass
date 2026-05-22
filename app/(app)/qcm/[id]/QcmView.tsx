@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { Question } from '@/types'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Trophy, RotateCcw, BookOpen, ZoomIn, X, Heart } from 'lucide-react'
+import { ArrowLeft, ArrowRight, CheckCircle2, XCircle, Trophy, RotateCcw, BookOpen, ZoomIn, X, Heart, Share2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTheme } from '@/contexts/ThemeContext'
@@ -283,6 +283,18 @@ export default function QcmView({ cours, questions, userId, totalAvailable, init
           </motion.p>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {/* Partager le score */}
+            <motion.button initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }}
+              whileHover={{ y: -2 }} whileTap={{ y: 2 }}
+              onClick={async () => {
+                const text = `Je viens d'avoir ${pct}% au QCM "${cours.title}" sur PASS 🎯${pct === 100 ? ' Score parfait !' : ''}\n🔥 Révise avec PASS : pass-saas.vercel.app`
+                if (navigator.share) { try { await navigator.share({ text }) } catch {} }
+                else { await navigator.clipboard.writeText(text); import('react-hot-toast').then(m => m.default.success('Copié !')).catch(() => {}) }
+              }}
+              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, background: 'rgba(255,255,255,0.06)', border: `2px solid ${colors.border}`, color: colors.text, borderRadius: 16, padding: isMobile ? '13px' : '14px', fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 14, cursor: 'pointer', boxShadow: `0 4px 0 ${colors.border2}` }}>
+              <Share2 size={15} />Partager mon score
+            </motion.button>
+
             {/* Encore 10 questions — CTA principal en mode rapide */}
             <motion.button initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }}
               whileHover={{ y: -3 }} whileTap={{ y: 4 }}

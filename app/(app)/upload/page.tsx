@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useDropzone } from 'react-dropzone'
 import { createClient } from '@/lib/supabase/client'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Upload, FileText, ImageIcon, X, Zap, Calendar, BookOpen, Loader2, ClipboardPaste } from 'lucide-react'
+import { Upload, FileText, ImageIcon, X, Zap, Calendar, BookOpen, Loader2, ClipboardPaste, CheckCircle2 } from 'lucide-react'
 import { useTheme } from '@/contexts/ThemeContext'
 import { useIsMobile } from '@/hooks/useIsMobile'
 import toast from 'react-hot-toast'
@@ -32,6 +32,7 @@ export default function UploadPage() {
   const [subject, setSubject] = useState('')
   const [examDate, setExamDate] = useState('')
   const [loading, setLoading] = useState(false)
+  const [loadingStep, setLoadingStep] = useState(0)
   const [step, setStep] = useState<'drop' | 'form'>('drop')
   const [lang, setLang] = useState<'fr' | 'en'>('fr')
 
@@ -85,7 +86,7 @@ export default function UploadPage() {
       }).select().single()
       if (coursErr) throw coursErr
 
-      toast.loading('Génération des fiches en cours…', { id: 'gen' })
+      setLoadingStep(1)
       const fd = new FormData()
       fd.append('file_url', signedUrl)
       fd.append('file_type', file.type)
@@ -94,17 +95,18 @@ export default function UploadPage() {
       fd.append('title', title)
       fd.append('lang', lang)
 
+      setTimeout(() => setLoadingStep(2), 3000)
+
       const res = await fetch('/api/generate', { method: 'POST', body: fd })
       let result: { error?: string; fiches_count?: number } = {}
       try { result = await res.json() } catch { result = { error: `Réponse invalide (HTTP ${res.status})` } }
       if (!res.ok) {
-        toast.dismiss('gen')
         toast.error(result.error ?? `Erreur ${res.status}`, { duration: 6000 })
-        setLoading(false)
+        setLoading(false); setLoadingStep(0)
         return
       }
-      toast.dismiss('gen')
-      toast.success(`${result.fiches_count} fiches générées ! 🎉`)
+      setLoadingStep(3)
+      await new Promise(r => setTimeout(r, 900))
       router.push(`/cours/${cours.id}`)
     } catch (err: unknown) {
       console.error(err)
@@ -134,24 +136,25 @@ export default function UploadPage() {
       }).select().single()
       if (coursErr) throw coursErr
 
-      toast.loading('Génération des fiches en cours…', { id: 'gen' })
+      setLoadingStep(1)
       const fd = new FormData()
       fd.append('text_content', pastedText)
       fd.append('cours_id', cours.id)
       fd.append('title', title)
       fd.append('lang', lang)
 
+      setTimeout(() => setLoadingStep(2), 2000)
+
       const res = await fetch('/api/generate', { method: 'POST', body: fd })
       let result: { error?: string; fiches_count?: number } = {}
       try { result = await res.json() } catch { result = { error: `Réponse invalide (HTTP ${res.status})` } }
       if (!res.ok) {
-        toast.dismiss('gen')
         toast.error(result.error ?? `Erreur ${res.status}`, { duration: 6000 })
-        setLoading(false)
+        setLoading(false); setLoadingStep(0)
         return
       }
-      toast.dismiss('gen')
-      toast.success(`${result.fiches_count} fiches générées ! 🎉`)
+      setLoadingStep(3)
+      await new Promise(r => setTimeout(r, 900))
       router.push(`/cours/${cours.id}`)
     } catch (err: unknown) {
       console.error(err)
@@ -170,6 +173,54 @@ export default function UploadPage() {
   })
 
   const showForm = (mode === 'file' && step === 'form' && file) || (mode === 'text' && pastedText.trim().length > 20)
+
+  const LOAD_STEPS = [
+    { emoji: '📖', label: 'Lecture du cours…' },
+    { emoji: '🧠', label: 'Génération des fiches par l\'IA…' },
+    { emoji: '✅', label: 'Fiches créées !' },
+  ]
+
+  if (loading && loadingStep > 0) return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
+      <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: 'spring', damping: 18 }}
+        style={{ textAlign: 'center', maxWidth: 360, width: '100%' }}>
+        <motion.div
+          animate={{ rotate: loadingStep < 3 ? 360 : 0, scale: loadingStep === 3 ? [1, 1.3, 1] : 1 }}
+          transition={{ rotate: { repeat: loadingStep < 3 ? Infinity : 0, duration: 2, ease: 'linear' }, scale: { duration: 0.5 } }}
+          style={{ fontSize: 72, marginBottom: 24, display: 'block', lineHeight: 1 }}>
+          {LOAD_STEPS[loadingStep - 1]?.emoji ?? '⚡'}
+        </motion.div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
+          {LOAD_STEPS.map((s, i) => {
+            const done = i + 1 < loadingStep
+            const active = i + 1 === loadingStep
+            return (
+              <motion.div key={i} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.12 }}
+                style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 14,
+                  background: active ? 'rgba(200,255,0,0.08)' : done ? 'rgba(34,197,94,0.06)' : colors.surface2,
+                  border: `2px solid ${active ? colors.lime : done ? '#22c55e' : colors.border}`,
+                  boxShadow: active ? `0 0 16px rgba(200,255,0,0.15)` : 'none' }}>
+                <span style={{ fontSize: 22, flexShrink: 0 }}>
+                  {done ? '✅' : active ? s.emoji : '⏳'}
+                </span>
+                <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 700, fontSize: 14,
+                  color: active ? colors.lime : done ? '#22c55e' : colors.muted }}>
+                  {s.label}
+                </span>
+                {active && loadingStep < 3 && (
+                  <motion.div animate={{ opacity: [1, 0.3, 1] }} transition={{ repeat: Infinity, duration: 1.2 }}
+                    style={{ marginLeft: 'auto', display: 'flex', gap: 3 }}>
+                    {[0,1,2].map(j => <span key={j} style={{ width: 5, height: 5, borderRadius: '50%', background: colors.lime, display: 'block' }} />)}
+                  </motion.div>
+                )}
+              </motion.div>
+            )
+          })}
+        </div>
+        <p style={{ fontSize: 12, color: colors.muted, fontFamily: 'DM Sans, sans-serif' }}>⚡ Généré en moins de 30 secondes</p>
+      </motion.div>
+    </div>
+  )
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: isMobile ? '20px 16px 100px' : '32px 24px 48px', transition: 'background 0.25s' }}>
