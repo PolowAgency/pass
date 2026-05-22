@@ -92,18 +92,39 @@ export default function ShopView({ gems: initialGems, hearts: initialHearts, max
               <h1 style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 26 : 32, color: colors.text, margin: 0, letterSpacing: '-0.5px' }}>
                 💎 Shop
               </h1>
-              <p style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 14, color: colors.muted, marginTop: 4 }}>
+              <p style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 500, fontStyle: 'italic', fontSize: 15, color: colors.muted, marginTop: 4, letterSpacing: '-0.2px' }}>
                 Dépense tes gems, grimpe plus vite.
               </p>
             </div>
-            {/* Gems counter large */}
+            {/* Gems counter — pill glassmorphism */}
             <motion.div
-              animate={{ scale: [1, 1.08, 1] }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: isMobile ? '10px 16px' : '12px 20px', borderRadius: 18, background: 'rgba(96,165,250,0.1)', border: '2px solid rgba(96,165,250,0.3)', boxShadow: '0 4px 0 #1D4ED8' }}>
-              <span style={{ fontSize: isMobile ? 28 : 36, lineHeight: 1 }}>💎</span>
-              <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 22 : 28, color: '#60A5FA', lineHeight: 1.1 }}>{gems}</span>
-              <span style={{ fontFamily: 'DM Sans, sans-serif', fontSize: 11, color: colors.muted, marginTop: 2 }}>gems</span>
+              initial={{ opacity: 0, scale: 0.88 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ type: 'spring', damping: 16, delay: 0.15 }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: isMobile ? 8 : 10,
+                padding: isMobile ? '10px 18px' : '12px 22px',
+                borderRadius: 99,
+                background: 'linear-gradient(135deg, rgba(96,165,250,0.18) 0%, rgba(59,130,246,0.08) 100%)',
+                backdropFilter: 'blur(12px)',
+                border: '1.5px solid rgba(96,165,250,0.25)',
+                boxShadow: '0 2px 24px rgba(96,165,250,0.15), inset 0 1px 0 rgba(255,255,255,0.06)',
+              }}>
+              <span style={{ fontSize: isMobile ? 20 : 24, lineHeight: 1, filter: 'drop-shadow(0 0 6px rgba(96,165,250,0.6))' }}>💎</span>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 0 }}>
+                <motion.span
+                  animate={{ scale: [1, 1.1, 1] }}
+                  transition={{ duration: 0.3, delay: 0.25 }}
+                  style={{
+                    fontFamily: 'Outfit, sans-serif', fontWeight: 800,
+                    fontSize: isMobile ? 22 : 26, lineHeight: 1, letterSpacing: '-0.5px',
+                    background: 'linear-gradient(135deg, #93C5FD, #60A5FA)',
+                    WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                  }}>
+                  {gems}
+                </motion.span>
+                <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 600, fontSize: 10, color: '#60A5FA', opacity: 0.6, letterSpacing: '1px', textTransform: 'uppercase' }}>gems</span>
+              </div>
             </motion.div>
           </div>
         </div>
