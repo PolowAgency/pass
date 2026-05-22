@@ -35,46 +35,11 @@ function buildSystemPrompt(lang: 'fr' | 'en', imageCount = 0) {
 
   const imageFormat = imageCount > 0 ? ',\n    "image_index": null' : ''
 
-  return `Tu es un expert en pédagogie médicale/universitaire. Tu génères des fiches d'examen RIGOUREUSES et ACTIVES — jamais des résumés génériques.
-
-${langBlock}
-${imageBlock}
-
-NOMBRE DE FICHES : génère UNE FICHE PAR SECTION/THÈME du cours. Si le cours a 6 sections, fais 6 fiches minimum. JAMAIS moins d'une fiche par thème identifié.
-
-RÈGLES ABSOLUES par champ (les exemples ci-dessous illustrent le FORMAT uniquement — génère du contenu propre au cours fourni) :
-
-summary → 2-3 phrases de FAITS PRÉCIS testables. INTERDIT de reformuler le titre.
-  Format attendu: "Tissu X est Y (caractéristique clé). Il diffère de Z par A et B. Sa localisation est C."
-
-schema_text → TOUJOURS une string avec tableau ou diagramme en texte. JAMAIS null pour anatomie/pharma/biologie/chimie/droit.
-  Format tableau: "COL1     | COL2    | COL3\\nValeur1  | Valeur2 | Valeur3"
-
-exam_traps → MINIMUM 2 pièges PRÉCIS sur CE concept (pas des généralités).
-  Format: ["Terme X = caractéristique Y MAIS PAS Z — piège QCM fréquent", "Ne pas confondre X (définition A) et Y (définition B)"]
-
-key_numbers → Format "valeur : label précis" TOUJOURS.
-  Format: ["32 : nombre de dents adulte", "6 mois : début éruption temporaire"]
-
-memory_trick → Vrai mnémotechnique : acronyme, image absurde, histoire courte.
-  JAMAIS une répétition du fait ("X = le plus dur" n'est pas un mnémotechnique).
-
-important_points → Affirmations QCM précises avec le fait testable en gras (majuscules).
-  Format: "La structure X est la SEULE à avoir propriété Y"
-
-key_concepts → Définition précise + exemple clinique ou testable.
-
-QCM : EXACTEMENT 2 questions par fiche (N fiches → 2N questions OBLIGATOIRES).
-Types : "Lequel est FAUX parmi ces affirmations", "Combien de X", "Quelle est la différence entre X et Y".
-Chaque question a exactement 4 options SANS lettre préfixe. correct_answer est l'index (0, 1, 2 ou 3).
-
-STRUCTURE JSON :
-- Racine : objet avec clés "fiches" (tableau) et "questions" (tableau)
-- Chaque fiche : title (string), difficulty ("easy"|"medium"|"hard"), content (objet)
-- content : summary, key_concepts (tableau d'objets term/definition/example), important_points (tableau), schema_text (string), exam_traps (tableau min 2), key_numbers (tableau), memory_trick${imageFormat ? ', image_index (number|null)' : ''}
-- Chaque question : fiche_title, question, options (tableau de 4 strings), correct_answer (entier 0-3), explanation
-
-JSON valide uniquement, sans markdown.`
+  return `Expert pédagogie. Génère fiches d'examen rigoureuses depuis le cours.
+${langBlock}${imageBlock ? '\n' + imageBlock : ''}
+RÈGLES : 1 fiche/thème (min 3). Chaque fiche : summary (2-3 faits précis), key_concepts (term/definition/example), important_points (affirmations QCM), schema_text (tableau texte ou null), exam_traps (2+ pièges), key_numbers (valeur:label), memory_trick (mnémotechnique réel).${imageFormat ? ' image_index : numéro ou null.' : ''}
+QCM : 2 questions/fiche, 4 options, correct_answer=index 0-3.
+JSON : {"fiches":[{title,difficulty,content}],"questions":[{fiche_title,question,options,correct_answer,explanation}]}`
 }
 
 // Validation stricte de la structure générée
@@ -354,11 +319,11 @@ export async function POST(request: NextRequest) {
     try {
       const response = await getGroq().chat.completions.create({
         model: 'llama-3.3-70b-versatile',
-        max_tokens: 4000,
+        max_tokens: 3500,
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: buildSystemPrompt(lang, imageCount) },
-          { role: 'user', content: `Voici le contenu du cours :${visualContext}\n\n${rawContent.slice(0, 8000)}` },
+          { role: 'user', content: `Cours :${visualContext}\n\n${rawContent.slice(0, 6000)}` },
         ],
       })
       rawJson = response.choices[0]?.message?.content ?? ''
