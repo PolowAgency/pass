@@ -35,11 +35,22 @@ function buildSystemPrompt(lang: 'fr' | 'en', imageCount = 0) {
 
   const imageFormat = imageCount > 0 ? ',\n    "image_index": null' : ''
 
-  return `Expert pédagogie. Génère fiches d'examen rigoureuses depuis le cours.
+  return `Tu es un pédagogue expert (PASS, médecine, droit, sciences). Génère des fiches de révision COMPLÈTES et RIGOUREUSES depuis le cours fourni.
 ${langBlock}${imageBlock ? '\n' + imageBlock : ''}
-RÈGLES : 1 fiche/thème (min 3). Chaque fiche : summary (2-3 faits précis), key_concepts (term/definition/example), important_points (affirmations QCM), schema_text (tableau texte ou null), exam_traps (2+ pièges), key_numbers (valeur:label), memory_trick (mnémotechnique réel).${imageFormat ? ' image_index : numéro ou null.' : ''}
-QCM : 2 questions/fiche, 4 options, correct_answer=index 0-3.
-JSON : {"fiches":[{title,difficulty,content}],"questions":[{fiche_title,question,options,correct_answer,explanation}]}`
+OBJECTIF : chaque fiche doit permettre à un étudiant de répondre à des questions d'examen sur ce thème sans relire le cours. Contenu dense, précis, jamais générique.
+
+QUALITÉ ATTENDUE PAR CHAMP :
+- summary : 3-4 phrases. Explique LE CONCEPT en profondeur — mécanisme, contexte, conséquences. NE PAS juste lister des mots-clés.
+- key_concepts : 3-6 termes. Définition précise et autonome (pas une paraphrase du terme) + exemple concret tiré du cours.
+- important_points : 4-6 assertions exactes type QCM ("La dose X est...", "Le mécanisme Y entraîne...", "En cas de Z, on observe...").
+- exam_traps : 2-3 pièges spécifiques ("Ne pas confondre A et B car...", "Piège : on pense X mais en réalité Y").
+- key_numbers : valeurs chiffrées du cours uniquement (doses, dates, constantes). Format "valeur : sens". [] si aucune valeur dans le cours.
+- schema_text : tableau ASCII ou arbre texte UNIQUEMENT si le concept a une structure hiérarchique ou un processus. null sinon.
+- memory_trick : vrai moyen mnémotechnique — acronyme, phrase-image, histoire courte. JAMAIS "retiens que...".
+
+STRUCTURE : 1 fiche par thème majeur (min 3, max 8 fiches).${imageFormat ? ' image_index : numéro ou null.' : ''}
+QCM : 2 questions par fiche, 4 options, distracteurs plausibles, explication utile (correct_answer = index 0-3).
+JSON : {"fiches":[{"title":"...","difficulty":"easy|medium|hard","content":{"summary":"...","key_concepts":[{"term":"...","definition":"...","example":"..."}],"important_points":["..."],"schema_text":"...ou null","exam_traps":["..."],"key_numbers":["..."],"memory_trick":"..."${imageFormat}}}],"questions":[{"fiche_title":"...","question":"...","options":["...","...","...","..."],"correct_answer":0,"explanation":"..."}]}`
 }
 
 // Validation stricte de la structure générée
@@ -319,11 +330,11 @@ export async function POST(request: NextRequest) {
     try {
       const response = await getGroq().chat.completions.create({
         model: 'llama-3.3-70b-versatile',
-        max_tokens: 3500,
+        max_tokens: 5000,
         response_format: { type: 'json_object' },
         messages: [
           { role: 'system', content: buildSystemPrompt(lang, imageCount) },
-          { role: 'user', content: `Cours :${visualContext}\n\n${rawContent.slice(0, 6000)}` },
+          { role: 'user', content: `Cours :${visualContext}\n\n${rawContent.slice(0, 8000)}` },
         ],
       })
       rawJson = response.choices[0]?.message?.content ?? ''
