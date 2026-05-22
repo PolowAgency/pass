@@ -14,6 +14,7 @@ import StreakModal from '@/components/StreakModal'
 import BadgeUnlockModal from '@/components/BadgeUnlockModal'
 import OnboardingWizard from '@/components/OnboardingWizard'
 import DailyRewardModal from '@/components/DailyRewardModal'
+import AppTour from '@/components/AppTour'
 import toast from 'react-hot-toast'
 import type { BadgeDef } from '@/lib/badges'
 
@@ -110,6 +111,7 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
   const [groupBySubject, setGroupBySubject] = useState(true)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [showTour, setShowTour] = useState(false)
 
   async function deleteCours(id: string) {
     setDeletingId(id)
@@ -160,6 +162,12 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
     if (!done && cours.length === 0) setTimeout(() => setShowOnboarding(true), 600)
   }, [])
 
+  useEffect(() => {
+    const tourDone = localStorage.getItem('pass-tour-done')
+    const onboarded = localStorage.getItem('pass-onboarded')
+    if (!tourDone && onboarded) setTimeout(() => setShowTour(true), 1200)
+  }, [])
+
   // Coffre quotidien — vérifié côté serveur
   useEffect(() => {
     const hasOnboarded = localStorage.getItem('pass-onboarded')
@@ -190,6 +198,7 @@ export default function DashboardView({ profile, cours, sessions, dueCount, weak
     <div style={{ minHeight: '100vh', background: 'var(--bg)', padding: isMobile ? '20px 16px 100px' : '28px 24px 80px', transition: 'background 0.25s' }}>
 
       <AnimatePresence>
+        {showTour && !showOnboarding && <AppTour onDone={() => setShowTour(false)} />}
         {showOnboarding && <OnboardingWizard onClose={() => setShowOnboarding(false)} />}
         {showDailyReward && !showOnboarding && (
           <DailyRewardModal

@@ -34,7 +34,7 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
 
       {/* Streak */}
       <Link href="/review" style={{ textDecoration: 'none', flexShrink: 0 }}>
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+        <motion.div data-tour="streak" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
           style={{ display: 'flex', alignItems: 'center', gap: 5, padding: isMobile ? '5px 10px' : '6px 14px', borderRadius: 99, background: streak > 0 ? colors.streakBg : colors.surface2, border: `2px solid ${streak > 0 ? colors.streakBorder : colors.border}`, cursor: 'pointer', boxShadow: streak > 0 ? `0 2px 0 ${theme === 'dark' ? '#CC5500' : '#B84400'}` : `0 2px 0 ${colors.border2}` }}>
           <span style={{ fontSize: isMobile ? 14 : 16, lineHeight: 1 }}>{streak > 0 ? '🔥' : '💤'}</span>
           <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 14 : 15, color: streak > 0 ? colors.streakText : colors.muted }}>{streak}</span>
@@ -42,7 +42,7 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
       </Link>
 
       {/* Hearts */}
-      <motion.div
+      <motion.div data-tour="hearts"
         style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 3 : 5, padding: isMobile ? '5px 9px' : '6px 13px', borderRadius: 99, background: hearts > 0 ? 'rgba(248,113,113,0.1)' : colors.surface2, border: `2px solid ${hearts > 0 ? 'rgba(248,113,113,0.4)' : colors.border}`, boxShadow: hearts > 0 ? '0 2px 0 #CC2200' : `0 2px 0 ${colors.border2}`, flexShrink: 0, cursor: 'default' }}>
         {isPremium ? (
           <>
@@ -106,7 +106,7 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
 
       {/* Gems — link vers /shop sur toutes tailles */}
       <Link href="/shop" style={{ textDecoration: 'none', flexShrink: 0 }}>
-        <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+        <motion.div data-tour="gems" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
           style={{ display: 'flex', alignItems: 'center', gap: isMobile ? 3 : 5, padding: isMobile ? '5px 9px' : '6px 13px', borderRadius: 99, background: 'rgba(96,165,250,0.1)', border: '2px solid rgba(96,165,250,0.3)', boxShadow: '0 2px 0 #1D4ED8', cursor: 'pointer' }}>
           <span style={{ fontSize: isMobile ? 13 : 14, lineHeight: 1 }}>💎</span>
           <span style={{ fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: isMobile ? 13 : 14, color: '#60A5FA' }}>{gems}</span>
@@ -121,6 +121,15 @@ export default function TopBar({ profile }: { profile: Profile | null }) {
             {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
           </motion.div>
         </AnimatePresence>
+      </motion.button>
+
+      {/* Bouton aide / relancer tour */}
+      <motion.button
+        whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.9 }}
+        onClick={() => { localStorage.removeItem('pass-tour-done'); window.location.reload() }}
+        title="Revoir le tutoriel"
+        style={{ width: 34, height: 34, borderRadius: 10, background: colors.surface2, border: `2px solid ${colors.border}`, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: `0 2px 0 ${colors.border2}`, fontFamily: 'Outfit, sans-serif', fontWeight: 800, fontSize: 13, color: colors.muted, flexShrink: 0 }}>
+        ?
       </motion.button>
 
       {/* Plan badge — masqué sur mobile */}

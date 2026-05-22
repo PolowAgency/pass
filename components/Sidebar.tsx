@@ -10,22 +10,22 @@ import { useTheme } from '@/contexts/ThemeContext'
 import toast from 'react-hot-toast'
 
 const NAV = [
-  { href: '/dashboard',   icon: LayoutDashboard, label: 'Dashboard',   emoji: '🏠' },
-  { href: '/review',      icon: BookOpen,        label: 'Révision',    emoji: '🧠' },
-  { href: '/upload',      icon: Upload,          label: 'Upload',      emoji: '📤' },
-  { href: '/coach',       icon: MessageCircle,   label: 'Coach IA',    emoji: '🤖' },
-  { href: '/leaderboard', icon: BarChart2,       label: 'Classement',  emoji: '🏆' },
-  { href: '/stats',       icon: BarChart2,       label: 'Stats',       emoji: '📊' },
-  { href: '/badges',      icon: BarChart2,       label: 'Badges',      emoji: '🏅' },
-  { href: '/shop',        icon: BarChart2,       label: 'Shop',        emoji: '💎' },
+  { href: '/dashboard',   icon: LayoutDashboard, label: 'Dashboard',   emoji: '🏠',  tour: undefined },
+  { href: '/review',      icon: BookOpen,        label: 'Révision',    emoji: '🧠',  tour: 'review' },
+  { href: '/upload',      icon: Upload,          label: 'Upload',      emoji: '📤',  tour: 'upload' },
+  { href: '/coach',       icon: MessageCircle,   label: 'Coach IA',    emoji: '🤖',  tour: 'coach' },
+  { href: '/leaderboard', icon: BarChart2,       label: 'Classement',  emoji: '🏆',  tour: undefined },
+  { href: '/stats',       icon: BarChart2,       label: 'Stats',       emoji: '📊',  tour: undefined },
+  { href: '/badges',      icon: BarChart2,       label: 'Badges',      emoji: '🏅',  tour: undefined },
+  { href: '/shop',        icon: BarChart2,       label: 'Shop',        emoji: '💎',  tour: undefined },
 ]
 
 const MOBILE_NAV = [
-  { href: '/dashboard',   label: 'Home',    emoji: '🏠' },
-  { href: '/review',      label: 'Réviser', emoji: '🧠' },
-  { href: '/leaderboard', label: 'Top',     emoji: '🏆' },
-  { href: '/coach',       label: 'Coach',   emoji: '🤖' },
-  { href: '/shop',        label: 'Shop',    emoji: '💎' },
+  { href: '/dashboard',   label: 'Home',    emoji: '🏠',  tour: undefined },
+  { href: '/review',      label: 'Réviser', emoji: '🧠',  tour: 'review' },
+  { href: '/leaderboard', label: 'Top',     emoji: '🏆',  tour: undefined },
+  { href: '/coach',       label: 'Coach',   emoji: '🤖',  tour: 'coach' },
+  { href: '/shop',        label: 'Shop',    emoji: '💎',  tour: undefined },
 ]
 
 export default function Sidebar({ profile }: { profile: Profile | null }) {
@@ -59,11 +59,12 @@ export default function Sidebar({ profile }: { profile: Profile | null }) {
         </div>
 
         <nav style={{ flex: 1, padding: '4px 12px', display: 'flex', flexDirection: 'column', gap: 2 }}>
-          {NAV.map(({ href, label, emoji }) => {
+          {NAV.map(({ href, label, emoji, tour }) => {
             const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
             return (
               <Link key={href} href={href} style={{ textDecoration: 'none' }}>
                 <motion.div
+                  {...(tour ? { 'data-tour': tour } : {})}
                   whileHover={{ x: active ? 0 : 4 }}
                   whileTap={{ scale: 0.97 }}
                   transition={{ type: 'spring', damping: 20, stiffness: 400 }}
@@ -121,11 +122,12 @@ export default function Sidebar({ profile }: { profile: Profile | null }) {
       {/* Mobile */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-around"
         style={{ background: colors.surface, borderTop: `2px solid ${colors.border}`, paddingTop: 6, paddingBottom: 'max(10px, env(safe-area-inset-bottom))' }}>
-        {MOBILE_NAV.map(({ href, emoji, label }) => {
+        {MOBILE_NAV.map(({ href, emoji, label, tour }) => {
           const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
           return (
             <Link key={href} href={href} style={{ textDecoration: 'none', flex: 1 }}>
               <motion.div whileTap={{ scale: 0.85 }}
+                {...(tour ? { 'data-tour': tour } : {})}
                 style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '4px 0', position: 'relative' }}>
                 <span style={{ fontSize: 22 }}>{emoji}</span>
                 <span style={{ fontSize: 10, fontFamily: 'Outfit, sans-serif', fontWeight: active ? 800 : 400, color: active ? colors.navActiveText : colors.muted }}>{label}</span>
